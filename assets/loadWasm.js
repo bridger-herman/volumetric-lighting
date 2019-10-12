@@ -10,7 +10,7 @@
 // eventually the manual initialization won't be required!
 
 // NOTE: this is relative to where your JavaScript modules are located
-import { default as init } from './pkg/wasm_starter.js';
+import { default as init } from './pkg/wre_wasm.js';
 
 export var wasm = null;
 
@@ -28,7 +28,7 @@ export async function importWasm() {
   console.log('initialing wasm');
 
   // NOTE: this is relative to wherever your HTML files are located
-  wasm = await init('./assets/pkg/wasm_starter_bg.wasm');
+  wasm = await init('./assets/pkg/wre_wasm_bg.wasm');
 
   console.log('wasm initialized');
 }

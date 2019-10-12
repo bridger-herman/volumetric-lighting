@@ -1,6 +1,6 @@
 #!/bin/sh
 
-WASM_LIB_NAME=wasm-starter
+WASM_LIB_NAME=wre_wasm
 
 set -ex
 
