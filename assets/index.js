@@ -1,9 +1,12 @@
 import { importWasm } from './loadWasm.js';
-// import { example_wasm_fn } from './pkg/wasm_starter.js'; // Example import
+import * as wre from './pkg/wre_wasm.js'; // Example import
 
 function init() {
-  console.log('Hello from JavaScript!');
-  // example_wasm_fn() // Example call to wasm code
+    console.log('Hello from JavaScript!');
+    // console.log(wre);
+    // let val = wre.do_work();
+    // console.log(val);
+    // wre.main_loop();
 }
 
 window.onload = () => importWasm().then(init);
