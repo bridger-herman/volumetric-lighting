@@ -2,7 +2,7 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(7)(arg0, arg1);
+    wasm.__wbg_function_table.get(2)(arg0, arg1);
 }
 /**
 */
@@ -70,7 +70,7 @@ function init(module) {
     let result;
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+    imports.wbg.__wbindgen_cb_forget = function(arg0) {
         takeObject(arg0);
     };
     imports.wbg.__wbindgen_cb_drop = function(arg0) {
@@ -82,7 +82,7 @@ function init(module) {
         const ret = false;
         return ret;
     };
-    imports.wbg.__wbindgen_cb_forget = function(arg0) {
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
     };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
@@ -170,7 +170,7 @@ function init(module) {
     imports.wbg.__wbindgen_rethrow = function(arg0) {
         throw takeObject(arg0);
     };
-    imports.wbg.__wbindgen_closure_wrapper32 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper26 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -178,7 +178,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(8)(state.a, state.b);
+                    wasm.__wbg_function_table.get(3)(state.a, state.b);
                     state.a = 0;
                 }
             }

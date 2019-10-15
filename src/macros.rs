@@ -12,3 +12,10 @@ macro_rules! wre_frame {
         *crate::state::WRE_FRAME.try_lock().unwrap()
     };
 }
+
+#[macro_export]
+macro_rules! wre_entities {
+    () => {
+        *crate::state::WRE_ENTITIES.try_lock().unwrap()
+    };
+}

@@ -10,6 +10,8 @@ extern crate wre_transform;
 #[macro_use]
 pub mod macros;
 
+pub mod entity_manager;
+pub mod entity;
 pub mod frame;
 pub mod frame_timer;
 pub mod state;
