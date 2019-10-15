@@ -15,7 +15,7 @@ pub struct EntityManager {
 
 impl EntityManager {
     pub fn create(&mut self) -> EntityId {
-        let id = self.entities.len() as u64;
+        let id = self.entities.len();
         let e = Entity { id };
         self.entities.push(e);
 

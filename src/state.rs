@@ -12,6 +12,7 @@ use std::sync::Mutex;
 
 use crate::entity_manager::EntityManager;
 use crate::frame::WreFrame;
+use crate::script_manager::ScriptManager;
 
 lazy_static! {
     /// Current frame information (timing, key presses, etc.)
@@ -19,4 +20,7 @@ lazy_static! {
 
     /// Entity manager for the game
     pub static ref WRE_ENTITIES: Mutex<EntityManager> = Mutex::new(EntityManager::default());
+
+    /// Script manager for the game
+    pub static ref WRE_SCRIPTS: Mutex<ScriptManager> = Mutex::new(ScriptManager::default());
 }

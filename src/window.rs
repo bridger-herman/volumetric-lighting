@@ -27,4 +27,6 @@ pub fn init_window(target_fps: i32) -> Result<(), JsValue> {
 pub fn one_frame() {
     info!("Frame: {:?}", wre_frame!());
     wre_frame!().timer.update();
+
+    wre_scripts!().update();
 }

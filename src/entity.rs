@@ -6,9 +6,9 @@
 
 //! Entity (GameObject)
 
-pub type EntityId = u64;
+pub type EntityId = usize;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Entity {
     pub id: EntityId,
 }

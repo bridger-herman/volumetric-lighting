@@ -1,8 +1,9 @@
+import { JsEntity } from './snippets/wre-dd34bbe426ca6729/assets/entity.js';
 
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(2)(arg0, arg1);
+    wasm.__wbg_function_table.get(37)(arg0, arg1);
 }
 /**
 */
@@ -31,6 +32,38 @@ function takeObject(idx) {
     dropObject(idx);
     return ret;
 }
+/**
+* @returns {any}
+*/
+export function create_entity() {
+    const ret = wasm.create_entity();
+    return takeObject(ret);
+}
+
+/**
+* @param {number} id
+* @returns {any}
+*/
+export function get_entity(id) {
+    const ret = wasm.get_entity(id);
+    return takeObject(ret);
+}
+
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
+}
+/**
+* @param {number} eid
+* @param {any} script
+*/
+export function add_script(eid, script) {
+    wasm.add_script(eid, addHeapObject(script));
+}
 
 let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 
@@ -44,15 +77,6 @@ function getUint8Memory() {
 
 function getStringFromWasm(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
-}
-
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
 }
 
 function isLikeNone(x) {
@@ -70,7 +94,7 @@ function init(module) {
     let result;
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbindgen_cb_forget = function(arg0) {
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
     };
     imports.wbg.__wbindgen_cb_drop = function(arg0) {
@@ -82,8 +106,23 @@ function init(module) {
         const ret = false;
         return ret;
     };
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+    imports.wbg.__wbindgen_cb_forget = function(arg0) {
         takeObject(arg0);
+    };
+    imports.wbg.__wbg_update_789d0790c008d77c = function(arg0) {
+        getObject(arg0).update();
+    };
+    imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
+        const ret = JSON.parse(getStringFromWasm(arg0, arg1));
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_new_04107c531b6ac32b = function(arg0) {
+        const ret = new JsEntity(arg0 >>> 0);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_id_cd4a78e5a8501b6d = function(arg0) {
+        const ret = getObject(arg0).id;
+        return ret;
     };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         const ret = getStringFromWasm(arg0, arg1);
@@ -170,7 +209,7 @@ function init(module) {
     imports.wbg.__wbindgen_rethrow = function(arg0) {
         throw takeObject(arg0);
     };
-    imports.wbg.__wbindgen_closure_wrapper26 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper91 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -178,7 +217,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(3)(state.a, state.b);
+                    wasm.__wbg_function_table.get(38)(state.a, state.b);
                     state.a = 0;
                 }
             }
