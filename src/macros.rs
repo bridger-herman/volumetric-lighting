@@ -26,3 +26,10 @@ macro_rules! wre_scripts {
         *crate::state::WRE_SCRIPTS.try_lock().unwrap()
     };
 }
+
+#[macro_export]
+macro_rules! wre_render_system {
+    () => {
+        *crate::state::WRE_RENDER_SYSTEM.try_lock().unwrap()
+    };
+}

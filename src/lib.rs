@@ -21,6 +21,8 @@ pub mod state;
 pub mod traits;
 pub mod transform;
 pub mod window;
+pub mod render_system;
+pub mod mesh;
 
 use wasm_bindgen::prelude::*;
 
@@ -34,8 +36,12 @@ pub fn start() -> Result<(), JsValue> {
     wasm_logger::init_with_level(log::Level::Info)
         .map_err(|_| JsValue::from("Failed to initialize logger"))?;
 
-    window::init_window(TARGET_FPS)?;
+    window::init(TARGET_FPS)?;
     info!("Initialized window with target {}fps", TARGET_FPS);
+
+    info!("{:?}", wre_render_system!().meshes());
+    // render_system::init()?;
+    // info!("Initialized WebGL render system");
 
     Ok(())
 }
