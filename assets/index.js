@@ -1,8 +1,6 @@
 import { importWasm } from './loadWasm.js';
 import { JsScript } from './jsScript.js'
-import * as wre from './pkg/wre_wasm.js'; // Example import
-
-
+import * as wre from './pkg/wre_wasm.js';
 
 function init() {
     console.log('Hello from JavaScript!');

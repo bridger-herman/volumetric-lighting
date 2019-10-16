@@ -25,7 +25,8 @@ pub fn init_window(target_fps: i32) -> Result<(), JsValue> {
 }
 
 pub fn one_frame() {
-    info!("Frame: {:?}", wre_frame!());
+    // info!("Frame: {:?}", wre_frame!());
+    // TODO: Update tab title
     wre_frame!().timer.update();
 
     wre_scripts!().update();

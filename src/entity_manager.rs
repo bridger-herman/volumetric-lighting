@@ -7,6 +7,7 @@
 //! Manages all the entities in the game
 
 use crate::entity::{Entity, EntityId};
+use crate::transform::Transform;
 
 #[derive(Debug, Default)]
 pub struct EntityManager {
@@ -16,17 +17,24 @@ pub struct EntityManager {
 impl EntityManager {
     pub fn create(&mut self) -> EntityId {
         let id = self.entities.len();
-        let e = Entity { id };
+        let e = Entity {
+            id,
+            transform: Transform::identity(),
+        };
         self.entities.push(e);
 
         id
     }
 
     pub fn get(&self, id: EntityId) -> &Entity {
-        &self.entities[id as usize]
+        &self.entities[id]
+    }
+
+    pub fn set(&mut self, id: EntityId, e: Entity) {
+        self.entities[id] = e;
     }
 
     pub fn get_mut(&mut self, id: EntityId) -> &mut Entity {
-        &mut self.entities[id as usize]
+        &mut self.entities[id]
     }
 }

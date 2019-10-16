@@ -1,9 +1,8 @@
-import { JsEntity } from './snippets/wre-dd34bbe426ca6729/assets/entity.js';
 
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(37)(arg0, arg1);
+    wasm.__wbg_function_table.get(11)(arg0, arg1);
 }
 /**
 */
@@ -58,6 +57,14 @@ function addHeapObject(obj) {
     return idx;
 }
 /**
+* @param {number} id
+* @param {any} entity
+*/
+export function set_entity(id, entity) {
+    wasm.set_entity(id, addHeapObject(entity));
+}
+
+/**
 * @param {number} eid
 * @param {any} script
 */
@@ -77,6 +84,61 @@ function getUint8Memory() {
 
 function getStringFromWasm(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
+}
+
+let WASM_VECTOR_LEN = 0;
+
+let cachedTextEncoder = new TextEncoder('utf-8');
+
+const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
+    ? function (arg, view) {
+    return cachedTextEncoder.encodeInto(arg, view);
+}
+    : function (arg, view) {
+    const buf = cachedTextEncoder.encode(arg);
+    view.set(buf);
+    return {
+        read: arg.length,
+        written: buf.length
+    };
+});
+
+function passStringToWasm(arg) {
+
+    let len = arg.length;
+    let ptr = wasm.__wbindgen_malloc(len);
+
+    const mem = getUint8Memory();
+
+    let offset = 0;
+
+    for (; offset < len; offset++) {
+        const code = arg.charCodeAt(offset);
+        if (code > 0x7F) break;
+        mem[ptr + offset] = code;
+    }
+
+    if (offset !== len) {
+        if (offset !== 0) {
+            arg = arg.slice(offset);
+        }
+        ptr = wasm.__wbindgen_realloc(ptr, len, len = offset + arg.length * 3);
+        const view = getUint8Memory().subarray(ptr + offset, ptr + len);
+        const ret = encodeString(arg, view);
+
+        offset += ret.written;
+    }
+
+    WASM_VECTOR_LEN = offset;
+    return ptr;
+}
+
+let cachegetInt32Memory = null;
+function getInt32Memory() {
+    if (cachegetInt32Memory === null || cachegetInt32Memory.buffer !== wasm.memory.buffer) {
+        cachegetInt32Memory = new Int32Array(wasm.memory.buffer);
+    }
+    return cachegetInt32Memory;
 }
 
 function isLikeNone(x) {
@@ -112,20 +174,20 @@ function init(module) {
     imports.wbg.__wbg_update_789d0790c008d77c = function(arg0) {
         getObject(arg0).update();
     };
-    imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
-        const ret = JSON.parse(getStringFromWasm(arg0, arg1));
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbg_new_04107c531b6ac32b = function(arg0) {
-        const ret = new JsEntity(arg0 >>> 0);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbg_id_cd4a78e5a8501b6d = function(arg0) {
-        const ret = getObject(arg0).id;
-        return ret;
-    };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         const ret = getStringFromWasm(arg0, arg1);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbindgen_json_serialize = function(arg0, arg1) {
+        const obj = getObject(arg1);
+        const ret = JSON.stringify(obj === undefined ? null : obj);
+        const ret0 = passStringToWasm(ret);
+        const ret1 = WASM_VECTOR_LEN;
+        getInt32Memory()[arg0 / 4 + 0] = ret0;
+        getInt32Memory()[arg0 / 4 + 1] = ret1;
+    };
+    imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
+        const ret = JSON.parse(getStringFromWasm(arg0, arg1));
         return addHeapObject(ret);
     };
     imports.wbg.__widl_instanceof_Window = function(arg0) {
@@ -209,7 +271,7 @@ function init(module) {
     imports.wbg.__wbindgen_rethrow = function(arg0) {
         throw takeObject(arg0);
     };
-    imports.wbg.__wbindgen_closure_wrapper91 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper63 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -217,7 +279,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(38)(state.a, state.b);
+                    wasm.__wbg_function_table.get(12)(state.a, state.b);
                     state.a = 0;
                 }
             }

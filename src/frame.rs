@@ -7,8 +7,7 @@
 //! Information about the Wasm Rendering Engine's current frame
 
 use crate::frame_timer::FrameTimer;
-use num_traits::Zero;
-use wre_transform::vec3::Vec3;
+use vecmat::vec::Vec3;
 
 #[derive(Debug)]
 pub struct WreFrame {
@@ -22,7 +21,7 @@ pub struct WreFrame {
     pub key_releases: Vec<String>,
 
     /// Delta in position of the mouse cursor
-    pub cursor_delta: Vec3,
+    pub cursor_delta: Vec3<usize>,
 }
 
 impl Default for WreFrame {
@@ -31,7 +30,7 @@ impl Default for WreFrame {
             timer: FrameTimer::default(),
             key_presses: Vec::new(),
             key_releases: Vec::new(),
-            cursor_delta: Vec3::zero(),
+            cursor_delta: Vec3::new(),
         }
     }
 }

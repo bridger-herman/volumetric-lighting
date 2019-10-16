@@ -7,7 +7,7 @@ extern crate wasm_logger;
 #[macro_use]
 extern crate lazy_static;
 extern crate instant;
-extern crate wre_transform;
+extern crate vecmat;
 
 #[macro_use]
 pub mod macros;
@@ -19,6 +19,7 @@ pub mod frame_timer;
 pub mod script_manager;
 pub mod state;
 pub mod traits;
+pub mod transform;
 pub mod window;
 
 use wasm_bindgen::prelude::*;
@@ -28,17 +29,6 @@ use crate::script_manager::JsScript;
 
 const TARGET_FPS: i32 = 2;
 
-#[wasm_bindgen(module = "/assets/entity.js")]
-extern "C" {
-    type JsEntity;
-
-    #[wasm_bindgen(constructor)]
-    fn new(id: u32) -> JsEntity;
-
-    #[wasm_bindgen(method, getter)]
-    fn id(this: &JsEntity) -> u32;
-}
-
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
     wasm_logger::init_with_level(log::Level::Info)
@@ -46,9 +36,6 @@ pub fn start() -> Result<(), JsValue> {
 
     window::init_window(TARGET_FPS)?;
     info!("Initialized window with target {}fps", TARGET_FPS);
-
-    let e = JsEntity::new(47);
-    info!("{:?}", e.id());
 
     Ok(())
 }
@@ -61,6 +48,11 @@ pub fn create_entity() -> JsValue {
 #[wasm_bindgen]
 pub fn get_entity(id: EntityId) -> JsValue {
     JsValue::from_serde(&wre_entities!().get(id)).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn set_entity(id: EntityId, entity: JsValue) {
+    wre_entities!().set(id, entity.into_serde().unwrap())
 }
 
 #[wasm_bindgen]

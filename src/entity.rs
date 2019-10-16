@@ -6,9 +6,12 @@
 
 //! Entity (GameObject)
 
+use crate::transform::Transform;
+
 pub type EntityId = usize;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Entity {
     pub id: EntityId,
+    pub transform: Transform,
 }
