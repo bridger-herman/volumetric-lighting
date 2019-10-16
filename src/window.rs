@@ -11,6 +11,8 @@ use wasm_bindgen::JsCast;
 
 use crate::traits::Update;
 
+const TITLE: &str = "Graphics";
+
 pub fn init_window(target_fps: i32) -> Result<(), JsValue> {
     let window = web_sys::window().expect("window.rs: No window!");
     let main_loop_closure = Closure::wrap(Box::new(one_frame) as Box<dyn Fn()>);
@@ -25,9 +27,15 @@ pub fn init_window(target_fps: i32) -> Result<(), JsValue> {
 }
 
 pub fn one_frame() {
-    // info!("Frame: {:?}", wre_frame!());
-    // TODO: Update tab title
     wre_frame!().timer.update();
 
+    set_title(&format!("{} | dt = {:?}", TITLE, wre_frame!().timer.dt));
+
     wre_scripts!().update();
+}
+
+fn set_title(title: &str) {
+    let window = web_sys::window().expect("window.rs: No window!");
+    let document = window.document().expect("window.rs: No document!");
+    document.set_title(title);
 }
