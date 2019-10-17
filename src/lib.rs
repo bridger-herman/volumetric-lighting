@@ -27,7 +27,7 @@ pub mod mesh;
 use wasm_bindgen::prelude::*;
 
 use crate::entity::EntityId;
-use crate::script_manager::JsScript;
+use crate::script_manager::WreScript;
 
 const TARGET_FPS: i32 = 2;
 
@@ -62,6 +62,6 @@ pub fn set_entity(id: EntityId, entity: JsValue) {
 }
 
 #[wasm_bindgen]
-pub fn add_script(eid: EntityId, script: JsScript) {
+pub fn add_script(eid: EntityId, script: WreScript) {
     wre_scripts!().add_script(eid, script)
 }

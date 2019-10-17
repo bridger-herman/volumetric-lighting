@@ -1,6 +1,6 @@
-import * as wre from './pkg/wre_wasm.js';
+import * as wre from '../pkg/wre_wasm.js';
 
-export class JsScript {
+export class WreScript {
     constructor(owner) {
         this._owner = owner;
     }

@@ -236,7 +236,7 @@ function init(module) {
         getInt32Memory()[arg0 / 4 + 0] = ret0;
         getInt32Memory()[arg0 / 4 + 1] = ret1;
     };
-    imports.wbg.__wbg_update_789d0790c008d77c = function(arg0) {
+    imports.wbg.__wbg_update_02b380c50c6e0a89 = function(arg0) {
         getObject(arg0).update();
     };
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {

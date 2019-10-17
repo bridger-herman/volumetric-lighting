@@ -14,33 +14,33 @@ use crate::traits::Update;
 
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen(module = "/assets/jsScript.js")]
+#[wasm_bindgen(module = "/assets/wre-js/wreScript.js")]
 extern "C" {
-    pub type JsScript;
+    pub type WreScript;
 
     #[wasm_bindgen(constructor)]
-    fn new() -> JsScript;
+    fn new() -> WreScript;
 
     #[wasm_bindgen(method)]
-    fn update(this: &JsScript);
+    fn update(this: &WreScript);
 }
 
-unsafe impl Send for JsScript {}
-unsafe impl Sync for JsScript {}
+unsafe impl Send for WreScript {}
+unsafe impl Sync for WreScript {}
 
-impl fmt::Debug for JsScript {
+impl fmt::Debug for WreScript {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "JsScript")
+        write!(fmt, "WreScript")
     }
 }
 
 #[derive(Default)]
 pub struct ScriptManager {
-    entity_scripts: HashMap<EntityId, JsScript>,
+    entity_scripts: HashMap<EntityId, WreScript>,
 }
 
 impl ScriptManager {
-    pub fn add_script(&mut self, eid: EntityId, script: JsScript) {
+    pub fn add_script(&mut self, eid: EntityId, script: WreScript) {
         self.entity_scripts.insert(eid, script);
     }
 }
