@@ -12,9 +12,9 @@ use web_sys::WebGlBuffer;
 
 #[derive(Debug)]
 pub struct Mesh {
-    vertices: Vec<Vec3::<f32>>,
-    normals: Vec<Vec3::<f32>>,
-    uvs: Vec<Vec2::<f32>>,
+    vertices: Vec<Vec3<f32>>,
+    normals: Vec<Vec3<f32>>,
+    uvs: Vec<Vec2<f32>>,
 
     vbo: WebGlBuffer,
 }

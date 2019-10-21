@@ -16,15 +16,17 @@ pub mod entity;
 pub mod entity_manager;
 pub mod frame;
 pub mod frame_timer;
+pub mod mesh;
+pub mod render_system;
 pub mod script_manager;
+pub mod shader;
 pub mod state;
 pub mod traits;
 pub mod transform;
 pub mod window;
-pub mod render_system;
-pub mod mesh;
 
 use wasm_bindgen::prelude::*;
+use web_sys::WebGlProgram;
 
 use crate::entity::EntityId;
 use crate::script_manager::WreScript;
@@ -64,4 +66,9 @@ pub fn set_entity(id: EntityId, entity: JsValue) {
 #[wasm_bindgen]
 pub fn add_script(eid: EntityId, script: WreScript) {
     wre_scripts!().add_script(eid, script)
+}
+
+#[wasm_bindgen]
+pub fn add_shader(name: &str, program: WebGlProgram) {
+    wre_render_system!().add_shader(name, &program);
 }
