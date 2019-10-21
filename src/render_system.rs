@@ -8,7 +8,8 @@
 
 use std::collections::HashMap;
 
-use web_sys::WebGlProgram;
+use wasm_bindgen::JsCast;
+use web_sys::{WebGlProgram, WebGlRenderingContext};
 
 use crate::mesh::Mesh;
 
@@ -21,44 +22,27 @@ pub struct RenderSystem {
 unsafe impl Send for RenderSystem {}
 
 impl RenderSystem {
-    pub fn new() -> Self {
-        // let document = web_sys::window().unwrap().document().unwrap();
-        // let canvas = document.get_element_by_id("canvas").unwrap();
-        // let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
+    pub fn render(&self) {
+        let document = web_sys::window().unwrap().document().unwrap();
+        let canvas = document.get_element_by_id("canvas").unwrap();
+        let canvas: web_sys::HtmlCanvasElement = canvas
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .expect("Unable to get canvas");
 
-        // let context = canvas
-        // .get_context("webgl")?
-        // .unwrap()
-        // .dyn_into::<WebGlRenderingContext>()?;
+        let context = canvas
+            .get_context("webgl")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<WebGlRenderingContext>()
+            .expect("Unable to get WebGL context");
 
-        // let vert_shader = compile_shader(
-        // &context,
-        // WebGlRenderingContext::VERTEX_SHADER,
-        // r#"
-        // attribute vec4 position;
-        // void main() {
-        // gl_Position = position;
-        // }
-        // "#,
-        // )?;
-        // let frag_shader = compile_shader(
-        // &context,
-        // WebGlRenderingContext::FRAGMENT_SHADER,
-        // r#"
-        // void main() {
-        // gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);
-        // }
-        // "#,
-        // )?;
+        const SHADER_NAME: &str = "unlit";
+        context.use_program(Some(&self.shaders[SHADER_NAME]));
 
-        // let program = link_program(&context, &vert_shader, &frag_shader)?;
+        let vertices = vec![-0.7, -0.7, 0.0, 0.7, -0.7, 0.0, 0.0, 0.7, 0.0];
 
-        // context.use_program(Some(&program));
-
-        // let vertices = vec![-0.7, -0.7, 0.0, 0.7, -0.7, 0.0, 0.0, 0.7, 0.0];
-
-        // let buffer = context.create_buffer().ok_or("failed to create buffer")?;
-        // context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&buffer));
+        let buffer = context.create_buffer().expect("failed to create buffer");
+        context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&buffer));
 
         // Note that `Float32Array::view` is somewhat dangerous (hence the
         // `unsafe`!). This is creating a raw view into our module's
@@ -68,37 +52,34 @@ impl RenderSystem {
         //
         // As a result, after `Float32Array::view` we have to be very careful not to
         // do any memory allocations before it's dropped.
-        // unsafe {
+        unsafe {
+            let vert_array = js_sys::Float32Array::view(&vertices);
 
-        // let vert_array = js_sys::Float32Array::view(&vertices);
-
-        // context.buffer_data_with_array_buffer_view(
-        // WebGlRenderingContext::ARRAY_BUFFER,
-        // &vert_array,
-        // WebGlRenderingContext::STATIC_DRAW,
-        // );
-        // }
-
-        // context.vertex_attrib_pointer_with_i32(0, 3, WebGlRenderingContext::FLOAT, false, 0, 0);
-        // context.enable_vertex_attrib_array(0);
-
-        // context.clear_color(0.0, 0.0, 0.0, 1.0);
-        // context.clear(WebGlRenderingContext::COLOR_BUFFER_BIT);
-
-        // context.draw_arrays(
-        // WebGlRenderingContext::TRIANGLES,
-        // 0,
-        // (vertices.len() / 3) as i32,
-        // );
-
-        Self {
-            meshes: vec![],
-            shaders: HashMap::new(),
+            context.buffer_data_with_array_buffer_view(
+                WebGlRenderingContext::ARRAY_BUFFER,
+                &vert_array,
+                WebGlRenderingContext::STATIC_DRAW,
+            );
         }
 
-        // info!("Initialized RenderSystem");
+        context.vertex_attrib_pointer_with_i32(
+            0,
+            3,
+            WebGlRenderingContext::FLOAT,
+            false,
+            0,
+            0,
+        );
+        context.enable_vertex_attrib_array(0);
 
-        // Ok(new_self)
+        context.clear_color(0.0, 0.0, 0.0, 1.0);
+        context.clear(WebGlRenderingContext::COLOR_BUFFER_BIT);
+
+        context.draw_arrays(
+            WebGlRenderingContext::TRIANGLES,
+            0,
+            (vertices.len() / 3) as i32,
+        );
     }
 
     pub fn meshes(&self) -> &Vec<Mesh> {

@@ -32,6 +32,7 @@ pub fn one_frame() {
     set_title(&format!("{} | dt = {:?}", TITLE, wre_frame!().timer.dt));
 
     wre_scripts!().update();
+    wre_render_system!().render();
 }
 
 fn set_title(title: &str) {

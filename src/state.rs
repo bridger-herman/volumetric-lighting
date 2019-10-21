@@ -26,6 +26,5 @@ lazy_static! {
     pub static ref WRE_SCRIPTS: Mutex<ScriptManager> = Mutex::new(ScriptManager::default());
 
     /// Rendering system
-    // pub static ref WRE_RENDER_SYSTEM: Mutex<RenderSystem> = Mutex::new(RenderSystem::new().expect("Unable to initialize render system"));
-    pub static ref WRE_RENDER_SYSTEM: Mutex<RenderSystem> = Mutex::new(RenderSystem::new());
+    pub static ref WRE_RENDER_SYSTEM: Mutex<RenderSystem> = Mutex::new(RenderSystem::default());
 }
