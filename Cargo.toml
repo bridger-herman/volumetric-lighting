@@ -19,6 +19,7 @@ num-traits = "0.2.8"
 lazy_static = "1.4"
 vecmat = { version = "0.4", git = "https://github.com/bridger-herman/vecmat-rs.git"}
 instant = { version = "0.1", features = [ "now", "wasm-bindgen" ]  }
+obj = "0.9"
 
 [dependencies.wasm-bindgen]
 version = "0.2.51"
@@ -32,7 +33,9 @@ features = [
     'HtmlCanvasElement',
     'WebGlBuffer',
     'WebGlRenderingContext',
+    'WebGl2RenderingContext',
     'WebGlProgram',
+    'WebGlVertexArrayObject',
     'WebGlShader',
     'Window',
 ]

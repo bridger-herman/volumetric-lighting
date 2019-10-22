@@ -8,16 +8,16 @@
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{WebGlProgram, WebGlRenderingContext, WebGlShader};
+use web_sys::{WebGlProgram, WebGl2RenderingContext, WebGlShader};
 
 #[wasm_bindgen]
 pub fn compile_vert_shader(source: &str) -> WebGlShader {
-    compile_shader(WebGlRenderingContext::VERTEX_SHADER, source)
+    compile_shader(WebGl2RenderingContext::VERTEX_SHADER, source)
 }
 
 #[wasm_bindgen]
 pub fn compile_frag_shader(source: &str) -> WebGlShader {
-    compile_shader(WebGlRenderingContext::FRAGMENT_SHADER, source)
+    compile_shader(WebGl2RenderingContext::FRAGMENT_SHADER, source)
 }
 
 fn compile_shader(shader_type: u32, source: &str) -> WebGlShader {
@@ -28,10 +28,10 @@ fn compile_shader(shader_type: u32, source: &str) -> WebGlShader {
         .expect("Unable to get canvas");
 
     let context = canvas
-        .get_context("webgl")
+        .get_context("webgl2")
         .unwrap()
         .unwrap()
-        .dyn_into::<WebGlRenderingContext>()
+        .dyn_into::<WebGl2RenderingContext>()
         .expect("Unable to get WebGL context");
     let shader = context
         .create_shader(shader_type)
@@ -40,7 +40,7 @@ fn compile_shader(shader_type: u32, source: &str) -> WebGlShader {
     context.compile_shader(&shader);
 
     if context
-        .get_shader_parameter(&shader, WebGlRenderingContext::COMPILE_STATUS)
+        .get_shader_parameter(&shader, WebGl2RenderingContext::COMPILE_STATUS)
         .as_bool()
         .unwrap_or(false)
     {
@@ -66,10 +66,10 @@ pub fn link_shader_program(
         .expect("Unable to get canvas");
 
     let context = canvas
-        .get_context("webgl")
+        .get_context("webgl2")
         .unwrap()
         .unwrap()
-        .dyn_into::<WebGlRenderingContext>()
+        .dyn_into::<WebGl2RenderingContext>()
         .expect("Unable to get WebGL context");
     let program = context
         .create_program()
@@ -80,7 +80,7 @@ pub fn link_shader_program(
     context.link_program(&program);
 
     if context
-        .get_program_parameter(&program, WebGlRenderingContext::LINK_STATUS)
+        .get_program_parameter(&program, WebGl2RenderingContext::LINK_STATUS)
         .as_bool()
         .unwrap_or(false)
     {

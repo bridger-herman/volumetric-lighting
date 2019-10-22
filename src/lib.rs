@@ -8,6 +8,7 @@ extern crate wasm_logger;
 extern crate lazy_static;
 extern crate instant;
 extern crate vecmat;
+extern crate obj;
 
 #[macro_use]
 pub mod macros;
@@ -71,4 +72,9 @@ pub fn add_script(eid: EntityId, script: WreScript) {
 #[wasm_bindgen]
 pub fn add_shader(name: &str, program: WebGlProgram) {
     wre_render_system!().add_shader(name, &program);
+}
+
+#[wasm_bindgen]
+pub fn add_mesh(eid: EntityId, obj_source: &str) {
+    wre_render_system!().add_obj_mesh(eid, obj_source);
 }

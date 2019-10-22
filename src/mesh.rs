@@ -6,15 +6,22 @@
 
 //! Only a container for data; passes self off to RenderSystem immediately
 
-use vecmat::vec::{Vec2, Vec3};
+use std::fmt;
 
-use web_sys::WebGlBuffer;
+use web_sys::WebGlVertexArrayObject;
 
-#[derive(Debug)]
+use crate::entity::EntityId;
+
 pub struct Mesh {
-    vertices: Vec<Vec3<f32>>,
-    normals: Vec<Vec3<f32>>,
-    uvs: Vec<Vec2<f32>>,
+    pub attached_to: EntityId,
 
-    vbo: WebGlBuffer,
+    pub pos: Vec<f32>,
+
+    pub vao: WebGlVertexArrayObject,
+}
+
+impl fmt::Debug for Mesh {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Mesh(attached_to: {0})", self.attached_to)
+    }
 }
