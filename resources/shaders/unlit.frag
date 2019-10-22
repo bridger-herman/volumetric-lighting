@@ -1,3 +1,11 @@
+#version 300 es
+
+precision mediump float;
+
+in vec4 norm;
+
+out vec4 frag_color;
+
 void main() {
-    gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);
+    frag_color = abs(norm);
 }

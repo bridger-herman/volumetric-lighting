@@ -41,6 +41,7 @@ impl RenderSystem {
 
         const SHADER_NAME: &str = "unlit";
         context.use_program(Some(&self.shaders[SHADER_NAME]));
+        info!("Loaded program");
 
         for mesh in &self.meshes {
             context.bind_vertex_array(Some(&mesh.vao));
@@ -54,12 +55,6 @@ impl RenderSystem {
                 0,
                 (mesh.pos.len() / 3) as i32,
             );
-            // context.draw_elements_with_i32(
-                // WebGl2RenderingContext::TRIANGLES,
-                // mesh.pos.len() as i32,
-                // WebGl2RenderingContext::UNSIGNED_SHORT,
-                // 0,
-            // );
         }
     }
 
@@ -92,7 +87,7 @@ impl RenderSystem {
         const SHADER_NAME: &str = "unlit";
         context.use_program(Some(&self.shaders[SHADER_NAME]));
 
-        // Collect the vertices into triangles
+        // Collect the positions into triangles
         // TODO assuming only one group per object, and only one object per file
         let mut pos = vec![];
         for tri in &obj_file.objects[0].groups[0].polys {
@@ -101,6 +96,16 @@ impl RenderSystem {
             pos.push(obj_file.position[tri[2].0]);
         }
         let pos_flat: Vec<_> = pos.iter().flatten().cloned().collect();
+
+        // Collect the normals into triangles
+        // TODO assuming only one group per object, and only one object per file
+        let mut norm = vec![];
+        for tri in &obj_file.objects[0].groups[0].polys {
+            norm.push(obj_file.normal[tri[0].2.unwrap()]);
+            norm.push(obj_file.normal[tri[1].2.unwrap()]);
+            norm.push(obj_file.normal[tri[2].2.unwrap()]);
+        }
+        let norm_flat: Vec<_> = norm.iter().flatten().cloned().collect();
 
         let vao = context.create_vertex_array().expect("failed to create vao");
         context.bind_vertex_array(Some(&vao));
@@ -136,11 +141,35 @@ impl RenderSystem {
             0,
         );
 
+        let norm_vbo = context.create_buffer().expect("failed to create norm_vbo");
+        context.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&norm_vbo));
+
+        unsafe {
+            let norm_array = js_sys::Float32Array::view(&norm_flat);
+
+            context.buffer_data_with_array_buffer_view(
+                WebGl2RenderingContext::ARRAY_BUFFER,
+                &norm_array,
+                WebGl2RenderingContext::STATIC_DRAW,
+            );
+        }
+
+        context.enable_vertex_attrib_array(1);
+        context.vertex_attrib_pointer_with_i32(
+            1,
+            3,
+            WebGl2RenderingContext::FLOAT,
+            false,
+            0,
+            0,
+        );
+
         let m = Mesh {
             attached_to: eid,
             pos: pos_flat,
             vao,
         };
         self.meshes.push(m);
+        info!("Finished loading mesh");
     }
 }
