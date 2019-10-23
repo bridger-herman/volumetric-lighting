@@ -41,7 +41,6 @@ impl RenderSystem {
 
         const SHADER_NAME: &str = "unlit";
         context.use_program(Some(&self.shaders[SHADER_NAME]));
-        info!("Loaded program");
 
         for mesh in &self.meshes {
             context.bind_vertex_array(Some(&mesh.vao));
@@ -181,6 +180,6 @@ impl RenderSystem {
             vao,
         };
         self.meshes.push(m);
-        info!("Finished loading mesh");
+        info!("Loaded mesh into {}", eid);
     }
 }

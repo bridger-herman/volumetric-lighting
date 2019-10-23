@@ -3,7 +3,7 @@
 in vec3 in_pos;
 in vec3 in_norm;
 
-uniform uni_model;
+uniform mat4 uni_model;
 
 out vec4 norm;
 

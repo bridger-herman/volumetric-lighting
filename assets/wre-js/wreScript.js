@@ -11,12 +11,16 @@ import * as wre from '../pkg/wre_wasm.js';
 
 export class WreScript {
     constructor(owner) {
-        this._owner = owner;
+        this._entityId = owner;
+        this._entity = wre.get_entity(this._entityId);
     }
 
-    update() {
-        let ownerObject = wre.get_entity(this._owner);
-        ownerObject.transform.position.data[0] += 0.1;
-        wre.set_entity(this._owner, ownerObject);
+    updateWrapper() {
+        this._entity = wre.get_entity(this._entityId);
+        this.update();
+        wre.set_entity(this._entityId, this._entity);
     }
+
+    // To be implemented by inheriters
+    update() {}
 }

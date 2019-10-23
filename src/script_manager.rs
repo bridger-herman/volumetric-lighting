@@ -22,7 +22,7 @@ extern "C" {
     fn new() -> WreScript;
 
     #[wasm_bindgen(method)]
-    fn update(this: &WreScript);
+    fn updateWrapper(this: &WreScript);
 }
 
 unsafe impl Send for WreScript {}
@@ -48,7 +48,7 @@ impl ScriptManager {
 impl Update for ScriptManager {
     fn update(&mut self) {
         for (_entity, script) in self.entity_scripts.iter_mut() {
-            script.update();
+            script.updateWrapper();
         }
     }
 }

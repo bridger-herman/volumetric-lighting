@@ -295,8 +295,8 @@ function init(module) {
         const ret = getObject(arg0);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_update_02b380c50c6e0a89 = function(arg0) {
-        getObject(arg0).update();
+    imports.wbg.__wbg_updateWrapper_8e32c48222ca26b1 = function(arg0) {
+        getObject(arg0).updateWrapper();
     };
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));

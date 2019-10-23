@@ -15,9 +15,9 @@ pub struct Transform {
     pub owner: Option<EntityId>,
     pub parent: Option<EntityId>,
 
-    pub position: Vec3,
-    pub rotation: Quat,
-    pub scale: Vec3,
+    position: Vec3,
+    rotation: Quat,
+    scale: Vec3,
 
     pub matrix: Mat4,
 }
