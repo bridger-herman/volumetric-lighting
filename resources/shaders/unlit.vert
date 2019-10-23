@@ -3,10 +3,12 @@
 in vec3 in_pos;
 in vec3 in_norm;
 
+uniform uni_model;
+
 out vec4 norm;
 
 void main() {
-    gl_Position = vec4(in_pos, 1);
+    gl_Position = uni_model * vec4(in_pos, 1);
     norm = vec4(in_norm, 1);
 }
 

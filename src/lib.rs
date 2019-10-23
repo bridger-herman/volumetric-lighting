@@ -7,7 +7,7 @@ extern crate wasm_logger;
 #[macro_use]
 extern crate lazy_static;
 extern crate instant;
-extern crate vecmat;
+extern crate glam;
 extern crate obj;
 
 #[macro_use]

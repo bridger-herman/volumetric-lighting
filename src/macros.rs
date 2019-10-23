@@ -18,6 +18,9 @@ macro_rules! wre_entities {
     () => {
         *crate::state::WRE_ENTITIES.try_lock().unwrap()
     };
+    ($eid:expr) => {
+        &*crate::state::WRE_ENTITIES.try_lock().unwrap().get($eid)
+    }
 }
 
 #[macro_export]

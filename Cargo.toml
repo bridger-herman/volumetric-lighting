@@ -17,7 +17,7 @@ serde = "1.0.59"
 serde_derive = "1.0.59"
 num-traits = "0.2.8"
 lazy_static = "1.4"
-vecmat = { version = "0.4", git = "https://github.com/bridger-herman/vecmat-rs.git"}
+glam = { version = "0.8", features = [ "serde" ] }
 instant = { version = "0.1", features = [ "now", "wasm-bindgen" ]  }
 obj = "0.9"
 
@@ -38,4 +38,5 @@ features = [
     'WebGlVertexArrayObject',
     'WebGlShader',
     'Window',
+    'WebGlUniformLocation',
 ]

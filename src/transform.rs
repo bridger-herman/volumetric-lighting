@@ -6,33 +6,49 @@
 
 //! Transformation matrix for 3-space, stored in a 4x4 matrix
 
-use vecmat::vec::Vec3;
+use glam::{Mat4, Vec3, Quat};
+
+use crate::entity::EntityId;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Transform {
-    pub position: Vec3<f32>,
-    pub rotation: Vec3<f32>,
-    pub scale: Vec3<f32>,
+    pub owner: Option<EntityId>,
+    pub parent: Option<EntityId>,
+
+    pub position: Vec3,
+    pub rotation: Quat,
+    pub scale: Vec3,
+
+    pub matrix: Mat4,
 }
 
 impl Transform {
     pub fn new(
-        position: Vec3<f32>,
-        rotation: Vec3<f32>,
-        scale: Vec3<f32>,
+        owner: EntityId,
+        position: Vec3,
+        rotation: Quat,
+        scale: Vec3,
     ) -> Self {
+        let matrix = Mat4::from_scale_rotation_translation(scale, rotation, position);
         Self {
+            owner: Some(owner),
+            parent: None,
             position,
             rotation,
             scale,
+            matrix,
         }
     }
 
     pub fn identity() -> Self {
         Self {
-            position: Vec3::<f32>::new(),
-            rotation: Vec3::<f32>::new(),
-            scale: Vec3::from(1.0, 1.0, 1.0),
+            owner: None,
+            parent: None,
+            position: Vec3::zero(),
+            rotation: Quat::identity(),
+            scale: Vec3::one(),
+            matrix: Mat4::identity(),
         }
     }
+
 }

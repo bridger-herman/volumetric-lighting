@@ -50,6 +50,17 @@ impl RenderSystem {
             context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT |
                           WebGl2RenderingContext::DEPTH_BUFFER_BIT);
 
+            let model_matrix: [f32; 16] = wre_entities!(mesh.attached_to).transform.matrix.to_cols_array();
+
+            let model_uniform_location = context.get_uniform_location(&self.shaders[SHADER_NAME], "uni_model");
+
+
+            context.uniform_matrix4fv_with_f32_array(
+                model_uniform_location.as_ref(),
+                false,
+                &model_matrix,
+            );
+
             context.draw_arrays(
                 WebGl2RenderingContext::TRIANGLES,
                 0,
