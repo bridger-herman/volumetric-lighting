@@ -8,22 +8,10 @@
  */
 
 import * as wre from './pkg/wre_wasm.js';
-import { MoveTest } from './user-scripts/moveTest.js'
 
 export function initWre() {
-    initShader('unlit').then(() => {
-        let e = wre.create_entity();
-        console.log('create_entity');
-        loadResource('/resources/models/hex.obj').then((obj_text) => {
-            wre.add_mesh(e, obj_text);
-            console.log('add mesh');
-        }).then(() => {
-            let s = new MoveTest(e);
-            wre.add_script(e, s);
-            console.log('add script');
-        }).then(() => {
-            wre.make_ready();
-        });
+    return initShader('unlit').then(() => {
+        wre.make_ready();
     });
 }
 

@@ -51,4 +51,26 @@ impl Transform {
         }
     }
 
+    pub fn position(&self) -> Vec3 {
+        self.position
+    }
+    pub fn rotation(&self) -> Quat {
+        self.rotation
+    }
+    pub fn scale(&self) -> Vec3 {
+        self.scale
+    }
+
+    pub fn set_position(&mut self, new_position: Vec3) {
+        self.position = new_position;
+        self.matrix = Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.position);
+    }
+    pub fn set_rotation(&mut self, new_rotation: Quat) {
+        self.rotation = new_rotation;
+        self.matrix = Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.position);
+    }
+    pub fn set_scale(&mut self, new_scale: Vec3) {
+        self.scale = new_scale;
+        self.matrix = Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.position);
+    }
 }

@@ -13,11 +13,9 @@ import { WreScript } from '../wre.js';
 export class MoveTest extends WreScript {
     // To be implemented by inheriters
     update() {
-        let scale = 1.01;
-        let mat = this._entity.transform.matrix;
-        mat[0] *= scale;
-        mat[5] *= scale;
-        mat[10] *= scale;
+        let deltaScale = 1.01;
+        let scale = this._entity.transform.scale();
+        this._entity.transform.set_scale(scale * deltaScale);
     }
 }
 
