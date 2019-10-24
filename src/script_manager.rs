@@ -14,7 +14,7 @@ use crate::traits::Update;
 
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen(module = "/assets/wre-js/wreScript.js")]
+#[wasm_bindgen(module = "/assets/wre.js")]
 extern "C" {
     pub type WreScript;
 

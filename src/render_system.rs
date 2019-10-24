@@ -20,12 +20,17 @@ use crate::entity::EntityId;
 pub struct RenderSystem {
     meshes: Vec<Mesh>,
     shaders: HashMap<String, WebGlProgram>,
+    ready: bool,
 }
 
 unsafe impl Send for RenderSystem {}
 
 impl RenderSystem {
     pub fn render(&self) {
+        if !self.ready {
+            return;
+        }
+
         let document = web_sys::window().unwrap().document().unwrap();
         let canvas = document.get_element_by_id("canvas").unwrap();
         let canvas: web_sys::HtmlCanvasElement = canvas
@@ -70,6 +75,10 @@ impl RenderSystem {
 
     pub fn meshes(&self) -> &Vec<Mesh> {
         &self.meshes
+    }
+
+    pub fn make_ready(&mut self) {
+        self.ready = true;
     }
 
     pub fn add_shader(&mut self, name: &str, program: &WebGlProgram) {
@@ -180,6 +189,6 @@ impl RenderSystem {
             vao,
         };
         self.meshes.push(m);
-        info!("Loaded mesh into {}", eid);
+        info!("Loaded mesh into entity {}", eid);
     }
 }

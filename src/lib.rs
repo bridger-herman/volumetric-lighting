@@ -32,7 +32,7 @@ use web_sys::WebGlProgram;
 use crate::entity::EntityId;
 use crate::script_manager::WreScript;
 
-const TARGET_FPS: i32 = 2;
+const TARGET_FPS: i32 = 30;
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
@@ -77,4 +77,9 @@ pub fn add_shader(name: &str, program: WebGlProgram) {
 #[wasm_bindgen]
 pub fn add_mesh(eid: EntityId, obj_source: &str) {
     wre_render_system!().add_obj_mesh(eid, obj_source);
+}
+
+#[wasm_bindgen]
+pub fn make_ready() {
+    wre_render_system!().make_ready();
 }

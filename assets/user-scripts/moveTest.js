@@ -7,8 +7,8 @@
  * Base class for a JS script that can be attached to an Entity
  */
 
-import { WreScript } from '../wre-js/wreScript.js'
 import * as wre from '../pkg/wre_wasm.js';
+import { WreScript } from '../wre.js';
 
 export class MoveTest extends WreScript {
     // To be implemented by inheriters
