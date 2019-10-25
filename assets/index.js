@@ -16,7 +16,7 @@ import * as wre from './pkg/wre_wasm.js';
 
 function init() {
     initWre().then(() => {
-        Scene.loadSceneAsync('/resources/scenes/test.json');
+        Scene.loadSceneAsync('/resources/scenes/easy.json');
     });
 }
 

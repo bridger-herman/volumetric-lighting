@@ -8,8 +8,9 @@
  */
 
 import * as wre from './pkg/wre_wasm.js'
-import { loadResource } from './wre.js'
+import { loadResource, WreScript } from './wre.js'
 import { MoveTest } from './user-scripts/moveTest.js'
+import { BoardManager } from './user-scripts/BoardManager.js'
 
 export class Scene {
     static loadSceneAsync(scenePath) {
@@ -22,7 +23,10 @@ export class Scene {
                 let eid = wre.create_entity();
                 wre.set_color(eid, sceneEntity.color);
                 loadResource(prefab.mesh).then((objText) => {
-                    wre.add_mesh(eid, objText);
+                    if (typeof prefab.mesh !== 'undefined') {
+                        wre.add_mesh(eid, objText);
+                    }
+                }).then(() => {
                     for (let s in prefab.scripts) {
                         // TODO: This is incredibly unsafe. How to best do
                         // this?
