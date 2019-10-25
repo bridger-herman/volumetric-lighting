@@ -16,7 +16,9 @@ use obj::{Obj, SimplePolygon};
 use crate::mesh::Mesh;
 use crate::entity::EntityId;
 
-#[derive(Default)]
+const SHADER_NAME: &str = "default2";
+
+// #[derive(Default)]
 pub struct RenderSystem {
     meshes: Vec<Mesh>,
     shaders: HashMap<String, WebGlProgram>,
@@ -44,7 +46,6 @@ impl RenderSystem {
             .dyn_into::<WebGl2RenderingContext>()
             .expect("Unable to get WebGL context");
 
-        const SHADER_NAME: &str = "unlit";
         context.use_program(Some(&self.shaders[SHADER_NAME]));
 
         for mesh in &self.meshes {
@@ -103,7 +104,6 @@ impl RenderSystem {
             .dyn_into::<WebGl2RenderingContext>()
             .expect("Unable to get WebGL context");
 
-        const SHADER_NAME: &str = "unlit";
         context.use_program(Some(&self.shaders[SHADER_NAME]));
 
         // Collect the positions into triangles
@@ -190,5 +190,30 @@ impl RenderSystem {
         };
         self.meshes.push(m);
         info!("Loaded mesh into entity {}", eid);
+    }
+}
+
+impl Default for RenderSystem {
+    fn default() -> Self {
+        let document = web_sys::window().unwrap().document().unwrap();
+        let canvas = document.get_element_by_id("canvas").unwrap();
+        let canvas: web_sys::HtmlCanvasElement = canvas
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .expect("Unable to get canvas");
+
+        let context = canvas
+            .get_context("webgl2")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<WebGl2RenderingContext>()
+            .expect("Unable to get WebGL context");
+
+        context.enable(WebGl2RenderingContext::DEPTH_TEST);
+
+        Self {
+            meshes: Vec::default(),
+            shaders: HashMap::default(),
+            ready: false,
+        }
     }
 }

@@ -11,7 +11,7 @@ import * as wre from './pkg/wre_wasm.js';
 import { Transform } from './transform.js'
 
 export function initWre() {
-    return initShader('unlit').then(() => {
+    return initShader('default2').then(() => {
         wre.make_ready();
     });
 }
@@ -21,6 +21,7 @@ export class WreScript {
         this._entityId = owner;
         this._entity = wre.get_entity(this._entityId);
         this.transform = Transform.identity();
+        this.start();
     }
 
     updateWrapper() {
@@ -34,6 +35,7 @@ export class WreScript {
     }
 
     // To be implemented by inheriters
+    start() {}
     update() {}
 }
 

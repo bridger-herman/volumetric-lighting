@@ -16,7 +16,7 @@ import * as wre from './pkg/wre_wasm.js';
 function init() {
     initWre().then(() => {
         let e = wre.create_entity();
-        loadResource('/resources/models/hex.obj').then((obj_text) => {
+        loadResource('/resources/models/sphere_smooth.obj').then((obj_text) => {
             wre.add_mesh(e, obj_text);
         }).then(() => {
             let s = new MoveTest(e);

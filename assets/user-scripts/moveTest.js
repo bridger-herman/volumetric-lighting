@@ -11,10 +11,15 @@ import * as wre from '../pkg/wre_wasm.js';
 import { WreScript } from '../wre.js';
 
 export class MoveTest extends WreScript {
+    start() {
+        this.currentRotation = 0.0;
+        this.transform.scale = glm.mul(glm.vec3(1.0), 0.1);
+    }
+
     // To be implemented by inheriters
     update() {
-        let deltaScale = 1.01;
-        this.transform.scale = glm.mul(this.transform.scale, deltaScale);
+        this.currentRotation += 0.01;
+        this.transform.rotation = glm.vec3(0.0, this.currentRotation, 0.0);
     }
 }
 
