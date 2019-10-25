@@ -7,6 +7,7 @@
 //! Entity (GameObject)
 
 use crate::transform::Transform;
+use crate::material::Material;
 
 pub type EntityId = usize;
 
@@ -14,6 +15,7 @@ pub type EntityId = usize;
 pub struct Entity {
     pub id: EntityId,
     pub transform: Transform,
+    pub material: Material,
 }
 
 impl Entity {

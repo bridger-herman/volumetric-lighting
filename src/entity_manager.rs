@@ -7,6 +7,7 @@
 //! Manages all the entities in the game
 
 use crate::entity::{Entity, EntityId};
+use crate::material::Material;
 use crate::transform::Transform;
 
 #[derive(Debug, Default)]
@@ -20,6 +21,7 @@ impl EntityManager {
         let e = Entity {
             id,
             transform: Transform::identity(),
+            material: Material::default(),
         };
         self.entities.push(e);
 

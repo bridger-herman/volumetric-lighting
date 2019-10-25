@@ -25,6 +25,7 @@ pub mod state;
 pub mod traits;
 pub mod transform;
 pub mod window;
+pub mod material;
 
 use wasm_bindgen::prelude::*;
 use web_sys::WebGlProgram;
@@ -77,6 +78,11 @@ pub fn add_shader(name: &str, program: WebGlProgram) {
 #[wasm_bindgen]
 pub fn add_mesh(eid: EntityId, obj_source: &str) {
     wre_render_system!().add_obj_mesh(eid, obj_source);
+}
+
+#[wasm_bindgen]
+pub fn set_color(eid: EntityId, color: JsValue) {
+    wre_entities!(eid, true).material.color = color.into_serde().unwrap();
 }
 
 #[wasm_bindgen]

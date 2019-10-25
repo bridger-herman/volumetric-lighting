@@ -22,6 +22,7 @@ function init() {
             let s = new MoveTest(e);
             wre.add_script(e, s);
         }).then(() => {
+            wre.set_color(e, [1, 0, 0, 1]);
         });
     });
 }

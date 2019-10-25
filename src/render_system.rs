@@ -56,14 +56,18 @@ impl RenderSystem {
                           WebGl2RenderingContext::DEPTH_BUFFER_BIT);
 
             let model_matrix = wre_entities!(mesh.attached_to).transform.matrix;
-
             let model_uniform_location = context.get_uniform_location(&self.shaders[SHADER_NAME], "uni_model");
-
-
             context.uniform_matrix4fv_with_f32_array(
                 model_uniform_location.as_ref(),
                 false,
                 &model_matrix,
+            );
+
+            let color = wre_entities!(mesh.attached_to).material.color;
+            let color_uniform_location = context.get_uniform_location(&self.shaders[SHADER_NAME], "uni_color");
+            context.uniform4fv_with_f32_array(
+                color_uniform_location.as_ref(),
+                &color,
             );
 
             context.draw_arrays(

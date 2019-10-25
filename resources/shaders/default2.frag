@@ -4,11 +4,12 @@ precision mediump float;
 
 // a directional light
 const vec3 lightDir = normalize(vec3(0, 1, 0.5));
-const vec4 color = vec4(0.8, 0.0, 0.8, 1.0);
 const float ambient = 0.2;
 
 in vec3 pos;
 in vec3 norm;
+
+uniform vec4 uni_color;
 
 out vec4 frag_color;
 
@@ -20,11 +21,11 @@ void main() {
 
     vec3 outColor = vec3(0,0,0);
     // ambient color
-    outColor += color.xyz * ambient;
+    outColor += uni_color.xyz * ambient;
     // diffuse color
-    outColor += color.xyz * max(dot(lightDir, n), 0.0);
+    outColor += uni_color.xyz * max(dot(lightDir, n), 0.0);
     // specular color
-    outColor += color.xyz * pow(max(dot(h, n), 0.0), 5.0);
+    outColor += uni_color.xyz * pow(max(dot(h, n), 0.0), 5.0);
 
-    frag_color = vec4(outColor, color.w);
+    frag_color = vec4(outColor, uni_color.w);
 }
