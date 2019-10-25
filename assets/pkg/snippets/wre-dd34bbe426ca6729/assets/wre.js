@@ -1,13 +1,14 @@
-/* shader.js
+/* wre.js
  *
  * Copyright (c) 2019, University of Minnesota
  *
  * Author: Bridger Herman
  *
- * Compile and link shaders, and add them to the rendering engine
+ * Assorted useful JavaScript interactions for WRE
  */
 
 import * as wre from './pkg/wre_wasm.js';
+import { Transform } from './transform.js'
 
 export function initWre() {
     return initShader('unlit').then(() => {
@@ -19,12 +20,17 @@ export class WreScript {
     constructor(owner) {
         this._entityId = owner;
         this._entity = wre.get_entity(this._entityId);
+        this.transform = Transform.identity();
     }
 
     updateWrapper() {
         this._entity = wre.get_entity(this._entityId);
         this.update();
         wre.set_entity(this._entityId, this._entity);
+    }
+
+    getTransform() {
+        return this.transform.matrix.elements;
     }
 
     // To be implemented by inheriters

@@ -14,8 +14,7 @@ export class MoveTest extends WreScript {
     // To be implemented by inheriters
     update() {
         let deltaScale = 1.01;
-        let scale = this._entity.transform.scale();
-        this._entity.transform.set_scale(scale * deltaScale);
+        this.transform.scale = glm.mul(this.transform.scale, deltaScale);
     }
 }
 

@@ -20,7 +20,10 @@ macro_rules! wre_entities {
     };
     ($eid:expr) => {
         &*crate::state::WRE_ENTITIES.try_lock().unwrap().get($eid)
-    }
+    };
+    ($eid:expr, $mutable:expr) => {
+        &mut *crate::state::WRE_ENTITIES.try_lock().unwrap().get_mut($eid)
+    };
 }
 
 #[macro_export]

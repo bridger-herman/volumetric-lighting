@@ -15,3 +15,9 @@ pub struct Entity {
     pub id: EntityId,
     pub transform: Transform,
 }
+
+impl Entity {
+    pub fn update_transform_matrix(&mut self, matrix: &[f32; 16]) {
+        self.transform.matrix = *matrix;
+    }
+}
