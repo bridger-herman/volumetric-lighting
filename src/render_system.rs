@@ -48,12 +48,13 @@ impl RenderSystem {
 
         context.use_program(Some(&self.shaders[SHADER_NAME]));
 
+        context.clear_color(0.0, 0.0, 0.0, 1.0);
+        context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT |
+                      WebGl2RenderingContext::DEPTH_BUFFER_BIT);
+
         for mesh in &self.meshes {
             context.bind_vertex_array(Some(&mesh.vao));
 
-            context.clear_color(0.0, 0.0, 0.0, 1.0);
-            context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT |
-                          WebGl2RenderingContext::DEPTH_BUFFER_BIT);
 
             let model_matrix = wre_entities!(mesh.attached_to).transform.matrix;
             let model_uniform_location = context.get_uniform_location(&self.shaders[SHADER_NAME], "uni_model");

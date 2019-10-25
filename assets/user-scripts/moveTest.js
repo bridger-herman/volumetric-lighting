@@ -13,7 +13,6 @@ import { WreScript } from '../wre.js';
 export class MoveTest extends WreScript {
     start() {
         this.currentRotation = 0.0;
-        this.transform.scale = glm.mul(glm.vec3(1.0), 0.1);
     }
 
     // To be implemented by inheriters
