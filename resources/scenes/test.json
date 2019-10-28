@@ -1,24 +1,25 @@
 {
     "prefabs": {
         "sphere": {
-            "mesh": "/resources/models/sphere_smooth.obj",
-            "scripts": ["MoveTest"]
+            "mesh": "/resources/models/small_sphere.obj",
+            "scripts": ["WreScript"]
+        },
+        "board": {
+            "mesh": "/resources/models/board_segment.obj",
+            "scripts": ["WreScript"]
+        },
+        "boardManager": {
+            "scripts": ["BoardManager"]
         }
     },
     "scene": [
         {
-            "prefab": "sphere",
-            "color": [0.5, 0.0, 0.0, 1.0],
+            "prefab": "boardManager",
+            "color": [0.0, 0.0, 0.0, 1.0],
             "position": [0, 0, 0],
             "rotation": [0, 0, 0],
-            "scale": [0.1, 0.1, 0.1]
-        },
-        {
-            "prefab": "sphere",
-            "color": [0.0, 0.5, 0.0, 1.0],
-            "position": [0.5, 0.0, 0],
-            "rotation": [0, 0, 0],
-            "scale": [0.1, 0.1, 0.1]
+            "scale": [1.0, 1.0, 1.0]
         }
     ]
 }
+
