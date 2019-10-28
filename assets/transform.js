@@ -31,6 +31,15 @@ export class Transform {
         return new Transform(glm.vec3(0.0), glm.vec3(0.0), glm.vec3(1.0));
     }
 
+    lerp(other, t) {
+        return new Transform(
+            glm.mix(this.position, other.position, t),
+            glm.mix(this.rotation, other.rotation, t),
+            glm.mix(this.scale, other.scale, t),
+            this._entity,
+        )
+    }
+
     get matrix() {
         return this._matrix;
     }

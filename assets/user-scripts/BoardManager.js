@@ -10,6 +10,8 @@
 import * as wre from '../pkg/wre_wasm.js';
 import { WreScript, loadResource } from '../wre.js';
 import { Ray } from '../ray.js';
+import { PlaceToken } from './placeToken.js';
+import { Transform } from '../transform.js';
 
 export class BoardManager extends WreScript {
     // Arrow function to preserve `this` context
@@ -53,8 +55,24 @@ export class BoardManager extends WreScript {
         if (checkBounds(boardCoords[0]) && checkBounds(boardCoords[1])) {
             let e = wre.create_entity();
             wre.add_mesh(e, this._objText);
-            let script = new WreScript();
-            script.transform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1);
+            let script = new PlaceToken();
+
+            let startTransform = Transform.identity();
+            startTransform.position = glm.vec3(0.0, 0.5, -0.5);
+            startTransform.scale = glm.vec3(1.0, 1.0, 8.0);
+
+            let midTransform = Transform.identity();
+            midTransform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
+            midTransform.scale = glm.vec3(1.0, 2.0, 1.0);
+
+            let endTransform = Transform.identity();
+            endTransform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
+            endTransform.scale = glm.vec3(1.0, 1.0, 1.0);
+
+            script.setKeyframe(startTransform, 0.0)
+            script.setKeyframe(midTransform, 0.5)
+            script.setKeyframe(endTransform, 1.0)
+
             wre.add_script(e, script);
             wre.set_color(e, this._colors[this._currentColor]);
         }
@@ -155,7 +173,6 @@ export class BoardManager extends WreScript {
         });
 
         loadResource('/resources/models/small_sphere.obj').then((objText) => {
-            this._objText = objText;
             for (let color in this._board) {
                 for (let pairIndex in this._board[color]) {
                     let sphere = wre.create_entity();
