@@ -47,18 +47,20 @@ export class BoardManager extends WreScript {
 
         // Gives int in range [0, 8]
         let boardCoords = [coordX2D + 4, coordY2D + 4];
-        console.log(boardCoords);
 
-        let e = wre.create_entity();
-        wre.add_mesh(e, this._objText);
-        let script = new WreScript();
-        script.transform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1);
-        wre.add_script(e, script);
-        wre.set_color(e, this._colors[this._currentColor]);
+        let checkBounds = (c) => {return c >= 0 && c < 9};
+
+        if (checkBounds(boardCoords[0]) && checkBounds(boardCoords[1])) {
+            let e = wre.create_entity();
+            wre.add_mesh(e, this._objText);
+            let script = new WreScript();
+            script.transform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1);
+            wre.add_script(e, script);
+            wre.set_color(e, this._colors[this._currentColor]);
+        }
     }
 
     keyboardHandler = (evt) => {
-        console.log(evt.key);
         let changed = false;
         if (evt.key == 'ArrowUp') {
             this._currentColorIndex = (this._currentColorIndex + 1) % 9;
