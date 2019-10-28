@@ -40,22 +40,43 @@ export class BoardManager extends WreScript {
             }
             t += deltaT;
         }
+
+        // Gives int in range [-4, 4]
+        let coordX2D = Math.round(coord.x * 10.0);
+        let coordY2D = Math.round(coord.z * 10.0);
+
+        // Gives int in range [0, 8]
+        let boardCoords = [coordX2D + 4, coordY2D + 4];
+        console.log(boardCoords);
+
         let e = wre.create_entity();
         wre.add_mesh(e, this._objText);
         let script = new WreScript();
-        // script.transform.position = glm.add(imagePlaneLocation, glm.mul(this._camDir, 0.1));
-        script.transform.position = coord;
-        script.transform.scale = glm.vec3(0.05, 0.05, 0.05);
+        script.transform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1);
         wre.add_script(e, script);
-        wre.set_color(e, [0, 1, 0, 1]);
+        wre.set_color(e, this._colors[this._currentColor]);
+    }
+
+    keyboardHandler = (evt) => {
+        console.log(evt.key);
+        let changed = false;
+        if (evt.key == 'ArrowUp') {
+            this._currentColorIndex = (this._currentColorIndex + 1) % 9;
+            changed = true;
+        } else if (evt.key == 'ArrowDown') {
+            this._currentColorIndex = (this._currentColorIndex - 1) % 9;
+            changed = true;
+        }
+        if (changed) {
+            this._currentColor = Object.keys(this._colors)[this._currentColorIndex];
+            wre.set_color(this._indicator, this._colors[this._currentColor]);
+        }
     }
 
     start() {
-        loadResource('/resources/models/sphere_smooth.obj').then((objText) => {
-            this._objText = objText;
-        });
         let canvas = document.getElementById('canvas');
         canvas.addEventListener('click', (evt) => this.mouseHandler(evt));
+        document.addEventListener('keydown', (evt) => this.keyboardHandler(evt));
 
         this._nearPlane = 0.1;
         this._aspect = 16.0 / 9.0;
@@ -94,7 +115,7 @@ export class BoardManager extends WreScript {
 
         this._upperLeft = glm.add(topLeft, imagePlaneCenter);
 
-        let colors = {
+        this._colors = {
             "red": [0.584314, 0.109804, 0.0745098, 1.0],
             "orange": [0.666667, 0.278431, 0.0235294, 1.0],
             "yellow": [0.627451, 0.588235, 0.0117647, 1.0],
@@ -104,8 +125,12 @@ export class BoardManager extends WreScript {
             "darkBlue": [0.121569, 0.345098, 0.596078, 1.0],
             "lightPurple": [0.45098, 0.380392, 0.560784, 1.0],
             "darkPurple": [0.2, 0.0823529, 0.317647, 1.0],
-        }
-        let board = {
+        };
+
+        this._currentColorIndex = 0;
+        this._currentColor = Object.keys(this._colors)[0];
+
+        this._board = {
             "red": [[1, 6], [5, 1], [7, 8], [8, 3]],
             "orange": [[0, 4], [2, 2], [3, 1], [6, 6]],
             "yellow": [[0, 6], [1, 0], [2, 3], [3, 2], [5, 8], [8, 4]],
@@ -116,24 +141,34 @@ export class BoardManager extends WreScript {
             "lightPurple": [[0, 3], [3, 6], [5, 2], [6, 7], [8, 5]],
             "darkPurple": [[0, 5], [3, 0], [5, 6], [6, 8]],
         };
-        return;
+
         loadResource('/resources/models/small_sphere.obj').then((objText) => {
             this._objText = objText;
-            for (let color in board) {
-                for (let pairIndex in board[color]) {
+            this._indicator = wre.create_entity();
+            wre.add_mesh(this._indicator, this._objText);
+            let script = new WreScript();
+            script.transform.position = glm.add(this._camPos, glm.vec3(0.0, -0.3, -0.5));
+            wre.add_script(this._indicator, script);
+            wre.set_color(this._indicator, this._colors[this._currentColor]);
+        });
+
+        loadResource('/resources/models/small_sphere.obj').then((objText) => {
+            this._objText = objText;
+            for (let color in this._board) {
+                for (let pairIndex in this._board[color]) {
                     let sphere = wre.create_entity();
                     wre.add_mesh(sphere, objText);
                     let script = new WreScript();
                     script.transform.position = glm.add(
-                        glm.mul(glm.vec3(0.0, 0.0, 0.1), board[color][pairIndex][0]),
-                        glm.mul(glm.vec3(0.1, 0.0, 0.0), board[color][pairIndex][1])
+                        glm.mul(glm.vec3(0.0, 0.0, 0.1), this._board[color][pairIndex][0]),
+                        glm.mul(glm.vec3(0.1, 0.0, 0.0), this._board[color][pairIndex][1])
                     );
                     script.transform.position = glm.sub(
                         script.transform.position,
                         glm.vec3(0.4, 0.0, 0.4),
                     );
                     wre.add_script(sphere, script);
-                    wre.set_color(sphere, colors[color]);
+                    wre.set_color(sphere, this._colors[color]);
                 }
             }
         })
