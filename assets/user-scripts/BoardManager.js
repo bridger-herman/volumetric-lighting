@@ -12,7 +12,7 @@ import { WreScript, loadResource } from '../wre.js';
 import { Ray } from '../ray.js';
 import { PlaceToken } from './placeToken.js';
 import { Transform } from '../transform.js';
-import { nearlySolved, easy } from './boards.js'
+import { oneFromWin, nearlySolved, easy, challenging } from './boards.js'
 
 export class BoardManager extends WreScript {
     // Arrow function to preserve `this` context
@@ -221,7 +221,7 @@ export class BoardManager extends WreScript {
             });
         }
 
-        this._board = nearlySolved;
+        this._board = easy;
 
         loadResource('/resources/models/small_sphere.obj').then((objText) => {
             this._objText = objText;
