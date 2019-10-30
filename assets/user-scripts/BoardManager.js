@@ -223,11 +223,11 @@ export class BoardManager extends WreScript {
 
         this._board = easy;
 
-        loadResource('/resources/models/small_sphere.obj').then((objText) => {
+        loadResource('./resources/models/small_sphere.obj').then((objText) => {
             this._objText = objText;
         });
 
-        loadResource('/resources/models/small_sphere.obj').then((objText) => {
+        loadResource('./resources/models/small_sphere.obj').then((objText) => {
             for (let color in this._board) {
                 for (let pairIndex in this._board[color]) {
                     let sphere = wre.create_entity();

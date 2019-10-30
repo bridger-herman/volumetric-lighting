@@ -1,11 +1,11 @@
 {
     "prefabs": {
         "sphere": {
-            "mesh": "/resources/models/small_sphere.obj",
+            "mesh": "./resources/models/small_sphere.obj",
             "scripts": ["WreScript"]
         },
         "board": {
-            "mesh": "/resources/models/board_segment.obj",
+            "mesh": "./resources/models/board_segment.obj",
             "scripts": ["WreScript"]
         },
         "boardManager": {

@@ -41,12 +41,12 @@ export class WreScript {
 
 async function initShader(name) {
     let vertPromise =
-        loadResource(`/resources/shaders/${name}.vert`).then((shaderText) => {
+        loadResource(`./resources/shaders/${name}.vert`).then((shaderText) => {
             console.debug(`Compiling vert shader '${name}'`);
             return wre.compile_vert_shader(shaderText)
     });
     let fragPromise =
-        loadResource(`/resources/shaders/${name}.frag`).then((shaderText) => {
+        loadResource(`./resources/shaders/${name}.frag`).then((shaderText) => {
             console.debug(`Compiling frag shader '${name}'`);
             return wre.compile_frag_shader(shaderText)
     });
