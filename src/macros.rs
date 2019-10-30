@@ -27,6 +27,13 @@ macro_rules! wre_entities {
 }
 
 #[macro_export]
+macro_rules! wre_entities_mut {
+    () => {
+        &mut *crate::state::WRE_ENTITIES.try_lock().unwrap()
+    };
+}
+
+#[macro_export]
 macro_rules! wre_scripts {
     () => {
         *crate::state::WRE_SCRIPTS.try_lock().unwrap()

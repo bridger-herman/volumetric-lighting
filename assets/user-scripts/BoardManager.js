@@ -48,11 +48,13 @@ export class BoardManager extends WreScript {
         let coordY2D = Math.round(coord.z * 10.0);
 
         // Gives int in range [0, 8]
-        let boardCoords = [coordX2D + 4, coordY2D + 4];
+        let boardCoords = [coordY2D + 4, coordX2D + 4];
 
         let checkBounds = (c) => {return c >= 0 && c < 9};
 
         if (checkBounds(boardCoords[0]) && checkBounds(boardCoords[1])) {
+            let valid = this.checkSpace(...boardCoords, this._currentColor);
+
             let e = wre.create_entity();
             wre.add_mesh(e, this._objText);
             let script = new PlaceToken();
@@ -69,13 +71,67 @@ export class BoardManager extends WreScript {
             endTransform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
             endTransform.scale = glm.vec3(1.0, 1.0, 1.0);
 
-            script.setKeyframe(startTransform, 0.0)
-            script.setKeyframe(midTransform, 0.5)
-            script.setKeyframe(endTransform, 1.0)
-
-            wre.add_script(e, script);
             wre.set_color(e, this._colors[this._currentColor]);
+            if (valid) {
+                script.setKeyframe(startTransform, 0.0);
+                script.setKeyframe(midTransform, 0.5);
+                script.setKeyframe(endTransform, 1.0);
+
+                wre.add_script(e, script);
+                this._board[this._currentColor].push(boardCoords);
+            } else {
+                let lastTf = Transform.identity();
+                lastTf.position = glm.vec3(0.0, 1.0, 0.0);
+                lastTf.scale = glm.vec3(1.0, 6.0, 1.0);
+
+                script.setKeyframe(startTransform, 0.0);
+                script.setKeyframe(midTransform, 0.2);
+                midTransform.position = glm.add(midTransform.position, glm.vec3(0, 0.1, 0));
+                script.setKeyframe(endTransform, 0.5);
+                endTransform.position = glm.add(midTransform.position, glm.vec3(0, 0.1, 0));
+                script.setKeyframe(lastTf, 1.0);
+
+                wre.add_script(e, script);
+                wre.set_color(e, this._colors[this._currentColor]);
+            }
         }
+    }
+
+    checkSpace(row, col, testColor) {
+        // Check to see if anything's already in the space
+        for (let color in this._board) {
+            for (let i in this._board[color]) {
+                let space = this._board[color][i];
+                if (row == space[0] && col == space[1]) {
+                    return false;
+                }
+            }
+        }
+
+        // Check to see if anything of this color is already in the column or
+        // row
+        for (let i in this._board[testColor]) {
+            let space = this._board[testColor][i];
+            if (row == space[0] || col == space[1]) {
+                return false;
+            }
+        }
+
+        // Check to see if anything of this color is already in the same box
+        let rowBox = Math.floor(row / 3);
+        let colBox = Math.floor(col / 3);
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+                let inBox = this._board[testColor].find((el) => {
+                    return el[0] == ((rowBox * 3) + r) && el[1] == ((colBox * 3) + c);
+                });
+
+                if (inBox) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     start() {

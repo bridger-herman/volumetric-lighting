@@ -2,7 +2,7 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(54)(arg0, arg1);
+    wasm.__wbg_function_table.get(50)(arg0, arg1);
 }
 /**
 */
@@ -37,6 +37,13 @@ function takeObject(idx) {
 export function create_entity() {
     const ret = wasm.create_entity();
     return takeObject(ret);
+}
+
+/**
+* @param {number} eid
+*/
+export function destroy_entity(eid) {
+    wasm.destroy_entity(eid);
 }
 
 /**
@@ -581,7 +588,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper207 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper205 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -589,7 +596,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(55)(state.a, state.b);
+                    wasm.__wbg_function_table.get(51)(state.a, state.b);
                     state.a = 0;
                 }
             }

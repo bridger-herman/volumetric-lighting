@@ -39,4 +39,8 @@ impl EntityManager {
     pub fn get_mut(&mut self, id: EntityId) -> &mut Entity {
         &mut self.entities[id]
     }
+
+    pub fn remove(&mut self, id: EntityId) {
+        self.entities.remove(id);
+    }
 }

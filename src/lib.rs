@@ -56,6 +56,11 @@ pub fn create_entity() -> JsValue {
 }
 
 #[wasm_bindgen]
+pub fn destroy_entity(eid: EntityId) {
+    wre_entities_mut!().remove(eid);
+}
+
+#[wasm_bindgen]
 pub fn get_entity(id: EntityId) -> JsValue {
     JsValue::from_serde(&wre_entities!().get(id)).unwrap()
 }
