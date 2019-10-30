@@ -78,25 +78,9 @@ export class BoardManager extends WreScript {
         }
     }
 
-    keyboardHandler = (evt) => {
-        let changed = false;
-        if (evt.key == 'ArrowUp') {
-            this._currentColorIndex = (this._currentColorIndex + 1) % 9;
-            changed = true;
-        } else if (evt.key == 'ArrowDown') {
-            this._currentColorIndex = (this._currentColorIndex - 1) % 9;
-            changed = true;
-        }
-        if (changed) {
-            this._currentColor = Object.keys(this._colors)[this._currentColorIndex];
-            wre.set_color(this._indicator, this._colors[this._currentColor]);
-        }
-    }
-
     start() {
         let canvas = document.getElementById('canvas');
         canvas.addEventListener('click', (evt) => this.mouseHandler(evt));
-        document.addEventListener('keydown', (evt) => this.keyboardHandler(evt));
 
         this._nearPlane = 0.1;
         this._aspect = 16.0 / 9.0;
@@ -147,8 +131,34 @@ export class BoardManager extends WreScript {
             "darkPurple": [0.2, 0.0823529, 0.317647, 1.0],
         };
 
-        this._currentColorIndex = 0;
+        for (let colorName in this._colors) {
+            let colorInts = this._colors[colorName].map((c) => parseInt(c * 255));
+            let colorValue = "#" + ((1 << 24) + (colorInts[0] << 16) + (colorInts[1] << 8) + colorInts[2]).toString(16).slice(1);
+            let buttonHtml = `<button id="${colorName}" class="color-button"><div class="color-preview" style="background-color: ${colorValue}"></div></button>`;
+            document.getElementById('button-container').innerHTML += buttonHtml;
+        }
+
         this._currentColor = Object.keys(this._colors)[0];
+        document.getElementById(this._currentColor).style['background-color'] = '#DDD';
+
+        for (let colorName in this._colors) {
+            let button = document.getElementById(colorName);
+            button.addEventListener('click', (evt) => {
+                let clicked = evt.target;
+                if (!this._colors.hasOwnProperty(evt.target.id)) {
+                    clicked = clicked.parentElement;
+                }
+
+                let buttons = document.getElementsByClassName('color-button');
+                for (let i = 0; i < buttons.length; i++) {
+                    buttons[i].style['background-color'] = '#000';
+                }
+
+                this._currentColor = clicked.id;
+                clicked.style['background-color'] = '#DDD';
+            });
+        }
+
 
         this._board = {
             "red": [[1, 6], [5, 1], [7, 8], [8, 3]],
@@ -164,12 +174,6 @@ export class BoardManager extends WreScript {
 
         loadResource('/resources/models/small_sphere.obj').then((objText) => {
             this._objText = objText;
-            this._indicator = wre.create_entity();
-            wre.add_mesh(this._indicator, this._objText);
-            let script = new WreScript();
-            script.transform.position = glm.add(this._camPos, glm.vec3(0.0, -0.3, -0.5));
-            wre.add_script(this._indicator, script);
-            wre.set_color(this._indicator, this._colors[this._currentColor]);
         });
 
         loadResource('/resources/models/small_sphere.obj').then((objText) => {

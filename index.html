@@ -3,9 +3,26 @@
     <head>
         <meta charset="UTF-8">
         <title></title>
+        <style>
+.color-preview {
+    margin: 10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+}
+#button-container {
+    display: flex;
+    justify-content: center;
+}
+#button-container>button {
+    background-color: #000;
+}
+        </style>
     </head>
     <body>
         <canvas id="canvas" width="1280" height="720"></canvas>
+        <div id="button-container"></div>
+
         <script src="./assets/offline/glm-js.min.js"></script>
         <script src="./assets/offline/jquery-3.4.1.min.js"></script>
         <!-- <script src="https://humbletim.github.io/glm-js/code/build/glm-js.min.js"></script> -->
