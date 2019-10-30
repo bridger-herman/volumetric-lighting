@@ -12,6 +12,7 @@ import { WreScript, loadResource } from '../wre.js';
 import { Ray } from '../ray.js';
 import { PlaceToken } from './placeToken.js';
 import { Transform } from '../transform.js';
+import { nearlySolved, easy } from './boards.js'
 
 export class BoardManager extends WreScript {
     // Arrow function to preserve `this` context
@@ -79,6 +80,11 @@ export class BoardManager extends WreScript {
 
                 wre.add_script(e, script);
                 this._board[this._currentColor].push(boardCoords);
+
+                let win = Object.values(this._board).every((v) => v.length == 9);
+                if (win) {
+                    document.getElementById('win-container').innerHTML = '<h1 id="win-text">WINNER!</h1>';
+                }
             } else {
                 let lastTf = Transform.identity();
                 lastTf.position = glm.vec3(0.0, 1.0, 0.0);
@@ -215,18 +221,7 @@ export class BoardManager extends WreScript {
             });
         }
 
-
-        this._board = {
-            "red": [[1, 6], [5, 1], [7, 8], [8, 3]],
-            "orange": [[0, 4], [2, 2], [3, 1], [6, 6]],
-            "yellow": [[0, 6], [1, 0], [2, 3], [3, 2], [5, 8], [8, 4]],
-            "lightGreen": [[2, 6], [3, 7], [6, 5]],
-            "darkGreen": [[2, 1], [6, 2], [8, 7]],
-            "lightBlue": [[2, 0], [5, 5], [8, 2]],
-            "darkBlue": [[0, 1], [3, 3], [5, 7], [7, 2]],
-            "lightPurple": [[0, 3], [3, 6], [5, 2], [6, 7], [8, 5]],
-            "darkPurple": [[0, 5], [3, 0], [5, 6], [6, 8]],
-        };
+        this._board = nearlySolved;
 
         loadResource('/resources/models/small_sphere.obj').then((objText) => {
             this._objText = objText;

@@ -17,11 +17,26 @@
 #button-container>button {
     background-color: #000;
 }
+#win-text {
+    position: fixed;
+    top: 100px;
+    width: 1280px;
+    text-align: center;
+    color: white;
+    font-size: 100px;
+    animation: spin 2s;
+    filter: drop-shadow(0 0 10px black);
+}
+@keyframes spin {
+    from {transform: rotate(359.0deg);}
+    to {transform: rotate(0.0deg);}
+}
         </style>
     </head>
     <body>
         <canvas id="canvas" width="1280" height="720"></canvas>
         <div id="button-container"></div>
+        <div id="win-container"></div>
 
         <script src="./assets/offline/glm-js.min.js"></script>
         <script src="./assets/offline/jquery-3.4.1.min.js"></script>
