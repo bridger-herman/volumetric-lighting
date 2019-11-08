@@ -19,7 +19,7 @@ macro_rules! wre_entities {
         *crate::state::WRE_ENTITIES.try_lock().unwrap()
     };
     ($eid:expr) => {
-        &*crate::state::WRE_ENTITIES.try_lock().unwrap().get($eid)
+        crate::state::WRE_ENTITIES.try_lock().unwrap().get($eid)
     };
     ($eid:expr, $mutable:expr) => {
         &mut *crate::state::WRE_ENTITIES.try_lock().unwrap().get_mut($eid)

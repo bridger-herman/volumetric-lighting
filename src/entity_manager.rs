@@ -21,15 +21,15 @@ impl EntityManager {
         let e = Entity {
             id,
             transform: Transform::identity(),
-            material: Material::default(),
+            // material: Material::default(),
         };
         self.entities.push(e);
 
         id
     }
 
-    pub fn get(&self, id: EntityId) -> &Entity {
-        &self.entities[id]
+    pub fn get(&self, id: EntityId) -> Entity {
+        self.entities[id]
     }
 
     pub fn set(&mut self, id: EntityId, e: Entity) {

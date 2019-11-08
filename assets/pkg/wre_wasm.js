@@ -2,7 +2,7 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(50)(arg0, arg1);
+    wasm.__wbg_function_table.get(27)(arg0, arg1);
 }
 /**
 */
@@ -48,11 +48,11 @@ export function destroy_entity(eid) {
 
 /**
 * @param {number} id
-* @returns {any}
+* @returns {Entity}
 */
 export function get_entity(id) {
     const ret = wasm.get_entity(id);
-    return takeObject(ret);
+    return Entity.__wrap(ret);
 }
 
 function addHeapObject(obj) {
@@ -63,14 +63,6 @@ function addHeapObject(obj) {
     heap[idx] = obj;
     return idx;
 }
-/**
-* @param {number} id
-* @param {any} entity
-*/
-export function set_entity(id, entity) {
-    wasm.set_entity(id, addHeapObject(entity));
-}
-
 /**
 * @param {number} eid
 * @param {any} script
@@ -150,14 +142,6 @@ export function add_mesh(eid, obj_source) {
 }
 
 /**
-* @param {number} eid
-* @param {any} color
-*/
-export function set_color(eid, color) {
-    wasm.set_color(eid, addHeapObject(color));
-}
-
-/**
 */
 export function make_ready() {
     wasm.make_ready();
@@ -203,10 +187,11 @@ export function link_shader_program(vert_shader, frag_shader) {
     }
 }
 
-let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-
-function getStringFromWasm(ptr, len) {
-    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
 }
 
 let cachegetInt32Memory = null;
@@ -215,14 +200,6 @@ function getInt32Memory() {
         cachegetInt32Memory = new Int32Array(wasm.memory.buffer);
     }
     return cachegetInt32Memory;
-}
-
-function isLikeNone(x) {
-    return x === undefined || x === null;
-}
-
-function handleError(e) {
-    wasm.__wbindgen_exn_store(addHeapObject(e));
 }
 
 let cachegetFloat32Memory = null;
@@ -235,6 +212,27 @@ function getFloat32Memory() {
 
 function getArrayF32FromWasm(ptr, len) {
     return getFloat32Memory().subarray(ptr / 4, ptr / 4 + len);
+}
+
+function passArrayF32ToWasm(arg) {
+    const ptr = wasm.__wbindgen_malloc(arg.length * 4);
+    getFloat32Memory().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+
+function getStringFromWasm(ptr, len) {
+    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
+}
+
+function isLikeNone(x) {
+    return x === undefined || x === null;
+}
+
+function handleError(e) {
+    wasm.__wbindgen_exn_store(addHeapObject(e));
 }
 
 function debugString(val) {
@@ -301,6 +299,2386 @@ function debugString(val) {
     // TODO we could test for more things here, like `Set`s and `Map`s.
     return className;
 }
+/**
+*/
+export class Entity {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Entity.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_entity_free(ptr);
+    }
+    /**
+    * @returns {number}
+    */
+    get id() {
+        const ret = wasm.__wbg_get_entity_id(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set id(arg0) {
+        wasm.__wbg_set_entity_id(this.ptr, arg0);
+    }
+    /**
+    * @returns {Transform}
+    */
+    get transform() {
+        const ret = wasm.__wbg_get_entity_transform(this.ptr);
+        return Transform.__wrap(ret);
+    }
+    /**
+    * @param {Transform} arg0
+    */
+    set transform(arg0) {
+        _assertClass(arg0, Transform);
+        const ptr0 = arg0.ptr;
+        arg0.ptr = 0;
+        wasm.__wbg_set_entity_transform(this.ptr, ptr0);
+    }
+    /**
+    * @param {number} id
+    * @returns {Entity}
+    */
+    constructor(id) {
+        const ret = wasm.entity_new(id);
+        return Entity.__wrap(ret);
+    }
+}
+/**
+* A 3x3 column major matrix.
+*
+* This type is 16 byte aligned.
+*/
+export class Mat3 {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Mat3.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_mat3_free(ptr);
+    }
+    /**
+    * @returns {Mat3}
+    */
+    static zero() {
+        const ret = wasm.mat3_zero();
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @returns {Mat3}
+    */
+    static identity() {
+        const ret = wasm.mat3_identity();
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat3` from three column vectors.
+    * @param {Vec3} x_axis
+    * @param {Vec3} y_axis
+    * @param {Vec3} z_axis
+    * @returns {Mat3}
+    */
+    static from_cols(x_axis, y_axis, z_axis) {
+        _assertClass(x_axis, Vec3);
+        const ptr0 = x_axis.ptr;
+        x_axis.ptr = 0;
+        _assertClass(y_axis, Vec3);
+        const ptr1 = y_axis.ptr;
+        y_axis.ptr = 0;
+        _assertClass(z_axis, Vec3);
+        const ptr2 = z_axis.ptr;
+        z_axis.ptr = 0;
+        const ret = wasm.mat3_from_cols(ptr0, ptr1, ptr2);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat3` from a `[f32; 9]` stored in column major order.
+    * If your data is stored in row major you will need to `transpose` the resulting `Mat3`.
+    * Creates a new `[f32; 9]` storing data in column major order.
+    * If you require data in row major order `transpose` the `Mat3` first.
+    * Creates a new `Mat3` from a `[[f32; 3]; 3]` stored in column major order.
+    * If your data is in row major order you will need to `transpose` the resulting `Mat3`.
+    * Creates a new `[[f32; 3]; 3]` storing data in column major order.
+    * If you require data in row major order `transpose` the `Mat3` first.
+    * Creates a new `Mat3` that can scale, rotate and translate a 2D vector.
+    * `angle` is in radians.
+    * @param {Vec2} scale
+    * @param {number} angle
+    * @param {Vec2} translation
+    * @returns {Mat3}
+    */
+    static from_scale_angle_translation(scale, angle, translation) {
+        _assertClass(scale, Vec2);
+        const ptr0 = scale.ptr;
+        scale.ptr = 0;
+        _assertClass(translation, Vec2);
+        const ptr1 = translation.ptr;
+        translation.ptr = 0;
+        const ret = wasm.mat3_from_scale_angle_translation(ptr0, angle, ptr1);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {Quat} rotation
+    * @returns {Mat3}
+    */
+    static from_quat(rotation) {
+        _assertClass(rotation, Quat);
+        const ptr0 = rotation.ptr;
+        rotation.ptr = 0;
+        const ret = wasm.mat3_from_quat(ptr0);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * Create a 3x3 rotation matrix from a normalized rotation axis and angle (in radians).
+    * @param {Vec3} axis
+    * @param {number} angle
+    * @returns {Mat3}
+    */
+    static from_axis_angle(axis, angle) {
+        _assertClass(axis, Vec3);
+        const ptr0 = axis.ptr;
+        axis.ptr = 0;
+        const ret = wasm.mat3_from_axis_angle(ptr0, angle);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * Create a 3x3 rotation matrix from the given euler angles (in radians).
+    * @param {number} yaw
+    * @param {number} pitch
+    * @param {number} roll
+    * @returns {Mat3}
+    */
+    static from_rotation_ypr(yaw, pitch, roll) {
+        const ret = wasm.mat3_from_rotation_ypr(yaw, pitch, roll);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * Create a 3x3 rotation matrix from the angle (in radians) around the x axis.
+    * @param {number} angle
+    * @returns {Mat3}
+    */
+    static from_rotation_x(angle) {
+        const ret = wasm.mat3_from_rotation_x(angle);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * Create a 3x3 rotation matrix from the angle (in radians) around the y axis.
+    * @param {number} angle
+    * @returns {Mat3}
+    */
+    static from_rotation_y(angle) {
+        const ret = wasm.mat3_from_rotation_y(angle);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * Create a 3x3 rotation matrix from the angle (in radians) around the z axis.
+    * @param {number} angle
+    * @returns {Mat3}
+    */
+    static from_rotation_z(angle) {
+        const ret = wasm.mat3_from_rotation_z(angle);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} scale
+    * @returns {Mat3}
+    */
+    static from_scale(scale) {
+        _assertClass(scale, Vec3);
+        const ptr0 = scale.ptr;
+        scale.ptr = 0;
+        const ret = wasm.mat3_from_scale(ptr0);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} x
+    */
+    set_x_axis(x) {
+        _assertClass(x, Vec3);
+        const ptr0 = x.ptr;
+        x.ptr = 0;
+        wasm.mat3_set_x_axis(this.ptr, ptr0);
+    }
+    /**
+    * @param {Vec3} y
+    */
+    set_y_axis(y) {
+        _assertClass(y, Vec3);
+        const ptr0 = y.ptr;
+        y.ptr = 0;
+        wasm.mat3_set_y_axis(this.ptr, ptr0);
+    }
+    /**
+    * @param {Vec3} z
+    */
+    set_z_axis(z) {
+        _assertClass(z, Vec3);
+        const ptr0 = z.ptr;
+        z.ptr = 0;
+        wasm.mat3_set_z_axis(this.ptr, ptr0);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    x_axis() {
+        const ret = wasm.mat3_x_axis(this.ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    y_axis() {
+        const ret = wasm.mat3_y_axis(this.ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    z_axis() {
+        const ret = wasm.mat3_z_axis(this.ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {Mat3}
+    */
+    transpose() {
+        const ret = wasm.mat3_transpose(this.ptr);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    determinant() {
+        const ret = wasm.mat3_determinant(this.ptr);
+        return ret;
+    }
+    /**
+    * @returns {Mat3}
+    */
+    inverse() {
+        const ret = wasm.mat3_inverse(this.ptr);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    mul_vec3(other) {
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat3_mul_vec3(this.ptr, ptr0);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * Multiplies two 3x3 matrices.
+    * @param {Mat3} other
+    * @returns {Mat3}
+    */
+    mul_mat3(other) {
+        _assertClass(other, Mat3);
+        const ret = wasm.mat3_mul_mat3(this.ptr, other.ptr);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {Mat3} other
+    * @returns {Mat3}
+    */
+    add_mat3(other) {
+        _assertClass(other, Mat3);
+        const ret = wasm.mat3_add_mat3(this.ptr, other.ptr);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {Mat3} other
+    * @returns {Mat3}
+    */
+    sub_mat3(other) {
+        _assertClass(other, Mat3);
+        const ret = wasm.mat3_sub_mat3(this.ptr, other.ptr);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Mat3}
+    */
+    mul_scalar(other) {
+        const ret = wasm.mat3_mul_scalar(this.ptr, other);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {Vec2} other
+    * @returns {Vec2}
+    */
+    transform_point2(other) {
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat3_transform_point2(this.ptr, ptr0);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * @param {Vec2} other
+    * @returns {Vec2}
+    */
+    transform_vector2(other) {
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat3_transform_vector2(this.ptr, ptr0);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Returns true if the absolute difference of all elements between `self`
+    * and `other` is less than or equal to `max_abs_diff`.
+    *
+    * This can be used to compare if two `Mat3`\'s contain similar elements. It
+    * works best when comparing with a known value. The `max_abs_diff` that
+    * should be used used depends on the values being compared against.
+    *
+    * For more on floating point comparisons see
+    * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    * @param {Mat3} other
+    * @param {number} max_abs_diff
+    * @returns {boolean}
+    */
+    abs_diff_eq(other, max_abs_diff) {
+        _assertClass(other, Mat3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat3_abs_diff_eq(this.ptr, ptr0, max_abs_diff);
+        return ret !== 0;
+    }
+    /**
+    * @param {Vec3} x_axis
+    * @param {Vec3} y_axis
+    * @param {Vec3} z_axis
+    * @returns {Mat3}
+    */
+    static new(x_axis, y_axis, z_axis) {
+        _assertClass(x_axis, Vec3);
+        const ptr0 = x_axis.ptr;
+        x_axis.ptr = 0;
+        _assertClass(y_axis, Vec3);
+        const ptr1 = y_axis.ptr;
+        y_axis.ptr = 0;
+        _assertClass(z_axis, Vec3);
+        const ptr2 = z_axis.ptr;
+        z_axis.ptr = 0;
+        const ret = wasm.mat3_new(ptr0, ptr1, ptr2);
+        return Mat3.__wrap(ret);
+    }
+}
+/**
+* A 4x4 column major matrix.
+*
+* This type is 16 byte aligned.
+*/
+export class Mat4 {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Mat4.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_mat4_free(ptr);
+    }
+    /**
+    * Creates a new `Mat4` with all elements set to `0.0`.
+    * @returns {Mat4}
+    */
+    static zero() {
+        const ret = wasm.mat4_zero();
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat4` identity matrix.
+    * @returns {Mat4}
+    */
+    static identity() {
+        const ret = wasm.mat4_identity();
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat4` from four column vectors.
+    * @param {Vec4} x_axis
+    * @param {Vec4} y_axis
+    * @param {Vec4} z_axis
+    * @param {Vec4} w_axis
+    * @returns {Mat4}
+    */
+    static from_cols(x_axis, y_axis, z_axis, w_axis) {
+        _assertClass(x_axis, Vec4);
+        const ptr0 = x_axis.ptr;
+        x_axis.ptr = 0;
+        _assertClass(y_axis, Vec4);
+        const ptr1 = y_axis.ptr;
+        y_axis.ptr = 0;
+        _assertClass(z_axis, Vec4);
+        const ptr2 = z_axis.ptr;
+        z_axis.ptr = 0;
+        _assertClass(w_axis, Vec4);
+        const ptr3 = w_axis.ptr;
+        w_axis.ptr = 0;
+        const ret = wasm.mat4_from_cols(ptr0, ptr1, ptr2, ptr3);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat4` from a `[f32; 16]` stored in column major order.
+    * If your data is stored in row major you will need to `transpose` the resulting `Mat4`.
+    * Creates a new `[f32; 16]` storing data in column major order.
+    * If you require data in row major order `transpose` the `Mat4` first.
+    * Creates a new `Mat4` from a `[[f32; 4]; 4]` stored in column major order.
+    * If your data is in row major order you will need to `transpose` the resulting `Mat4`.
+    * Creates a new `[[f32; 4]; 4]` storing data in column major order.
+    * If you require data in row major order `transpose` the `Mat4` first.
+    * @param {Vec3} scale
+    * @param {Quat} rotation
+    * @param {Vec3} translation
+    * @returns {Mat4}
+    */
+    static from_scale_rotation_translation(scale, rotation, translation) {
+        _assertClass(scale, Vec3);
+        const ptr0 = scale.ptr;
+        scale.ptr = 0;
+        _assertClass(rotation, Quat);
+        const ptr1 = rotation.ptr;
+        rotation.ptr = 0;
+        _assertClass(translation, Vec3);
+        const ptr2 = translation.ptr;
+        translation.ptr = 0;
+        const ret = wasm.mat4_from_scale_rotation_translation(ptr0, ptr1, ptr2);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Quat} rotation
+    * @param {Vec3} translation
+    * @returns {Mat4}
+    */
+    static from_rotation_translation(rotation, translation) {
+        _assertClass(rotation, Quat);
+        const ptr0 = rotation.ptr;
+        rotation.ptr = 0;
+        _assertClass(translation, Vec3);
+        const ptr1 = translation.ptr;
+        translation.ptr = 0;
+        const ret = wasm.mat4_from_rotation_translation(ptr0, ptr1);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Quat} rotation
+    * @returns {Mat4}
+    */
+    static from_quat(rotation) {
+        _assertClass(rotation, Quat);
+        const ptr0 = rotation.ptr;
+        rotation.ptr = 0;
+        const ret = wasm.mat4_from_quat(ptr0);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} translation
+    * @returns {Mat4}
+    */
+    static from_translation(translation) {
+        _assertClass(translation, Vec3);
+        const ptr0 = translation.ptr;
+        translation.ptr = 0;
+        const ret = wasm.mat4_from_translation(ptr0);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat4` containing a rotation around a normalized rotation axis of
+    * angle (in radians).
+    * @param {Vec3} axis
+    * @param {number} angle
+    * @returns {Mat4}
+    */
+    static from_axis_angle(axis, angle) {
+        _assertClass(axis, Vec3);
+        const ptr0 = axis.ptr;
+        axis.ptr = 0;
+        const ret = wasm.mat4_from_axis_angle(ptr0, angle);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat4` containing a rotation around the given euler angles
+    * (in radians).
+    * @param {number} yaw
+    * @param {number} pitch
+    * @param {number} roll
+    * @returns {Mat4}
+    */
+    static from_rotation_ypr(yaw, pitch, roll) {
+        const ret = wasm.mat4_from_rotation_ypr(yaw, pitch, roll);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat4` containing a rotation around the x axis of angle
+    * (in radians).
+    * @param {number} angle
+    * @returns {Mat4}
+    */
+    static from_rotation_x(angle) {
+        const ret = wasm.mat4_from_rotation_x(angle);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat4` containing a rotation around the y axis of angle
+    * (in radians).
+    * @param {number} angle
+    * @returns {Mat4}
+    */
+    static from_rotation_y(angle) {
+        const ret = wasm.mat4_from_rotation_y(angle);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat4` containing a rotation around the z axis of angle
+    * (in radians).
+    * @param {number} angle
+    * @returns {Mat4}
+    */
+    static from_rotation_z(angle) {
+        const ret = wasm.mat4_from_rotation_z(angle);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} scale
+    * @returns {Mat4}
+    */
+    static from_scale(scale) {
+        _assertClass(scale, Vec3);
+        const ptr0 = scale.ptr;
+        scale.ptr = 0;
+        const ret = wasm.mat4_from_scale(ptr0);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Vec4} x
+    */
+    set_x_axis(x) {
+        _assertClass(x, Vec4);
+        const ptr0 = x.ptr;
+        x.ptr = 0;
+        wasm.mat4_set_x_axis(this.ptr, ptr0);
+    }
+    /**
+    * @param {Vec4} y
+    */
+    set_y_axis(y) {
+        _assertClass(y, Vec4);
+        const ptr0 = y.ptr;
+        y.ptr = 0;
+        wasm.mat4_set_y_axis(this.ptr, ptr0);
+    }
+    /**
+    * @param {Vec4} z
+    */
+    set_z_axis(z) {
+        _assertClass(z, Vec4);
+        const ptr0 = z.ptr;
+        z.ptr = 0;
+        wasm.mat4_set_z_axis(this.ptr, ptr0);
+    }
+    /**
+    * @param {Vec4} w
+    */
+    set_w_axis(w) {
+        _assertClass(w, Vec4);
+        const ptr0 = w.ptr;
+        w.ptr = 0;
+        wasm.mat4_set_w_axis(this.ptr, ptr0);
+    }
+    /**
+    * @returns {Vec4}
+    */
+    x_axis() {
+        const ret = wasm.mat4_x_axis(this.ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @returns {Vec4}
+    */
+    y_axis() {
+        const ret = wasm.mat4_y_axis(this.ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @returns {Vec4}
+    */
+    z_axis() {
+        const ret = wasm.mat4_z_axis(this.ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @returns {Vec4}
+    */
+    w_axis() {
+        const ret = wasm.mat4_w_axis(this.ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @returns {Mat4}
+    */
+    transpose() {
+        const ret = wasm.mat4_transpose(this.ptr);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    determinant() {
+        const ret = wasm.mat4_determinant(this.ptr);
+        return ret;
+    }
+    /**
+    * @returns {Mat4}
+    */
+    inverse() {
+        const ret = wasm.mat4_inverse(this.ptr);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} eye
+    * @param {Vec3} center
+    * @param {Vec3} up
+    * @returns {Mat4}
+    */
+    static look_at_lh(eye, center, up) {
+        _assertClass(eye, Vec3);
+        const ptr0 = eye.ptr;
+        eye.ptr = 0;
+        _assertClass(center, Vec3);
+        const ptr1 = center.ptr;
+        center.ptr = 0;
+        _assertClass(up, Vec3);
+        const ptr2 = up.ptr;
+        up.ptr = 0;
+        const ret = wasm.mat4_look_at_lh(ptr0, ptr1, ptr2);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} eye
+    * @param {Vec3} center
+    * @param {Vec3} up
+    * @returns {Mat4}
+    */
+    static look_at_rh(eye, center, up) {
+        _assertClass(eye, Vec3);
+        const ptr0 = eye.ptr;
+        eye.ptr = 0;
+        _assertClass(center, Vec3);
+        const ptr1 = center.ptr;
+        center.ptr = 0;
+        _assertClass(up, Vec3);
+        const ptr2 = up.ptr;
+        up.ptr = 0;
+        const ret = wasm.mat4_look_at_rh(ptr0, ptr1, ptr2);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Builds a right-handed perspective projection matrix with [-1,1] depth range.
+    * This is the equivalent of the common perspective function `gluPerspective` in OpenGL.
+    * See https://www.khronos.org/opengl/wiki/GluPerspective_code
+    * @param {number} fov_y_radians
+    * @param {number} aspect_ratio
+    * @param {number} z_near
+    * @param {number} z_far
+    * @returns {Mat4}
+    */
+    static perspective_glu_rh(fov_y_radians, aspect_ratio, z_near, z_far) {
+        const ret = wasm.mat4_perspective_glu_rh(fov_y_radians, aspect_ratio, z_near, z_far);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Build infinite right-handed perspective projection matrix with [0,1] depth range.
+    * @param {number} fov_y_radians
+    * @param {number} aspect_ratio
+    * @param {number} z_near
+    * @returns {Mat4}
+    */
+    static perspective_infinite_rh(fov_y_radians, aspect_ratio, z_near) {
+        const ret = wasm.mat4_perspective_infinite_rh(fov_y_radians, aspect_ratio, z_near);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * Build infinite reverse right-handed perspective projection matrix with [0,1] depth range.
+    * @param {number} fov_y_radians
+    * @param {number} aspect_ratio
+    * @param {number} z_near
+    * @returns {Mat4}
+    */
+    static perspective_infinite_reverse_rh(fov_y_radians, aspect_ratio, z_near) {
+        const ret = wasm.mat4_perspective_infinite_reverse_rh(fov_y_radians, aspect_ratio, z_near);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Vec4} other
+    * @returns {Vec4}
+    */
+    mul_vec4(other) {
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat4_mul_vec4(this.ptr, ptr0);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Multiplies two 4x4 matrices.
+    * @param {Mat4} other
+    * @returns {Mat4}
+    */
+    mul_mat4(other) {
+        _assertClass(other, Mat4);
+        const ret = wasm.mat4_mul_mat4(this.ptr, other.ptr);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Mat4} other
+    * @returns {Mat4}
+    */
+    add_mat4(other) {
+        _assertClass(other, Mat4);
+        const ret = wasm.mat4_add_mat4(this.ptr, other.ptr);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Mat4} other
+    * @returns {Mat4}
+    */
+    sub_mat4(other) {
+        _assertClass(other, Mat4);
+        const ret = wasm.mat4_sub_mat4(this.ptr, other.ptr);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Mat4}
+    */
+    mul_scalar(other) {
+        const ret = wasm.mat4_mul_scalar(this.ptr, other);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    transform_point3(other) {
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat4_transform_point3(this.ptr, ptr0);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    transform_vector3(other) {
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat4_transform_vector3(this.ptr, ptr0);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * Returns true if the absolute difference of all elements between `self`
+    * and `other` is less than or equal to `max_abs_diff`.
+    *
+    * This can be used to compare if two `Mat4`\'s contain similar elements. It
+    * works best when comparing with a known value. The `max_abs_diff` that
+    * should be used used depends on the values being compared against.
+    *
+    * For more on floating point comparisons see
+    * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    * @param {Mat4} other
+    * @param {number} max_abs_diff
+    * @returns {boolean}
+    */
+    abs_diff_eq(other, max_abs_diff) {
+        _assertClass(other, Mat4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat4_abs_diff_eq(this.ptr, ptr0, max_abs_diff);
+        return ret !== 0;
+    }
+    /**
+    * @returns {Float32Array}
+    */
+    to_flat_vec() {
+        const retptr = 8;
+        const ret = wasm.mat4_to_flat_vec(retptr, this.ptr);
+        const memi32 = getInt32Memory();
+        const v0 = getArrayF32FromWasm(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1]).slice();
+        wasm.__wbindgen_free(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1] * 4);
+        return v0;
+    }
+    /**
+    * @param {Vec4} x_axis
+    * @param {Vec4} y_axis
+    * @param {Vec4} z_axis
+    * @param {Vec4} w_axis
+    * @returns {Mat4}
+    */
+    static new(x_axis, y_axis, z_axis, w_axis) {
+        _assertClass(x_axis, Vec4);
+        const ptr0 = x_axis.ptr;
+        x_axis.ptr = 0;
+        _assertClass(y_axis, Vec4);
+        const ptr1 = y_axis.ptr;
+        y_axis.ptr = 0;
+        _assertClass(z_axis, Vec4);
+        const ptr2 = z_axis.ptr;
+        z_axis.ptr = 0;
+        _assertClass(w_axis, Vec4);
+        const ptr3 = w_axis.ptr;
+        w_axis.ptr = 0;
+        const ret = wasm.mat4_new(ptr0, ptr1, ptr2, ptr3);
+        return Mat4.__wrap(ret);
+    }
+}
+/**
+* A quaternion representing an orientation.
+*
+* This quaternion is intended to be of unit length but may denormalize due to
+* floating point \"error creep\" which can occur when successive quaternion
+* operations are applied.
+*
+* This type is 16 byte aligned.
+*/
+export class Quat {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Quat.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_quat_free(ptr);
+    }
+    /**
+    * Creates a new rotation quaternion.
+    *
+    * This should generally not be called manually unless you know what you are doing. Use one of
+    * the other constructors instead such as `identity` or `from_axis_angle`.
+    *
+    * `new` is mostly used by unit tests and `serde` deserialization.
+    * @param {number} x
+    * @param {number} y
+    * @param {number} z
+    * @param {number} w
+    * @returns {Quat}
+    */
+    static new(x, y, z, w) {
+        const ret = wasm.quat_new(x, y, z, w);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * @returns {Quat}
+    */
+    static identity() {
+        const ret = wasm.quat_identity();
+        return Quat.__wrap(ret);
+    }
+    /**
+    * Creates a new rotation quaternion from an unaligned `&[f32]`.
+    *
+    * # Preconditions
+    *
+    * The resulting quaternion is expected to be of unit length.
+    *
+    * # Panics
+    *
+    * Panics if `slice` length is less than 4.
+    * @param {Float32Array} slice
+    * @returns {Quat}
+    */
+    static from_slice_unaligned(slice) {
+        const ret = wasm.quat_from_slice_unaligned(passArrayF32ToWasm(slice), WASM_VECTOR_LEN);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * Writes the quaternion to an unaligned `&mut [f32]`.
+    *
+    * # Panics
+    *
+    * Panics if `slice` length is less than 4.
+    * @param {Float32Array} slice
+    */
+    write_to_slice_unaligned(slice) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ptr0 = passArrayF32ToWasm(slice);
+        const len0 = WASM_VECTOR_LEN;
+        try {
+            wasm.quat_write_to_slice_unaligned(ptr, ptr0, len0);
+        } finally {
+            slice.set(getFloat32Memory().subarray(ptr0 / 4, ptr0 / 4 + len0));
+            wasm.__wbindgen_free(ptr0, len0 * 4);
+        }
+    }
+    /**
+    * Create a new quaterion for a normalized rotation axis and angle
+    * (in radians).
+    * @param {Vec3} axis
+    * @param {number} angle
+    * @returns {Quat}
+    */
+    static from_axis_angle(axis, angle) {
+        _assertClass(axis, Vec3);
+        const ptr0 = axis.ptr;
+        axis.ptr = 0;
+        const ret = wasm.quat_from_axis_angle(ptr0, angle);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * Creates a new quaternion from the angle (in radians) around the x axis.
+    * @param {number} angle
+    * @returns {Quat}
+    */
+    static from_rotation_x(angle) {
+        const ret = wasm.quat_from_rotation_x(angle);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * Creates a new quaternion from the angle (in radians) around the y axis.
+    * @param {number} angle
+    * @returns {Quat}
+    */
+    static from_rotation_y(angle) {
+        const ret = wasm.quat_from_rotation_y(angle);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * Creates a new quaternion from the angle (in radians) around the z axis.
+    * @param {number} angle
+    * @returns {Quat}
+    */
+    static from_rotation_z(angle) {
+        const ret = wasm.quat_from_rotation_z(angle);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * Create a quaternion from the given yaw (around y), pitch (around x) and roll (around z)
+    * in radians.
+    * @param {number} yaw
+    * @param {number} pitch
+    * @param {number} roll
+    * @returns {Quat}
+    */
+    static from_rotation_ypr(yaw, pitch, roll) {
+        const ret = wasm.quat_from_rotation_ypr(yaw, pitch, roll);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * @param {Mat3} mat
+    * @returns {Quat}
+    */
+    static from_rotation_mat3(mat) {
+        _assertClass(mat, Mat3);
+        const ret = wasm.quat_from_rotation_mat3(mat.ptr);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * @returns {Quat}
+    */
+    conjugate() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.quat_conjugate(ptr);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * @param {Quat} other
+    * @returns {number}
+    */
+    dot(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Quat);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.quat_dot(ptr, ptr0);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    length() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.quat_length(ptr);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    length_squared() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.quat_length_squared(ptr);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    length_reciprocal() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.quat_length_reciprocal(ptr);
+        return ret;
+    }
+    /**
+    * @returns {Quat}
+    */
+    normalize() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.quat_normalize(ptr);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * @returns {boolean}
+    */
+    is_normalized() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.quat_is_normalized(ptr);
+        return ret !== 0;
+    }
+    /**
+    * @returns {boolean}
+    */
+    is_near_identity() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.quat_is_near_identity(ptr);
+        return ret !== 0;
+    }
+    /**
+    * Returns true if the absolute difference of all elements between `self`
+    * and `other` is less than or equal to `max_abs_diff`.
+    *
+    * This can be used to compare if two `Quat`\'s contain similar elements. It
+    * works best when comparing with a known value. The `max_abs_diff` that
+    * should be used used depends on the values being compared against.
+    *
+    * For more on floating point comparisons see
+    * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    * @param {Quat} other
+    * @param {number} max_abs_diff
+    * @returns {boolean}
+    */
+    abs_diff_eq(other, max_abs_diff) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Quat);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.quat_abs_diff_eq(ptr, ptr0, max_abs_diff);
+        return ret !== 0;
+    }
+    /**
+    * @param {Quat} end
+    * @param {number} t
+    * @returns {Quat}
+    */
+    lerp(end, t) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(end, Quat);
+        const ptr0 = end.ptr;
+        end.ptr = 0;
+        const ret = wasm.quat_lerp(ptr, ptr0, t);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * Multiplies a quaternion and a 3D vector, rotating it.
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    mul_vec3(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.quat_mul_vec3(ptr, ptr0);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * Multiplies two quaternions.
+    * Note that due to floating point rounding the result may not be perfectly normalized.
+    * @param {Quat} other
+    * @returns {Quat}
+    */
+    mul_quat(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Quat);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.quat_mul_quat(ptr, ptr0);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * @param {Mat4} mat
+    * @returns {Quat}
+    */
+    static from_rotation_mat4(mat) {
+        _assertClass(mat, Mat4);
+        const ret = wasm.quat_from_rotation_mat4(mat.ptr);
+        return Quat.__wrap(ret);
+    }
+}
+/**
+*/
+export class Transform {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Transform.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_transform_free(ptr);
+    }
+    /**
+    * @param {Vec3} position
+    * @param {Quat} rotation
+    * @param {Vec3} scale
+    * @returns {Transform}
+    */
+    constructor(position, rotation, scale) {
+        _assertClass(position, Vec3);
+        const ptr0 = position.ptr;
+        position.ptr = 0;
+        _assertClass(rotation, Quat);
+        const ptr1 = rotation.ptr;
+        rotation.ptr = 0;
+        _assertClass(scale, Vec3);
+        const ptr2 = scale.ptr;
+        scale.ptr = 0;
+        const ret = wasm.transform_new(ptr0, ptr1, ptr2);
+        return Transform.__wrap(ret);
+    }
+    /**
+    * @returns {Transform}
+    */
+    static identity() {
+        const ret = wasm.transform_identity();
+        return Transform.__wrap(ret);
+    }
+    /**
+    * @returns {Mat4}
+    */
+    matrix() {
+        const ret = wasm.transform_matrix(this.ptr);
+        return Mat4.__wrap(ret);
+    }
+}
+/**
+* A 2-dimensional vector.
+*/
+export class Vec2 {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Vec2.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_vec2_free(ptr);
+    }
+    /**
+    * Returns a new `Vec4` with elements representing the sign of `self`.
+    *
+    * - `1.0` if the number is positive, `+0.0` or `INFINITY`
+    * - `-1.0` if the number is negative, `-0.0` or `NEG_INFINITY`
+    * @returns {Vec2}
+    */
+    sign() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_sign(ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Computes the reciprocal `1.0/n` of each element, returning the
+    * results in a new `Vec2`.
+    * @returns {Vec2}
+    */
+    reciprocal() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_reciprocal(ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Performs a linear interpolation between `self` and `other` based on
+    * the value `s`.
+    *
+    * When `s` is `0.0`, the result will be equal to `self`.  When `s`
+    * is `1.0`, the result will be equal to `other`.
+    * @param {Vec2} other
+    * @param {number} s
+    * @returns {Vec2}
+    */
+    lerp(other, s) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_lerp(ptr, ptr0, s);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Returns whether `self` is length `1.0` or not.
+    *
+    * Uses a precision threshold of `std::f32::EPSILON`.
+    * @returns {boolean}
+    */
+    is_normalized() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_is_normalized(ptr);
+        return ret !== 0;
+    }
+    /**
+    * Returns true if the absolute difference of all elements between `self`
+    * and `other` is less than or equal to `max_abs_diff`.
+    *
+    * This can be used to compare if two `Vec2`\'s contain similar elements. It
+    * works best when comparing with a known value. The `max_abs_diff` that
+    * should be used used depends on the values being compared against.
+    *
+    * For more on floating point comparisons see
+    * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    * @param {Vec2} other
+    * @param {number} max_abs_diff
+    * @returns {boolean}
+    */
+    abs_diff_eq(other, max_abs_diff) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_abs_diff_eq(ptr, ptr0, max_abs_diff);
+        return ret !== 0;
+    }
+    /**
+    * Creates a new `Vec2` with all elements set to `0.0`.
+    * @returns {Vec2}
+    */
+    static zero() {
+        const ret = wasm.vec2_zero();
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec2` with all elements set to `1.0`.
+    * @returns {Vec2}
+    */
+    static one() {
+        const ret = wasm.vec2_one();
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec2` with values `[x: 1.0, y: 0.0]`.
+    * @returns {Vec2}
+    */
+    static unit_x() {
+        const ret = wasm.vec2_unit_x();
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec2` with values `[x: 0.0, y: 1.0]`.
+    * @returns {Vec2}
+    */
+    static unit_y() {
+        const ret = wasm.vec2_unit_y();
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec2` with all elements set to `v`.
+    * @param {number} v
+    * @returns {Vec2}
+    */
+    static splat(v) {
+        const ret = wasm.vec2_splat(v);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec3` from `self` and the given `z` value.
+    * @param {number} z
+    * @returns {Vec3}
+    */
+    extend(z) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_extend(ptr, z);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * Returns element `x`.
+    * @returns {number}
+    */
+    x() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_x(ptr);
+        return ret;
+    }
+    /**
+    * Returns element `y`.
+    * @returns {number}
+    */
+    y() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_y(ptr);
+        return ret;
+    }
+    /**
+    * Sets element `x`.
+    * @param {number} x
+    */
+    set_x(x) {
+        wasm.vec2_set_x(this.ptr, x);
+    }
+    /**
+    * Sets element `y`.
+    * @param {number} y
+    */
+    set_y(y) {
+        wasm.vec2_set_y(this.ptr, y);
+    }
+    /**
+    * Computes the dot product of `self` and `other`.
+    * @param {Vec2} other
+    * @returns {number}
+    */
+    dot(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_dot(ptr, ptr0);
+        return ret;
+    }
+    /**
+    * Computes the length of `self`.
+    * @returns {number}
+    */
+    length() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_length(ptr);
+        return ret;
+    }
+    /**
+    * Computes the squared length of `self`.
+    *
+    * This is generally faster than `Vec2::length()` as it avoids a square
+    * root operation.
+    * @returns {number}
+    */
+    length_squared() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_length_squared(ptr);
+        return ret;
+    }
+    /**
+    * Computes `1.0 / Vec2::length()`.
+    *
+    * For valid results, `self` must _not_ be of length zero.
+    * @returns {number}
+    */
+    length_reciprocal() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_length_reciprocal(ptr);
+        return ret;
+    }
+    /**
+    * Returns `self` normalized to length 1.0.
+    *
+    * For valid results, `self` must _not_ be of length zero.
+    * @returns {Vec2}
+    */
+    normalize() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_normalize(ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Returns the vertical minimum of `self` and `other`.
+    *
+    * In other words, this computes
+    * `[x: min(x1, x2), y: min(y1, y2)]`,
+    * taking the minimum of each element individually.
+    * @param {Vec2} other
+    * @returns {Vec2}
+    */
+    min(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_min(ptr, ptr0);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Returns the vertical maximum of `self` and `other`.
+    *
+    * In other words, this computes
+    * `[x: max(x1, x2), y: max(y1, y2)]`,
+    * taking the maximum of each element individually.
+    * @param {Vec2} other
+    * @returns {Vec2}
+    */
+    max(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_max(ptr, ptr0);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Returns the horizontal minimum of `self`\'s elements.
+    *
+    * In other words, this computes `min(x, y)`.
+    * @returns {number}
+    */
+    min_element() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_min_element(ptr);
+        return ret;
+    }
+    /**
+    * Returns the horizontal maximum of `self`\'s elements.
+    *
+    * In other words, this computes `max(x, y)`.
+    * @returns {number}
+    */
+    max_element() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_max_element(ptr);
+        return ret;
+    }
+    /**
+    * Performs a vertical `==` comparison between `self` and `other`,
+    * returning a `Vec2Mask` of the results.
+    *
+    * In other words, this computes `[x1 == x2, y1 == y2, z1 == z2, w1 == w2]`.
+    * @param {Vec2} other
+    * @returns {Vec2Mask}
+    */
+    cmpeq(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_cmpeq(ptr, ptr0);
+        return Vec2Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `!=` comparison between `self` and `other`,
+    * returning a `Vec2Mask` of the results.
+    *
+    * In other words, this computes `[x1 != x2, y1 != y2, z1 != z2, w1 != w2]`.
+    * @param {Vec2} other
+    * @returns {Vec2Mask}
+    */
+    cmpne(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_cmpne(ptr, ptr0);
+        return Vec2Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `>=` comparison between `self` and `other`,
+    * returning a `Vec2Mask` of the results.
+    *
+    * In other words, this computes `[x1 >= x2, y1 >= y2, z1 >= z2, w1 >= w2]`.
+    * @param {Vec2} other
+    * @returns {Vec2Mask}
+    */
+    cmpge(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_cmpge(ptr, ptr0);
+        return Vec2Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `>` comparison between `self` and `other`,
+    * returning a `Vec2Mask` of the results.
+    *
+    * In other words, this computes `[x1 > x2, y1 > y2, z1 > z2, w1 > w2]`.
+    * @param {Vec2} other
+    * @returns {Vec2Mask}
+    */
+    cmpgt(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_cmpgt(ptr, ptr0);
+        return Vec2Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `<=` comparison between `self` and `other`,
+    * returning a `Vec2Mask` of the results.
+    *
+    * In other words, this computes `[x1 <= x2, y1 <= y2, z1 <= z2, w1 <= w2]`.
+    * @param {Vec2} other
+    * @returns {Vec2Mask}
+    */
+    cmple(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_cmple(ptr, ptr0);
+        return Vec2Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `<` comparison between `self` and `other`,
+    * returning a `Vec2Mask` of the results.
+    *
+    * In other words, this computes `[x1 < x2, y1 < y2, z1 < z2, w1 < w2]`.
+    * @param {Vec2} other
+    * @returns {Vec2Mask}
+    */
+    cmplt(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec2_cmplt(ptr, ptr0);
+        return Vec2Mask.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec2` from the first two values in `slice`.
+    *
+    * # Panics
+    *
+    * Panics if `slice` is less than two elements long.
+    * @param {Float32Array} slice
+    * @returns {Vec2}
+    */
+    static from_slice_unaligned(slice) {
+        const ret = wasm.vec2_from_slice_unaligned(passArrayF32ToWasm(slice), WASM_VECTOR_LEN);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Writes the elements of `self` to the first two elements in `slice`.
+    *
+    * # Panics
+    *
+    * Panics if `slice` is less than two elements long.
+    * @param {Float32Array} slice
+    */
+    write_to_slice_unaligned(slice) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ptr0 = passArrayF32ToWasm(slice);
+        const len0 = WASM_VECTOR_LEN;
+        try {
+            wasm.vec2_write_to_slice_unaligned(ptr, ptr0, len0);
+        } finally {
+            slice.set(getFloat32Memory().subarray(ptr0 / 4, ptr0 / 4 + len0));
+            wasm.__wbindgen_free(ptr0, len0 * 4);
+        }
+    }
+    /**
+    * Returns a new `Vec2` containing the absolute value of each element of the original
+    * `Vec2`.
+    * @returns {Vec2}
+    */
+    abs() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2_abs(ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec2`.
+    * @param {number} x
+    * @param {number} y
+    * @returns {Vec2}
+    */
+    static new(x, y) {
+        const ret = wasm.vec2_new(x, y);
+        return Vec2.__wrap(ret);
+    }
+}
+/**
+* A 2-dimensional vector mask.
+*
+* This type is typically created by comparison methods on `Vec2`.
+*/
+export class Vec2Mask {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Vec2Mask.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_vec2mask_free(ptr);
+    }
+    /**
+    * Creates a new `Vec2Mask`.
+    * @param {boolean} x
+    * @param {boolean} y
+    * @returns {Vec2Mask}
+    */
+    static new(x, y) {
+        const ret = wasm.vec2mask_new(x, y);
+        return Vec2Mask.__wrap(ret);
+    }
+    /**
+    * Returns a bitmask with the lowest two bits set from the elements of
+    * the `Vec2Mask`.
+    *
+    * A true element results in a `1` bit and a false element in a `0` bit.
+    * Element `x` goes into the first lowest bit, element `y` into the
+    * second, etc.
+    * @returns {number}
+    */
+    bitmask() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2mask_bitmask(ptr);
+        return ret >>> 0;
+    }
+    /**
+    * Returns true if any of the elements are true, false otherwise.
+    *
+    * In other words: `x || y`.
+    * @returns {boolean}
+    */
+    any() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2mask_any(ptr);
+        return ret !== 0;
+    }
+    /**
+    * Returns true if all the elements are true, false otherwise.
+    *
+    * In other words: `x && y`.
+    * @returns {boolean}
+    */
+    all() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec2mask_all(ptr);
+        return ret !== 0;
+    }
+    /**
+    * Creates a new `Vec2` from the elements in `if_true` and `if_false`,
+    * selecting which to use for each element based on the `Vec2Mask`.
+    *
+    * A true element in the mask uses the corresponding element from
+    * `if_true`, and false uses the element from `if_false`.
+    * @param {Vec2} if_true
+    * @param {Vec2} if_false
+    * @returns {Vec2}
+    */
+    select(if_true, if_false) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(if_true, Vec2);
+        const ptr0 = if_true.ptr;
+        if_true.ptr = 0;
+        _assertClass(if_false, Vec2);
+        const ptr1 = if_false.ptr;
+        if_false.ptr = 0;
+        const ret = wasm.vec2mask_select(ptr, ptr0, ptr1);
+        return Vec2.__wrap(ret);
+    }
+}
+/**
+*/
+export class Vec3 {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Vec3.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_vec3_free(ptr);
+    }
+    /**
+    * Returns a new `Vec4` with elements representing the sign of `self`.
+    *
+    * - `1.0` if the number is positive, `+0.0` or `INFINITY`
+    * - `-1.0` if the number is negative, `-0.0` or `NEG_INFINITY`
+    * @returns {Vec3}
+    */
+    sign() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_sign(ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * Computes the reciprocal `1.0/n` of each element, returning the
+    * results in a new `Vec3`.
+    * @returns {Vec3}
+    */
+    reciprocal() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_reciprocal(ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * Performs a linear interpolation between `self` and `other` based on
+    * the value `s`.
+    *
+    * When `s` is `0.0`, the result will be equal to `self`.  When `s`
+    * is `1.0`, the result will be equal to `other`.
+    * @param {Vec3} other
+    * @param {number} s
+    * @returns {Vec3}
+    */
+    lerp(other, s) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_lerp(ptr, ptr0, s);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * Returns whether `self` of length `1.0` or not.
+    *
+    * Uses a precision threshold of `std::f32::EPSILON`.
+    * @returns {boolean}
+    */
+    is_normalized() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_is_normalized(ptr);
+        return ret !== 0;
+    }
+    /**
+    * Returns true if the absolute difference of all elements between `self`
+    * and `other` is less than or equal to `max_abs_diff`.
+    *
+    * This can be used to compare if two `Vec3`\'s contain similar elements. It
+    * works best when comparing with a known value. The `max_abs_diff` that
+    * should be used used depends on the values being compared against.
+    *
+    * For more on floating point comparisons see
+    * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    * @param {Vec3} other
+    * @param {number} max_abs_diff
+    * @returns {boolean}
+    */
+    abs_diff_eq(other, max_abs_diff) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_abs_diff_eq(ptr, ptr0, max_abs_diff);
+        return ret !== 0;
+    }
+}
+/**
+*/
+export class Vec4 {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Vec4.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_vec4_free(ptr);
+    }
+    /**
+    * Creates a new `Vec4` with all elements set to `0.0`.
+    * @returns {Vec4}
+    */
+    static zero() {
+        const ret = wasm.vec4_zero();
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec4` with all elements set to `1.0`.
+    * @returns {Vec4}
+    */
+    static one() {
+        const ret = wasm.vec4_one();
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec4`.
+    * @param {number} x
+    * @param {number} y
+    * @param {number} z
+    * @param {number} w
+    * @returns {Vec4}
+    */
+    static new(x, y, z, w) {
+        const ret = wasm.vec4_new(x, y, z, w);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec4` with values `[x: 1.0, y: 0.0, z: 0.0, w: 0.0]`.
+    * @returns {Vec4}
+    */
+    static unit_x() {
+        const ret = wasm.vec4_unit_x();
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec4` with values `[x: 0.0, y: 1.0, z: 0.0, w: 0.0]`.
+    * @returns {Vec4}
+    */
+    static unit_y() {
+        const ret = wasm.vec4_unit_y();
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec4` with values `[x: 0.0, y: 0.0, z: 1.0, w: 0.0]`.
+    * @returns {Vec4}
+    */
+    static unit_z() {
+        const ret = wasm.vec4_unit_z();
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec4` with values `[x: 0.0, y: 0.0, z: 0.0, w: 1.0]`.
+    * @returns {Vec4}
+    */
+    static unit_w() {
+        const ret = wasm.vec4_unit_w();
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec4` with all elements set to `v`.
+    * @param {number} v
+    * @returns {Vec4}
+    */
+    static splat(v) {
+        const ret = wasm.vec4_splat(v);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Creates a `Vec3` from the first three elements of `self`,
+    * removing `w`.
+    * @returns {Vec3}
+    */
+    truncate() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_truncate(ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * Returns element `x`.
+    * @returns {number}
+    */
+    x() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_x(ptr);
+        return ret;
+    }
+    /**
+    * Returns element `y`.
+    * @returns {number}
+    */
+    y() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_y(ptr);
+        return ret;
+    }
+    /**
+    * Returns element `z`.
+    * @returns {number}
+    */
+    z() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_z(ptr);
+        return ret;
+    }
+    /**
+    * Returns element `w`.
+    * @returns {number}
+    */
+    w() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_w(ptr);
+        return ret;
+    }
+    /**
+    * Sets element `x`.
+    * @param {number} x
+    */
+    set_x(x) {
+        wasm.vec4_set_x(this.ptr, x);
+    }
+    /**
+    * Sets element `y`.
+    * @param {number} y
+    */
+    set_y(y) {
+        wasm.vec4_set_y(this.ptr, y);
+    }
+    /**
+    * Sets element `z`.
+    * @param {number} z
+    */
+    set_z(z) {
+        wasm.vec4_set_z(this.ptr, z);
+    }
+    /**
+    * Sets element `w`.
+    * @param {number} w
+    */
+    set_w(w) {
+        wasm.vec4_set_w(this.ptr, w);
+    }
+    /**
+    * Computes the 4D dot product of `self` and `other`.
+    * @param {Vec4} other
+    * @returns {number}
+    */
+    dot(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_dot(ptr, ptr0);
+        return ret;
+    }
+    /**
+    * Computes the 4D length of `self`.
+    * @returns {number}
+    */
+    length() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_length(ptr);
+        return ret;
+    }
+    /**
+    * Computes the squared 4D length of `self`.
+    *
+    * This is generally faster than `Vec4::length()` as it avoids a square
+    * root operation.
+    * @returns {number}
+    */
+    length_squared() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_length_squared(ptr);
+        return ret;
+    }
+    /**
+    * Computes `1.0 / Vec4::length()`.
+    *
+    * For valid results, `self` must _not_ be of length zero.
+    * @returns {number}
+    */
+    length_reciprocal() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_length_reciprocal(ptr);
+        return ret;
+    }
+    /**
+    * Returns `self` normalized to length 1.0.
+    *
+    * For valid results, `self` must _not_ be of length zero.
+    * @returns {Vec4}
+    */
+    normalize() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_normalize(ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Returns the vertical minimum of `self` and `other`.
+    *
+    * In other words, this computes
+    * `[x: min(x1, x2), y: min(y1, y2), z: min(z1, z2), w: min(w1, w2)]`,
+    * taking the minimum of each element individually.
+    * @param {Vec4} other
+    * @returns {Vec4}
+    */
+    min(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_min(ptr, ptr0);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Returns the vertical maximum of `self` and `other`.
+    *
+    * In other words, this computes
+    * `[x: max(x1, x2), y: max(y1, y2), z: max(z1, z2), w: max(w1, w2)]`,
+    * taking the maximum of each element individually.
+    * @param {Vec4} other
+    * @returns {Vec4}
+    */
+    max(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_max(ptr, ptr0);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Returns the minimum of all four elements in `self`.
+    *
+    * In other words, this computes `min(x, y, z, w)`.
+    * @returns {number}
+    */
+    min_element() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_min_element(ptr);
+        return ret;
+    }
+    /**
+    * Returns the maximum of all four elements in `self`.
+    *
+    * In other words, this computes `max(x, y, z, w)`.
+    * @returns {number}
+    */
+    max_element() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_max_element(ptr);
+        return ret;
+    }
+    /**
+    * Performs a vertical `==` comparison between `self` and `other`,
+    * returning a `Vec4Mask` of the results.
+    *
+    * In other words, this computes `[x1 == x2, y1 == y2, z1 == z2, w1 == w2]`.
+    * @param {Vec4} other
+    * @returns {Vec4Mask}
+    */
+    cmpeq(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_cmpeq(ptr, ptr0);
+        return Vec4Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `!=` comparison between `self` and `other`,
+    * returning a `Vec4Mask` of the results.
+    *
+    * In other words, this computes `[x1 != x2, y1 != y2, z1 != z2, w1 != w2]`.
+    * @param {Vec4} other
+    * @returns {Vec4Mask}
+    */
+    cmpne(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_cmpne(ptr, ptr0);
+        return Vec4Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `>=` comparison between `self` and `other`,
+    * returning a `Vec4Mask` of the results.
+    *
+    * In other words, this computes `[x1 >= x2, y1 >= y2, z1 >= z2, w1 >= w2]`.
+    * @param {Vec4} other
+    * @returns {Vec4Mask}
+    */
+    cmpge(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_cmpge(ptr, ptr0);
+        return Vec4Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `>` comparison between `self` and `other`,
+    * returning a `Vec4Mask` of the results.
+    *
+    * In other words, this computes `[x1 > x2, y1 > y2, z1 > z2, w1 > w2]`.
+    * @param {Vec4} other
+    * @returns {Vec4Mask}
+    */
+    cmpgt(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_cmpgt(ptr, ptr0);
+        return Vec4Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `<=` comparison between `self` and `other`,
+    * returning a `Vec4Mask` of the results.
+    *
+    * In other words, this computes `[x1 <= x2, y1 <= y2, z1 <= z2, w1 <= w2]`.
+    * @param {Vec4} other
+    * @returns {Vec4Mask}
+    */
+    cmple(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_cmple(ptr, ptr0);
+        return Vec4Mask.__wrap(ret);
+    }
+    /**
+    * Performs a vertical `<` comparison between `self` and `other`,
+    * returning a `Vec4Mask` of the results.
+    *
+    * In other words, this computes `[x1 < x2, y1 < y2, z1 < z2, w1 < w2]`.
+    * @param {Vec4} other
+    * @returns {Vec4Mask}
+    */
+    cmplt(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_cmplt(ptr, ptr0);
+        return Vec4Mask.__wrap(ret);
+    }
+    /**
+    * Creates a new `Vec4` from the first four values in `slice`.
+    *
+    * # Panics
+    *
+    * Panics if `slice` is less than four elements long.
+    * @param {Float32Array} slice
+    * @returns {Vec4}
+    */
+    static from_slice_unaligned(slice) {
+        const ret = wasm.vec4_from_slice_unaligned(passArrayF32ToWasm(slice), WASM_VECTOR_LEN);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Writes the elements of `self` to the first four elements in `slice`.
+    *
+    * # Panics
+    *
+    * Panics if `slice` is less than four elements long.
+    * @param {Float32Array} slice
+    */
+    write_to_slice_unaligned(slice) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ptr0 = passArrayF32ToWasm(slice);
+        const len0 = WASM_VECTOR_LEN;
+        try {
+            wasm.vec4_write_to_slice_unaligned(ptr, ptr0, len0);
+        } finally {
+            slice.set(getFloat32Memory().subarray(ptr0 / 4, ptr0 / 4 + len0));
+            wasm.__wbindgen_free(ptr0, len0 * 4);
+        }
+    }
+    /**
+    * @returns {Vec4}
+    */
+    abs() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_abs(ptr);
+        return Vec4.__wrap(ret);
+    }
+}
+/**
+* A 4-dimensional vector mask.
+*
+* This type is typically created by comparison methods on `Vec4`.  It is
+* essentially a vector of four boolean values.
+*/
+export class Vec4Mask {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Vec4Mask.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_vec4mask_free(ptr);
+    }
+    /**
+    * Creates a new `Vec4Mask`.
+    * @param {boolean} x
+    * @param {boolean} y
+    * @param {boolean} z
+    * @param {boolean} w
+    * @returns {Vec4Mask}
+    */
+    static new(x, y, z, w) {
+        const ret = wasm.vec4mask_new(x, y, z, w);
+        return Vec4Mask.__wrap(ret);
+    }
+    /**
+    * Returns a bitmask with the lowest four bits set from the elements of
+    * the `Vec4Mask`.
+    *
+    * A true element results in a `1` bit and a false element in a `0` bit.
+    * Element `x` goes into the first lowest bit, element `y` into the
+    * second, etc.
+    * @returns {number}
+    */
+    bitmask() {
+        const ret = wasm.vec4mask_bitmask(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * Returns true if any of the elements are true, false otherwise.
+    *
+    * In other words: `x || y || z || w`.
+    * @returns {boolean}
+    */
+    any() {
+        const ret = wasm.vec4mask_any(this.ptr);
+        return ret !== 0;
+    }
+    /**
+    * Returns true if all the elements are true, false otherwise.
+    *
+    * In other words: `x && y && z && w`.
+    * @returns {boolean}
+    */
+    all() {
+        const ret = wasm.vec4mask_all(this.ptr);
+        return ret !== 0;
+    }
+    /**
+    * Creates a new `Vec4` from the elements in `if_true` and `if_false`,
+    * selecting which to use for each element based on the `Vec4Mask`.
+    *
+    * A true element in the mask uses the corresponding element from
+    * `if_true`, and false uses the element from `if_false`.
+    * @param {Vec4} if_true
+    * @param {Vec4} if_false
+    * @returns {Vec4}
+    */
+    select(if_true, if_false) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(if_true, Vec4);
+        const ptr0 = if_true.ptr;
+        if_true.ptr = 0;
+        _assertClass(if_false, Vec4);
+        const ptr1 = if_false.ptr;
+        if_false.ptr = 0;
+        const ret = wasm.vec4mask_select(ptr, ptr0, ptr1);
+        return Vec4.__wrap(ret);
+    }
+}
 
 function init(module) {
     if (typeof module === 'undefined') {
@@ -315,25 +2693,6 @@ function init(module) {
     };
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
-    };
-    imports.wbg.__wbindgen_json_serialize = function(arg0, arg1) {
-        const obj = getObject(arg1);
-        const ret = JSON.stringify(obj === undefined ? null : obj);
-        const ret0 = passStringToWasm(ret);
-        const ret1 = WASM_VECTOR_LEN;
-        getInt32Memory()[arg0 / 4 + 0] = ret0;
-        getInt32Memory()[arg0 / 4 + 1] = ret1;
-    };
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
-    };
-    imports.wbg.__wbg_getTransform_1338826b50ff931e = function(arg0) {
-        const ret = getObject(arg0).getTransform();
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-        const ret = getObject(arg0);
-        return addHeapObject(ret);
     };
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
@@ -350,6 +2709,13 @@ function init(module) {
     };
     imports.wbg.__wbindgen_cb_forget = function(arg0) {
         takeObject(arg0);
+    };
+    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
+        getObject(arg0).updateWrapper();
+    };
+    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
+        const ret = getObject(arg0);
+        return addHeapObject(ret);
     };
     imports.wbg.__widl_instanceof_Window = function(arg0) {
         const ret = getObject(arg0) instanceof Window;
@@ -548,21 +2914,6 @@ function init(module) {
         const ret = new Float32Array(getObject(arg0), arg1 >>> 0, arg2 >>> 0);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_length_29aedd90448579d3 = function(arg0) {
-        const ret = getObject(arg0).length;
-        return ret;
-    };
-    imports.wbg.__wbg_new_b4a6320f3b73e85c = function(arg0) {
-        const ret = new Float32Array(getObject(arg0));
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbg_set_025d82b4507baeae = function(arg0, arg1, arg2) {
-        getObject(arg0).set(getObject(arg1), arg2 >>> 0);
-    };
-    imports.wbg.__wbg_instanceof_Float32Array_b77db2f783bc87e5 = function(arg0) {
-        const ret = getObject(arg0) instanceof Float32Array;
-        return ret;
-    };
     imports.wbg.__wbg_log_b3e84ac4a3e12603 = function(arg0, arg1) {
         console.log(getStringFromWasm(arg0, arg1));
     };
@@ -588,7 +2939,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper205 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper119 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -596,7 +2947,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(51)(state.a, state.b);
+                    wasm.__wbg_function_table.get(28)(state.a, state.b);
                     state.a = 0;
                 }
             }

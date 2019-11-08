@@ -20,14 +20,14 @@ export class WreScript {
     constructor(owner) {
         this._entityId = owner;
         this._entity = wre.get_entity(this._entityId);
-        this.transform = Transform.identity();
+        // this.transform = Transform.identity();
         this.start();
     }
 
     updateWrapper() {
-        this._entity = wre.get_entity(this._entityId);
+        // this._entity = wre.get_entity(this._entityId);
         this.update();
-        wre.set_entity(this._entityId, this._entity);
+        // wre.set_entity(this._entityId, this._entity);
     }
 
     getTransform() {

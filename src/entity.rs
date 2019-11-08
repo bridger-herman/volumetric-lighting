@@ -6,20 +6,33 @@
 
 //! Entity (GameObject)
 
+use wasm_bindgen::prelude::*;
+
 use crate::transform::Transform;
 use crate::material::Material;
 
 pub type EntityId = usize;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[wasm_bindgen]
+#[derive(Debug, Clone, Copy)]
 pub struct Entity {
     pub id: EntityId,
     pub transform: Transform,
-    pub material: Material,
+    // pub material: Material,
 }
 
+#[wasm_bindgen]
 impl Entity {
-    pub fn update_transform_matrix(&mut self, matrix: &[f32; 16]) {
-        self.transform.matrix = *matrix;
+    #[wasm_bindgen(constructor)]
+    pub fn new(id: EntityId) -> Self {
+        Self {
+            id,
+            transform: Transform::identity(),
+            // material: Material::default(),
+        }
     }
+
+    // pub fn update_transform_matrix(&mut self, matrix: &[f32; 16]) {
+        // // self.transform.matrix = *matrix;
+    // }
 }

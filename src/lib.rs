@@ -30,7 +30,7 @@ pub mod material;
 use wasm_bindgen::prelude::*;
 use web_sys::WebGlProgram;
 
-use crate::entity::EntityId;
+use crate::entity::{Entity, EntityId};
 use crate::script_manager::WreScript;
 
 const TARGET_FPS: i32 = 30;
@@ -61,14 +61,14 @@ pub fn destroy_entity(eid: EntityId) {
 }
 
 #[wasm_bindgen]
-pub fn get_entity(id: EntityId) -> JsValue {
-    JsValue::from_serde(&wre_entities!().get(id)).unwrap()
+pub fn get_entity(id: EntityId) -> Entity {
+    wre_entities!().get(id)
 }
 
-#[wasm_bindgen]
-pub fn set_entity(id: EntityId, entity: JsValue) {
-    wre_entities!().set(id, entity.into_serde().unwrap())
-}
+// #[wasm_bindgen]
+// pub fn set_entity(id: EntityId, entity: JsValue) {
+    // wre_entities!().set(id, entity.into_serde().unwrap())
+// }
 
 #[wasm_bindgen]
 pub fn add_script(eid: EntityId, script: WreScript) {
@@ -85,10 +85,10 @@ pub fn add_mesh(eid: EntityId, obj_source: &str) {
     wre_render_system!().add_obj_mesh(eid, obj_source);
 }
 
-#[wasm_bindgen]
-pub fn set_color(eid: EntityId, color: JsValue) {
-    wre_entities!(eid, true).material.color = color.into_serde().unwrap();
-}
+// #[wasm_bindgen]
+// pub fn set_color(eid: EntityId, color: JsValue) {
+    // wre_entities!(eid, true).material.color = color.into_serde().unwrap();
+// }
 
 #[wasm_bindgen]
 pub fn make_ready() {
