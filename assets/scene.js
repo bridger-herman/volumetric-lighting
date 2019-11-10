@@ -47,7 +47,6 @@ export class Scene {
                     sceneEntity.color[2],
                     sceneEntity.color[3],
                 ));
-                console.log(entity.material.color.to_string());
                 wre.set_entity(eid, entity);
 
                 loadResource(prefab.mesh).then((objText) => {
@@ -59,7 +58,7 @@ export class Scene {
                         // TODO: This is incredibly unsafe. How to best do
                         // this?
                         let ScriptClass = eval(prefab.scripts[s]);
-                        let script = new ScriptClass;
+                        let script = new ScriptClass(eid);
                         wre.add_script(eid, script);
                     }
                 });

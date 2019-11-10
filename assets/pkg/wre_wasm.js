@@ -11,83 +11,6 @@ function _assertClass(instance, klass) {
     }
     return instance.ptr;
 }
-/**
-*/
-export function start() {
-    wasm.start();
-}
-
-const heap = new Array(32);
-
-heap.fill(undefined);
-
-heap.push(undefined, null, true, false);
-
-function getObject(idx) { return heap[idx]; }
-
-let heap_next = heap.length;
-
-function dropObject(idx) {
-    if (idx < 36) return;
-    heap[idx] = heap_next;
-    heap_next = idx;
-}
-
-function takeObject(idx) {
-    const ret = getObject(idx);
-    dropObject(idx);
-    return ret;
-}
-/**
-* @returns {any}
-*/
-export function create_entity() {
-    const ret = wasm.create_entity();
-    return takeObject(ret);
-}
-
-/**
-* @param {number} eid
-*/
-export function destroy_entity(eid) {
-    wasm.destroy_entity(eid);
-}
-
-/**
-* @param {number} id
-* @returns {Entity}
-*/
-export function get_entity(id) {
-    const ret = wasm.get_entity(id);
-    return Entity.__wrap(ret);
-}
-
-/**
-* @param {number} id
-* @param {Entity} entity
-*/
-export function set_entity(id, entity) {
-    _assertClass(entity, Entity);
-    const ptr0 = entity.ptr;
-    entity.ptr = 0;
-    wasm.set_entity(id, ptr0);
-}
-
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
-}
-/**
-* @param {number} eid
-* @param {any} script
-*/
-export function add_script(eid, script) {
-    wasm.add_script(eid, addHeapObject(script));
-}
 
 let WASM_VECTOR_LEN = 0;
 
@@ -143,28 +66,28 @@ function passStringToWasm(arg) {
     WASM_VECTOR_LEN = offset;
     return ptr;
 }
-/**
-* @param {string} name
-* @param {any} program
-*/
-export function add_shader(name, program) {
-    wasm.add_shader(passStringToWasm(name), WASM_VECTOR_LEN, addHeapObject(program));
+
+const heap = new Array(32);
+
+heap.fill(undefined);
+
+heap.push(undefined, null, true, false);
+
+function getObject(idx) { return heap[idx]; }
+
+let heap_next = heap.length;
+
+function dropObject(idx) {
+    if (idx < 36) return;
+    heap[idx] = heap_next;
+    heap_next = idx;
 }
 
-/**
-* @param {number} eid
-* @param {string} obj_source
-*/
-export function add_mesh(eid, obj_source) {
-    wasm.add_mesh(eid, passStringToWasm(obj_source), WASM_VECTOR_LEN);
+function takeObject(idx) {
+    const ret = getObject(idx);
+    dropObject(idx);
+    return ret;
 }
-
-/**
-*/
-export function make_ready() {
-    wasm.make_ready();
-}
-
 /**
 * @param {string} source
 * @returns {any}
@@ -203,6 +126,85 @@ export function link_shader_program(vert_shader, frag_shader) {
         heap[stack_pointer++] = undefined;
         heap[stack_pointer++] = undefined;
     }
+}
+
+/**
+*/
+export function start() {
+    wasm.start();
+}
+
+/**
+* @returns {any}
+*/
+export function create_entity() {
+    const ret = wasm.create_entity();
+    return takeObject(ret);
+}
+
+/**
+* @param {number} eid
+*/
+export function destroy_entity(eid) {
+    wasm.destroy_entity(eid);
+}
+
+/**
+* @param {number} id
+* @returns {Entity}
+*/
+export function get_entity(id) {
+    const ret = wasm.get_entity(id);
+    return Entity.__wrap(ret);
+}
+
+/**
+* @param {number} id
+* @param {Entity} entity
+*/
+export function set_entity(id, entity) {
+    _assertClass(entity, Entity);
+    const ptr0 = entity.ptr;
+    entity.ptr = 0;
+    wasm.set_entity(id, ptr0);
+}
+
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
+}
+/**
+* @param {number} eid
+* @param {any} script
+*/
+export function add_script(eid, script) {
+    wasm.add_script(eid, addHeapObject(script));
+}
+
+/**
+* @param {string} name
+* @param {any} program
+*/
+export function add_shader(name, program) {
+    wasm.add_shader(passStringToWasm(name), WASM_VECTOR_LEN, addHeapObject(program));
+}
+
+/**
+* @param {number} eid
+* @param {string} obj_source
+*/
+export function add_mesh(eid, obj_source) {
+    wasm.add_mesh(eid, passStringToWasm(obj_source), WASM_VECTOR_LEN);
+}
+
+/**
+*/
+export function make_ready() {
+    wasm.make_ready();
 }
 
 let cachegetInt32Memory = null;
@@ -2757,27 +2759,21 @@ export class Vec3 {
     * @returns {number}
     */
     x() {
-        const ptr = this.ptr;
-        this.ptr = 0;
-        const ret = wasm.vec3_x(ptr);
+        const ret = wasm.vec3_x(this.ptr);
         return ret;
     }
     /**
     * @returns {number}
     */
     y() {
-        const ptr = this.ptr;
-        this.ptr = 0;
-        const ret = wasm.vec3_y(ptr);
+        const ret = wasm.vec3_y(this.ptr);
         return ret;
     }
     /**
     * @returns {number}
     */
     z() {
-        const ptr = this.ptr;
-        this.ptr = 0;
-        const ret = wasm.vec3_z(ptr);
+        const ret = wasm.vec3_z(this.ptr);
         return ret;
     }
     /**
@@ -3197,9 +3193,7 @@ export class Vec4 {
     * @returns {number}
     */
     x() {
-        const ptr = this.ptr;
-        this.ptr = 0;
-        const ret = wasm.vec4_x(ptr);
+        const ret = wasm.vec4_x(this.ptr);
         return ret;
     }
     /**
@@ -3207,9 +3201,7 @@ export class Vec4 {
     * @returns {number}
     */
     y() {
-        const ptr = this.ptr;
-        this.ptr = 0;
-        const ret = wasm.vec4_y(ptr);
+        const ret = wasm.vec4_y(this.ptr);
         return ret;
     }
     /**
@@ -3217,9 +3209,7 @@ export class Vec4 {
     * @returns {number}
     */
     z() {
-        const ptr = this.ptr;
-        this.ptr = 0;
-        const ret = wasm.vec4_z(ptr);
+        const ret = wasm.vec4_z(this.ptr);
         return ret;
     }
     /**
@@ -3227,9 +3217,7 @@ export class Vec4 {
     * @returns {number}
     */
     w() {
-        const ptr = this.ptr;
-        this.ptr = 0;
-        const ret = wasm.vec4_w(ptr);
+        const ret = wasm.vec4_w(this.ptr);
         return ret;
     }
     /**
@@ -3738,12 +3726,11 @@ function init(module) {
     let result;
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
-        const ret = getStringFromWasm(arg0, arg1);
-        return addHeapObject(ret);
-    };
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
+    };
+    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
+        getObject(arg0).updateWrapper();
     };
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
@@ -3765,8 +3752,9 @@ function init(module) {
     imports.wbg.__wbindgen_cb_forget = function(arg0) {
         takeObject(arg0);
     };
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
+    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
+        const ret = getStringFromWasm(arg0, arg1);
+        return addHeapObject(ret);
     };
     imports.wbg.__widl_instanceof_Window = function(arg0) {
         const ret = getObject(arg0) instanceof Window;
@@ -3990,7 +3978,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper185 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper177 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;

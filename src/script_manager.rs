@@ -9,9 +9,6 @@
 use std::collections::HashMap;
 use std::fmt;
 
-use js_sys::Float32Array;
-use wasm_bindgen::JsCast;
-
 use crate::entity::EntityId;
 use crate::traits::Update;
 
@@ -26,9 +23,6 @@ extern "C" {
 
     #[wasm_bindgen(method)]
     fn updateWrapper(this: &WreScript);
-
-    #[wasm_bindgen(method)]
-    fn getTransform(this: &WreScript) -> JsValue;
 }
 
 unsafe impl Send for WreScript {}
@@ -53,7 +47,7 @@ impl ScriptManager {
 
 impl Update for ScriptManager {
     fn update(&mut self) {
-        for (entity, script) in self.entity_scripts.iter_mut() {
+        for (_entity, script) in self.entity_scripts.iter_mut() {
             script.updateWrapper();
         }
     }

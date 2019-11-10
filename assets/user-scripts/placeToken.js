@@ -9,13 +9,12 @@
 
 import * as wre from '../pkg/wre_wasm.js';
 import { WreScript, loadResource } from '../wre.js';
-import { Transform } from '../transform.js';
 
 export class PlaceToken extends WreScript {
     start() {
         this._keyframes = {
-            0.0: Transform.identity(),
-            1.0: Transform.identity(),
+            0.0: wre.Transform.identity(),
+            1.0: wre.Transform.identity(),
         };
 
         this.updateKeyframeArray();
@@ -59,7 +58,6 @@ export class PlaceToken extends WreScript {
         } else if (t < 0.0) {
             this.transform = this._keyframes[0.0];
         } else {
-            let x = previousKeyframe.lerp(nextKeyframe, intermediateT);
             this.transform = previousKeyframe.lerp(nextKeyframe, intermediateT);
         }
         this._currentFrame += 1;

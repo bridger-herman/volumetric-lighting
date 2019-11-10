@@ -7,8 +7,6 @@
 //! Manages all the entities in the game
 
 use crate::entity::{Entity, EntityId};
-use crate::material::Material;
-use crate::transform::Transform;
 
 #[derive(Debug, Default)]
 pub struct EntityManager {

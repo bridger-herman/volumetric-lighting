@@ -8,7 +8,6 @@
  */
 
 import * as wre from './pkg/wre_wasm.js';
-import { Transform } from './transform.js'
 
 export function initWre() {
     return initShader('default2').then(() => {
@@ -20,6 +19,7 @@ export class WreScript {
     constructor(owner) {
         this._entityId = owner;
         this._entity = wre.get_entity(this._entityId);
+        this.transform = wre.Transform.identity();
         this.start();
     }
 

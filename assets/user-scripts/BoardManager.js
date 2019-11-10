@@ -11,74 +11,77 @@ import * as wre from '../pkg/wre_wasm.js';
 import { WreScript, loadResource } from '../wre.js';
 import { Ray } from '../ray.js';
 import { PlaceToken } from './placeToken.js';
-import { Transform } from '../transform.js';
 import { oneFromWin, nearlySolved, easy, challenging } from './boards.js'
 
 export class BoardManager extends WreScript {
     // Arrow function to preserve `this` context
     mouseHandler = (evt) => {
-        let xOffset = glm.mul(this._camRight, this._pixelWidth * evt.offsetX);
-        let yOffset = glm.mul(this._camUp, -this._pixelHeight * evt.offsetY);
+        let xOffset = this._camRight.mul(this._pixelWidth * evt.offsetX);
+        let yOffset = this._camUp.mul(-this._pixelHeight * evt.offsetY);
 
-        let upLeftPlusYOffset = glm.add(
-            this._upperLeft,
-            yOffset,
-        );
-        let imagePlaneLocation = glm.add(
-            upLeftPlusYOffset,
-            xOffset,
-        );
-        let rayDir = glm.normalize(glm.sub(imagePlaneLocation, this._camPos));
+        let upLeftPlusYOffset = this._upperLeft.add(yOffset);
+        let imagePlaneLocation = upLeftPlusYOffset.add(xOffset);
+        let rayDir = imagePlaneLocation.sub(this._camPos).normalize();
 
         let mouseRay = new Ray(this._camPos, rayDir);
 
         let t = 0.0;
         let deltaT = 0.01;
         let underSurface = false;
-        let coord = glm.vec3(0);
+        let coord = wre.Vec3.zero();
         while (t < 10.0 && !underSurface) {
             coord = mouseRay.eval(t);
-            if (coord.y <= 0.0) {
+            if (coord.y() <= 0.0) {
                 underSurface = true;
             }
             t += deltaT;
         }
 
         // Gives int in range [-4, 4]
-        let coordX2D = Math.round(coord.x * 10.0);
-        let coordY2D = Math.round(coord.z * 10.0);
+        let coordX2D = Math.round(coord.x() * 10.0);
+        let coordY2D = Math.round(coord.z() * 10.0);
 
         // Gives int in range [0, 8]
         let boardCoords = [coordY2D + 4, coordX2D + 4];
+
+        console.log(`${coordX2D} ${coordY2D}`);
+        console.log(boardCoords);
 
         let checkBounds = (c) => {return c >= 0 && c < 9};
 
         if (checkBounds(boardCoords[0]) && checkBounds(boardCoords[1])) {
             let valid = this.checkSpace(...boardCoords, this._currentColor);
 
-            let e = wre.create_entity();
-            wre.add_mesh(e, this._objText);
-            let script = new PlaceToken();
+            let eid = wre.create_entity();
+            let entity = wre.get_entity(eid);
+            wre.add_mesh(eid, this._objText);
+            let script = new PlaceToken(eid);
 
-            let startTransform = Transform.identity();
-            startTransform.position = glm.vec3(0.0, 0.5, -0.5);
-            startTransform.scale = glm.vec3(1.0, 1.0, 8.0);
+            let startTransform = wre.Transform.identity();
+            startTransform.position = new wre.Vec3(0.0, 0.5, -0.5);
+            startTransform.scale = new wre.Vec3(1.0, 1.0, 8.0);
 
-            let midTransform = Transform.identity();
-            midTransform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
-            midTransform.scale = glm.vec3(1.0, 2.0, 1.0);
+            let midTransform = wre.Transform.identity();
+            midTransform.position = new wre.Vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
+            midTransform.scale = new wre.Vec3(1.0, 2.0, 1.0);
 
-            let endTransform = Transform.identity();
-            endTransform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
-            endTransform.scale = glm.vec3(1.0, 1.0, 1.0);
+            let endTransform = wre.Transform.identity();
+            endTransform.position = new wre.Vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
+            endTransform.scale = new wre.Vec3(1.0, 1.0, 1.0);
 
-            // wre.set_color(e, this._colors[this._currentColor]);
+            entity.material = new wre.Material(new wre.Vec4(
+                this._colors[this._currentColor][0],
+                this._colors[this._currentColor][1],
+                this._colors[this._currentColor][2],
+                this._colors[this._currentColor][3],
+            ));
+
             if (valid) {
                 script.setKeyframe(startTransform, 0.0);
                 script.setKeyframe(midTransform, 0.5);
                 script.setKeyframe(endTransform, 1.0);
 
-                wre.add_script(e, script);
+                wre.add_script(eid, script);
                 this._board[this._currentColor].push(boardCoords);
 
                 let win = Object.values(this._board).every((v) => v.length == 9);
@@ -86,20 +89,21 @@ export class BoardManager extends WreScript {
                     document.getElementById('win-container').innerHTML = '<h1 id="win-text">WINNER!</h1>';
                 }
             } else {
-                let lastTf = Transform.identity();
-                lastTf.position = glm.vec3(0.0, 1.0, 0.0);
-                lastTf.scale = glm.vec3(1.0, 6.0, 1.0);
+                let lastTf = wre.Transform.identity();
+                lastTf.position = new wre.Vec3(0.0, 1.0, 0.0);
+                lastTf.scale = new wre.Vec3(1.0, 6.0, 1.0);
 
                 script.setKeyframe(startTransform, 0.0);
                 script.setKeyframe(midTransform, 0.2);
-                midTransform.position = glm.add(midTransform.position, glm.vec3(0, 0.1, 0));
+                midTransform.position = midTransform.position.add(new wre.Vec3(0, 0.1, 0));
                 script.setKeyframe(endTransform, 0.5);
-                endTransform.position = glm.add(midTransform.position, glm.vec3(0, 0.1, 0));
+                endTransform.position = midTransform.position.add(new wre.Vec3(0, 0.1, 0));
                 script.setKeyframe(lastTf, 1.0);
 
-                wre.add_script(e, script);
-                // wre.set_color(e, this._colors[this._currentColor]);
+                wre.add_script(eid, script);
             }
+
+            wre.set_entity(eid, entity);
         }
     }
 
@@ -146,7 +150,7 @@ export class BoardManager extends WreScript {
 
         this._nearPlane = 0.1;
         this._aspect = 16.0 / 9.0;
-        this._vertHalfAngle = glm.radians(45.0 / 2.0);
+        this._vertHalfAngle = 45.0 * (Math.PI / 360.0);
         this._viewportHeight = 2.0 * Math.tan(this._vertHalfAngle);
         this._viewportWidth = this._viewportHeight * this._aspect;
         this._pixelWidth = this._viewportWidth / canvas.width;
@@ -157,29 +161,19 @@ export class BoardManager extends WreScript {
         this._pixelWidth *= 0.1;
         this._pixelHeight *= 0.1;
 
-        this._camPos = glm.vec3(0, 1, 1);
-        this._camDir = glm.normalize(glm.vec3(0, -1, -1));
-        this._camUp = glm.normalize(glm.vec3(0, 1, -1));
-        this._camRight = glm.vec3(1, 0, 0);
+        this._camPos = new wre.Vec3(0, 1, 1);
+        this._camDir = new wre.Vec3(0, -1, -1).normalize();
+        this._camUp = new wre.Vec3(0, 1, -1).normalize();
+        this._camRight = new wre.Vec3(1, 0, 0);
 
         // The upper-left-most pixel
-        // 0.5s are to center the rays on each pixel
-        let imagePlaneCenterOffset = glm.mul(this._camDir, this._nearPlane);
-        let imagePlaneCenter = glm.add(this._camPos, imagePlaneCenterOffset);
-        let topRow = glm.mul(
-            this._camUp,
-            this._pixelHeight * (canvas.height / 2.0 - 0.5)
-        );
-        let leftRow = glm.mul(
-            this._camRight,
-            -this._pixelWidth * (canvas.width / 2.0 - 0.5)
-        );
-        let topLeft = glm.add(
-            topRow,
-            leftRow,
-        );
+        let imagePlaneCenterOffset = this._camDir.mul(this._nearPlane);
+        let imagePlaneCenter = this._camPos.add(imagePlaneCenterOffset);
+        let topRow = this._camUp.mul(this._pixelHeight * (canvas.height / 2.0 - 0.5));
+        let leftRow = this._camRight.mul(-this._pixelWidth * (canvas.width / 2.0 - 0.5));
+        let topLeft = topRow.add(leftRow);
 
-        this._upperLeft = glm.add(topLeft, imagePlaneCenter);
+        this._upperLeft = topLeft.add(imagePlaneCenter);
 
         this._colors = {
             "red": [0.584314, 0.109804, 0.0745098, 1.0],
@@ -227,30 +221,30 @@ export class BoardManager extends WreScript {
             this._objText = objText;
         });
 
-        loadResource('./resources/models/small_sphere.obj').then((objText) => {
-            for (let color in this._board) {
-                for (let pairIndex in this._board[color]) {
-                    let sphere = wre.create_entity();
-                    let sphereEntity = wre.get_entity(sphere);
-                    wre.add_mesh(sphere, objText);
-                    let tf = sphereEntity.transform;
-                    tf.position =
-                        (new wre.Vec3(0.0, 0.0, 0.1))
-                                .mul(this._board[color][pairIndex][0])
-                        .add((new wre.Vec3(0.1, 0.0, 0.0))
-                                .mul(this._board[color][pairIndex][1]))
-                        .sub(new wre.Vec3(0.4, 0.0, 0.4));
-                    sphereEntity.transform = tf;
-                    sphereEntity.material = new wre.Material(new wre.Vec4(
-                        this._colors[color][0],
-                        this._colors[color][1],
-                        this._colors[color][2],
-                        this._colors[color][3],
-                    ));
-                    wre.set_entity(sphere, sphereEntity);
-                }
-            }
-        })
+        // loadResource('./resources/models/small_sphere.obj').then((objText) => {
+            // for (let color in this._board) {
+                // for (let pairIndex in this._board[color]) {
+                    // let sphere = wre.create_entity();
+                    // let sphereEntity = wre.get_entity(sphere);
+                    // wre.add_mesh(sphere, objText);
+                    // let tf = sphereEntity.transform;
+                    // tf.position =
+                        // (new wre.Vec3(0.0, 0.0, 0.1))
+                                // .mul(this._board[color][pairIndex][0])
+                        // .add((new wre.Vec3(0.1, 0.0, 0.0))
+                                // .mul(this._board[color][pairIndex][1]))
+                        // .sub(new wre.Vec3(0.4, 0.0, 0.4));
+                    // sphereEntity.transform = tf;
+                    // sphereEntity.material = new wre.Material(new wre.Vec4(
+                        // this._colors[color][0],
+                        // this._colors[color][1],
+                        // this._colors[color][2],
+                        // this._colors[color][3],
+                    // ));
+                    // wre.set_entity(sphere, sphereEntity);
+                // }
+            // }
+        // })
     }
 
     update() {

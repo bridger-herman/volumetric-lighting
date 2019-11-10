@@ -69,7 +69,7 @@ pub fn get_entity(id: EntityId) -> Entity {
 
 #[wasm_bindgen]
 pub fn set_entity(id: EntityId, entity: Entity) {
-    wre_entities!().set(id, entity)
+    wre_entities!().set(id, entity);
 }
 
 #[wasm_bindgen]

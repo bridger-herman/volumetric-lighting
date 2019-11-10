@@ -17,8 +17,8 @@ export class Ray {
 
     eval(t) {
         if (t >= this._tMin || t <= this._tMax) {
-            let extent = glm.mul(this._dir, t);
-            return glm.add(extent, this._start);
+            let extent = this._dir.mul(t);
+            return extent.add(this._start);
         }
     }
 }
