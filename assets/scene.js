@@ -41,9 +41,15 @@ export class Scene {
                 );
 
                 entity.transform = tf;
+                entity.material = new wre.Material(new wre.Vec4(
+                    sceneEntity.color[0],
+                    sceneEntity.color[1],
+                    sceneEntity.color[2],
+                    sceneEntity.color[3],
+                ));
+                console.log(entity.material.color.to_string());
                 wre.set_entity(eid, entity);
 
-                // wre.set_color(eid, sceneEntity.color);
                 loadResource(prefab.mesh).then((objText) => {
                     if (typeof prefab.mesh !== 'undefined') {
                         wre.add_mesh(eid, objText);

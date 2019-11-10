@@ -17,8 +17,8 @@ pub type EntityId = usize;
 #[derive(Debug, Clone, Copy)]
 pub struct Entity {
     pub id: EntityId,
-    transform: Transform,
-    // pub material: Material,
+    pub transform: Transform,
+    pub material: Material,
 }
 
 #[wasm_bindgen]
@@ -28,16 +28,7 @@ impl Entity {
         Self {
             id,
             transform: Transform::identity(),
-            // material: Material::default(),
+            material: Material::default(),
         }
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn transform(&self) -> Transform {
-        self.transform
-    }
-    #[wasm_bindgen(setter)]
-    pub fn set_transform(&mut self, new_transform: Transform) {
-        self.transform = new_transform;
     }
 }

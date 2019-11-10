@@ -62,10 +62,6 @@ impl Transform {
         }
     }
 
-    pub fn do_the_thing(&mut self) {
-        self.position = Vec3::new(10.0, 10.0, 10.0);
-    }
-
     #[wasm_bindgen(getter)]
     pub fn matrix(&self) -> Mat4 {
         self.matrix

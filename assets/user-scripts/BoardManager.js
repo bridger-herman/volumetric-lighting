@@ -241,8 +241,13 @@ export class BoardManager extends WreScript {
                                 .mul(this._board[color][pairIndex][1]))
                         .sub(new wre.Vec3(0.4, 0.0, 0.4));
                     sphereEntity.transform = tf;
+                    sphereEntity.material = new wre.Material(new wre.Vec4(
+                        this._colors[color][0],
+                        this._colors[color][1],
+                        this._colors[color][2],
+                        this._colors[color][3],
+                    ));
                     wre.set_entity(sphere, sphereEntity);
-                    // wre.set_color(sphere, this._colors[color]);
                 }
             }
         })

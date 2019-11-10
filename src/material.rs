@@ -6,7 +6,20 @@
 
 //! Data container for material information
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+use wasm_bindgen::prelude::*;
+
+use glam::Vec4;
+
+#[wasm_bindgen]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Material {
-    pub color: [f32; 4],
+    pub color: Vec4,
+}
+
+#[wasm_bindgen]
+impl Material {
+    #[wasm_bindgen(constructor)]
+    pub fn new(color: Vec4) -> Self {
+        Self { color }
+    }
 }

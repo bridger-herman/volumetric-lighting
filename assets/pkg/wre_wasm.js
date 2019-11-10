@@ -2,7 +2,14 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(29)(arg0, arg1);
+    wasm.__wbg_function_table.get(28)(arg0, arg1);
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
 }
 /**
 */
@@ -55,12 +62,6 @@ export function get_entity(id) {
     return Entity.__wrap(ret);
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-    return instance.ptr;
-}
 /**
 * @param {number} id
 * @param {Entity} entity
@@ -340,28 +341,44 @@ export class Entity {
         wasm.__wbg_set_entity_id(this.ptr, arg0);
     }
     /**
+    * @returns {Transform}
+    */
+    get transform() {
+        const ret = wasm.__wbg_get_entity_transform(this.ptr);
+        return Transform.__wrap(ret);
+    }
+    /**
+    * @param {Transform} arg0
+    */
+    set transform(arg0) {
+        _assertClass(arg0, Transform);
+        const ptr0 = arg0.ptr;
+        arg0.ptr = 0;
+        wasm.__wbg_set_entity_transform(this.ptr, ptr0);
+    }
+    /**
+    * @returns {Material}
+    */
+    get material() {
+        const ret = wasm.__wbg_get_entity_material(this.ptr);
+        return Material.__wrap(ret);
+    }
+    /**
+    * @param {Material} arg0
+    */
+    set material(arg0) {
+        _assertClass(arg0, Material);
+        const ptr0 = arg0.ptr;
+        arg0.ptr = 0;
+        wasm.__wbg_set_entity_material(this.ptr, ptr0);
+    }
+    /**
     * @param {number} id
     * @returns {Entity}
     */
     constructor(id) {
         const ret = wasm.entity_new(id);
         return Entity.__wrap(ret);
-    }
-    /**
-    * @returns {Transform}
-    */
-    get transform() {
-        const ret = wasm.entity_transform(this.ptr);
-        return Transform.__wrap(ret);
-    }
-    /**
-    * @param {Transform} new_transform
-    */
-    set transform(new_transform) {
-        _assertClass(new_transform, Transform);
-        const ptr0 = new_transform.ptr;
-        new_transform.ptr = 0;
-        wasm.entity_set_transform(this.ptr, ptr0);
     }
 }
 /**
@@ -1508,6 +1525,51 @@ export class Mat4 {
     }
 }
 /**
+*/
+export class Material {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Material.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_material_free(ptr);
+    }
+    /**
+    * @returns {Vec4}
+    */
+    get color() {
+        const ret = wasm.__wbg_get_material_color(this.ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @param {Vec4} arg0
+    */
+    set color(arg0) {
+        _assertClass(arg0, Vec4);
+        const ptr0 = arg0.ptr;
+        arg0.ptr = 0;
+        wasm.__wbg_set_material_color(this.ptr, ptr0);
+    }
+    /**
+    * @param {Vec4} color
+    * @returns {Material}
+    */
+    constructor(color) {
+        _assertClass(color, Vec4);
+        const ptr0 = color.ptr;
+        color.ptr = 0;
+        const ret = wasm.material_new(ptr0);
+        return Material.__wrap(ret);
+    }
+}
+/**
 * A quaternion representing an orientation.
 *
 * This quaternion is intended to be of unit length but may denormalize due to
@@ -1869,11 +1931,6 @@ export class Transform {
         _assertClass(other, Transform);
         const ret = wasm.transform_lerp(this.ptr, other.ptr, t);
         return Transform.__wrap(ret);
-    }
-    /**
-    */
-    do_the_thing() {
-        wasm.transform_do_the_thing(this.ptr);
     }
     /**
     * @returns {Mat4}
@@ -3692,6 +3749,10 @@ function init(module) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
         return addHeapObject(ret);
     };
+    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
+        const ret = getObject(arg0);
+        return addHeapObject(ret);
+    };
     imports.wbg.__wbindgen_cb_drop = function(arg0) {
         const obj = takeObject(arg0).original;
         if (obj.cnt-- == 1) {
@@ -3706,10 +3767,6 @@ function init(module) {
     };
     imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
         getObject(arg0).updateWrapper();
-    };
-    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-        const ret = getObject(arg0);
-        return addHeapObject(ret);
     };
     imports.wbg.__widl_instanceof_Window = function(arg0) {
         const ret = getObject(arg0) instanceof Window;
@@ -3933,7 +3990,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper153 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper185 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -3941,7 +3998,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(30)(state.a, state.b);
+                    wasm.__wbg_function_table.get(29)(state.a, state.b);
                     state.a = 0;
                 }
             }
