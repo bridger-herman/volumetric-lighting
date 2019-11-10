@@ -8,7 +8,7 @@
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{WebGlProgram, WebGl2RenderingContext, WebGlShader};
+use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlShader};
 
 #[wasm_bindgen]
 pub fn compile_vert_shader(source: &str) -> WebGlShader {

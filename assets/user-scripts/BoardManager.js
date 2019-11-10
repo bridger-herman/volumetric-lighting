@@ -72,7 +72,7 @@ export class BoardManager extends WreScript {
             endTransform.position = glm.vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
             endTransform.scale = glm.vec3(1.0, 1.0, 1.0);
 
-            wre.set_color(e, this._colors[this._currentColor]);
+            // wre.set_color(e, this._colors[this._currentColor]);
             if (valid) {
                 script.setKeyframe(startTransform, 0.0);
                 script.setKeyframe(midTransform, 0.5);
@@ -98,7 +98,7 @@ export class BoardManager extends WreScript {
                 script.setKeyframe(lastTf, 1.0);
 
                 wre.add_script(e, script);
-                wre.set_color(e, this._colors[this._currentColor]);
+                // wre.set_color(e, this._colors[this._currentColor]);
             }
         }
     }
@@ -231,18 +231,18 @@ export class BoardManager extends WreScript {
             for (let color in this._board) {
                 for (let pairIndex in this._board[color]) {
                     let sphere = wre.create_entity();
+                    let sphereEntity = wre.get_entity(sphere);
                     wre.add_mesh(sphere, objText);
-                    let script = new WreScript();
-                    script.transform.position = glm.add(
-                        glm.mul(glm.vec3(0.0, 0.0, 0.1), this._board[color][pairIndex][0]),
-                        glm.mul(glm.vec3(0.1, 0.0, 0.0), this._board[color][pairIndex][1])
-                    );
-                    script.transform.position = glm.sub(
-                        script.transform.position,
-                        glm.vec3(0.4, 0.0, 0.4),
-                    );
-                    wre.add_script(sphere, script);
-                    wre.set_color(sphere, this._colors[color]);
+                    let tf = sphereEntity.transform;
+                    tf.position =
+                        (new wre.Vec3(0.0, 0.0, 0.1))
+                                .mul(this._board[color][pairIndex][0])
+                        .add((new wre.Vec3(0.1, 0.0, 0.0))
+                                .mul(this._board[color][pairIndex][1]))
+                        .sub(new wre.Vec3(0.4, 0.0, 0.4));
+                    sphereEntity.transform = tf;
+                    wre.set_entity(sphere, sphereEntity);
+                    // wre.set_color(sphere, this._colors[color]);
                 }
             }
         })

@@ -6,8 +6,8 @@ extern crate log;
 extern crate wasm_logger;
 #[macro_use]
 extern crate lazy_static;
-extern crate instant;
 extern crate glam;
+extern crate instant;
 extern crate obj;
 
 #[macro_use]
@@ -17,6 +17,7 @@ pub mod entity;
 pub mod entity_manager;
 pub mod frame;
 pub mod frame_timer;
+pub mod material;
 pub mod mesh;
 pub mod render_system;
 pub mod script_manager;
@@ -25,13 +26,14 @@ pub mod state;
 pub mod traits;
 pub mod transform;
 pub mod window;
-pub mod material;
 
 use wasm_bindgen::prelude::*;
 use web_sys::WebGlProgram;
 
 use crate::entity::{Entity, EntityId};
 use crate::script_manager::WreScript;
+
+pub use glam::{Mat4, Quat, Vec3};
 
 const TARGET_FPS: i32 = 30;
 
@@ -65,10 +67,10 @@ pub fn get_entity(id: EntityId) -> Entity {
     wre_entities!().get(id)
 }
 
-// #[wasm_bindgen]
-// pub fn set_entity(id: EntityId, entity: JsValue) {
-    // wre_entities!().set(id, entity.into_serde().unwrap())
-// }
+#[wasm_bindgen]
+pub fn set_entity(id: EntityId, entity: Entity) {
+    wre_entities!().set(id, entity)
+}
 
 #[wasm_bindgen]
 pub fn add_script(eid: EntityId, script: WreScript) {
@@ -87,7 +89,7 @@ pub fn add_mesh(eid: EntityId, obj_source: &str) {
 
 // #[wasm_bindgen]
 // pub fn set_color(eid: EntityId, color: JsValue) {
-    // wre_entities!(eid, true).material.color = color.into_serde().unwrap();
+// wre_entities!(eid, true).material.color = color.into_serde().unwrap();
 // }
 
 #[wasm_bindgen]

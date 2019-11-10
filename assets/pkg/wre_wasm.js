@@ -2,7 +2,7 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(27)(arg0, arg1);
+    wasm.__wbg_function_table.get(29)(arg0, arg1);
 }
 /**
 */
@@ -53,6 +53,23 @@ export function destroy_entity(eid) {
 export function get_entity(id) {
     const ret = wasm.get_entity(id);
     return Entity.__wrap(ret);
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
+}
+/**
+* @param {number} id
+* @param {Entity} entity
+*/
+export function set_entity(id, entity) {
+    _assertClass(entity, Entity);
+    const ptr0 = entity.ptr;
+    entity.ptr = 0;
+    wasm.set_entity(id, ptr0);
 }
 
 function addHeapObject(obj) {
@@ -187,13 +204,6 @@ export function link_shader_program(vert_shader, frag_shader) {
     }
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-    return instance.ptr;
-}
-
 let cachegetInt32Memory = null;
 function getInt32Memory() {
     if (cachegetInt32Memory === null || cachegetInt32Memory.buffer !== wasm.memory.buffer) {
@@ -214,17 +224,17 @@ function getArrayF32FromWasm(ptr, len) {
     return getFloat32Memory().subarray(ptr / 4, ptr / 4 + len);
 }
 
+let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+
+function getStringFromWasm(ptr, len) {
+    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
+}
+
 function passArrayF32ToWasm(arg) {
     const ptr = wasm.__wbindgen_malloc(arg.length * 4);
     getFloat32Memory().set(arg, ptr / 4);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
-}
-
-let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-
-function getStringFromWasm(ptr, len) {
-    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
 }
 
 function isLikeNone(x) {
@@ -330,28 +340,290 @@ export class Entity {
         wasm.__wbg_set_entity_id(this.ptr, arg0);
     }
     /**
-    * @returns {Transform}
-    */
-    get transform() {
-        const ret = wasm.__wbg_get_entity_transform(this.ptr);
-        return Transform.__wrap(ret);
-    }
-    /**
-    * @param {Transform} arg0
-    */
-    set transform(arg0) {
-        _assertClass(arg0, Transform);
-        const ptr0 = arg0.ptr;
-        arg0.ptr = 0;
-        wasm.__wbg_set_entity_transform(this.ptr, ptr0);
-    }
-    /**
     * @param {number} id
     * @returns {Entity}
     */
     constructor(id) {
         const ret = wasm.entity_new(id);
         return Entity.__wrap(ret);
+    }
+    /**
+    * @returns {Transform}
+    */
+    get transform() {
+        const ret = wasm.entity_transform(this.ptr);
+        return Transform.__wrap(ret);
+    }
+    /**
+    * @param {Transform} new_transform
+    */
+    set transform(new_transform) {
+        _assertClass(new_transform, Transform);
+        const ptr0 = new_transform.ptr;
+        new_transform.ptr = 0;
+        wasm.entity_set_transform(this.ptr, ptr0);
+    }
+}
+/**
+* A 2x2 column major matrix.
+*/
+export class Mat2 {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Mat2.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_mat2_free(ptr);
+    }
+    /**
+    * @returns {Mat2}
+    */
+    static zero() {
+        const ret = wasm.mat2_zero();
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @returns {Mat2}
+    */
+    static identity() {
+        const ret = wasm.mat2_identity();
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat2` from four column vectors.
+    * @param {Vec2} x_axis
+    * @param {Vec2} y_axis
+    * @returns {Mat2}
+    */
+    static from_cols(x_axis, y_axis) {
+        _assertClass(x_axis, Vec2);
+        const ptr0 = x_axis.ptr;
+        x_axis.ptr = 0;
+        _assertClass(y_axis, Vec2);
+        const ptr1 = y_axis.ptr;
+        y_axis.ptr = 0;
+        const ret = wasm.mat2_from_cols(ptr0, ptr1);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * Creates a new `Mat2` from a `[f32; 4]` stored in column major order.
+    * If your data is stored in row major you will need to `transpose` the resulting `Mat2`.
+    * Creates a new `[f32; 4]` storing data in column major order.
+    * If you require data in row major order `transpose` the `Mat2` first.
+    * Creates a new `Mat2` from a `[[f32; 2]; 2]` stored in column major order.
+    * If your data is in row major order you will need to `transpose` the resulting `Mat2`.
+    * Creates a new `[[f32; 2]; 2]` storing data in column major order.
+    * If you require data in row major order `transpose` the `Mat2` first.
+    * Create a 2x2 matrix containing scale and rotation (in radians).
+    * @param {Vec2} scale
+    * @param {number} angle
+    * @returns {Mat2}
+    */
+    static from_scale_angle(scale, angle) {
+        _assertClass(scale, Vec2);
+        const ptr0 = scale.ptr;
+        scale.ptr = 0;
+        const ret = wasm.mat2_from_scale_angle(ptr0, angle);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * Create a 2x2 matrix containing a rotation (in radians).
+    * @param {number} angle
+    * @returns {Mat2}
+    */
+    static from_angle(angle) {
+        const ret = wasm.mat2_from_angle(angle);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Vec2} scale
+    * @returns {Mat2}
+    */
+    static from_scale(scale) {
+        _assertClass(scale, Vec2);
+        const ptr0 = scale.ptr;
+        scale.ptr = 0;
+        const ret = wasm.mat2_from_scale(ptr0);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Vec2} x
+    */
+    set_x_axis(x) {
+        _assertClass(x, Vec2);
+        const ptr0 = x.ptr;
+        x.ptr = 0;
+        wasm.mat2_set_x_axis(this.ptr, ptr0);
+    }
+    /**
+    * @param {Vec2} y
+    */
+    set_y_axis(y) {
+        _assertClass(y, Vec2);
+        const ptr0 = y.ptr;
+        y.ptr = 0;
+        wasm.mat2_set_y_axis(this.ptr, ptr0);
+    }
+    /**
+    * @returns {Vec2}
+    */
+    x_axis() {
+        const ret = wasm.mat2_x_axis(this.ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * @returns {Vec2}
+    */
+    y_axis() {
+        const ret = wasm.mat2_y_axis(this.ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * @returns {Mat2}
+    */
+    transpose() {
+        const ret = wasm.mat2_transpose(this.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    determinant() {
+        const ret = wasm.mat2_determinant(this.ptr);
+        return ret;
+    }
+    /**
+    * @returns {Mat2}
+    */
+    inverse() {
+        const ret = wasm.mat2_inverse(this.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Vec2} other
+    * @returns {Vec2}
+    */
+    mul_vec2(other) {
+        _assertClass(other, Vec2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat2_mul_vec2(this.ptr, ptr0);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * @param {Mat2} other
+    * @returns {Mat2}
+    */
+    mul_mat2(other) {
+        _assertClass(other, Mat2);
+        const ret = wasm.mat2_mul_mat2(this.ptr, other.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * Returns true if the absolute difference of all elements between `self`
+    * and `other` is less than or equal to `max_abs_diff`.
+    *
+    * This can be used to compare if two `Mat2`\'s contain similar elements. It
+    * works best when comparing with a known value. The `max_abs_diff` that
+    * should be used used depends on the values being compared against.
+    *
+    * For more on floating point comparisons see
+    * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    * @param {Mat2} other
+    * @param {number} max_abs_diff
+    * @returns {boolean}
+    */
+    abs_diff_eq(other, max_abs_diff) {
+        _assertClass(other, Mat2);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.mat2_abs_diff_eq(this.ptr, ptr0, max_abs_diff);
+        return ret !== 0;
+    }
+    /**
+    * @param {Mat2} other
+    * @returns {Mat2}
+    */
+    add(other) {
+        _assertClass(other, Mat2);
+        const ret = wasm.mat2_add(this.ptr, other.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Mat2} other
+    * @returns {Mat2}
+    */
+    sub(other) {
+        _assertClass(other, Mat2);
+        const ret = wasm.mat2_sub(this.ptr, other.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Mat2}
+    */
+    mul(other) {
+        const ret = wasm.mat2_mul(this.ptr, other);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @returns {string}
+    */
+    to_string() {
+        const retptr = 8;
+        const ret = wasm.mat2_to_string(retptr, this.ptr);
+        const memi32 = getInt32Memory();
+        const v0 = getStringFromWasm(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1]).slice();
+        wasm.__wbindgen_free(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1] * 1);
+        return v0;
+    }
+    /**
+    * @param {Mat2} other
+    * @returns {Mat2}
+    */
+    sub_mat2(other) {
+        _assertClass(other, Mat2);
+        const ret = wasm.mat2_sub_mat2(this.ptr, other.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Mat2} other
+    * @returns {Mat2}
+    */
+    add_mat2(other) {
+        _assertClass(other, Mat2);
+        const ret = wasm.mat2_add_mat2(this.ptr, other.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Mat2}
+    */
+    mul_scalar(other) {
+        const ret = wasm.mat2_mul_scalar(this.ptr, other);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Vec2} x_axis
+    * @param {Vec2} y_axis
+    * @returns {Mat2}
+    */
+    constructor(x_axis, y_axis) {
+        _assertClass(x_axis, Vec2);
+        const ptr0 = x_axis.ptr;
+        x_axis.ptr = 0;
+        _assertClass(y_axis, Vec2);
+        const ptr1 = y_axis.ptr;
+        y_axis.ptr = 0;
+        const ret = wasm.mat2_new(ptr0, ptr1);
+        return Mat2.__wrap(ret);
     }
 }
 /**
@@ -667,12 +939,49 @@ export class Mat3 {
         return ret !== 0;
     }
     /**
+    * @param {Mat3} other
+    * @returns {Mat3}
+    */
+    add(other) {
+        _assertClass(other, Mat3);
+        const ret = wasm.mat3_add(this.ptr, other.ptr);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {Mat3} other
+    * @returns {Mat3}
+    */
+    sub(other) {
+        _assertClass(other, Mat3);
+        const ret = wasm.mat3_sub(this.ptr, other.ptr);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Mat3}
+    */
+    mul(other) {
+        const ret = wasm.mat3_mul(this.ptr, other);
+        return Mat3.__wrap(ret);
+    }
+    /**
+    * @returns {string}
+    */
+    to_string() {
+        const retptr = 8;
+        const ret = wasm.mat3_to_string(retptr, this.ptr);
+        const memi32 = getInt32Memory();
+        const v0 = getStringFromWasm(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1]).slice();
+        wasm.__wbindgen_free(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1] * 1);
+        return v0;
+    }
+    /**
     * @param {Vec3} x_axis
     * @param {Vec3} y_axis
     * @param {Vec3} z_axis
     * @returns {Mat3}
     */
-    static new(x_axis, y_axis, z_axis) {
+    constructor(x_axis, y_axis, z_axis) {
         _assertClass(x_axis, Vec3);
         const ptr0 = x_axis.ptr;
         x_axis.ptr = 0;
@@ -1138,13 +1447,50 @@ export class Mat4 {
         return v0;
     }
     /**
+    * @param {Mat4} other
+    * @returns {Mat4}
+    */
+    add(other) {
+        _assertClass(other, Mat4);
+        const ret = wasm.mat4_add(this.ptr, other.ptr);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Mat4} other
+    * @returns {Mat4}
+    */
+    sub(other) {
+        _assertClass(other, Mat4);
+        const ret = wasm.mat4_sub(this.ptr, other.ptr);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Mat4}
+    */
+    mul(other) {
+        const ret = wasm.mat4_mul(this.ptr, other);
+        return Mat4.__wrap(ret);
+    }
+    /**
+    * @returns {string}
+    */
+    to_string() {
+        const retptr = 8;
+        const ret = wasm.mat4_to_string(retptr, this.ptr);
+        const memi32 = getInt32Memory();
+        const v0 = getStringFromWasm(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1]).slice();
+        wasm.__wbindgen_free(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1] * 1);
+        return v0;
+    }
+    /**
     * @param {Vec4} x_axis
     * @param {Vec4} y_axis
     * @param {Vec4} z_axis
     * @param {Vec4} w_axis
     * @returns {Mat4}
     */
-    static new(x_axis, y_axis, z_axis, w_axis) {
+    constructor(x_axis, y_axis, z_axis, w_axis) {
         _assertClass(x_axis, Vec4);
         const ptr0 = x_axis.ptr;
         x_axis.ptr = 0;
@@ -1198,7 +1544,7 @@ export class Quat {
     * @param {number} w
     * @returns {Quat}
     */
-    static new(x, y, z, w) {
+    constructor(x, y, z, w) {
         const ret = wasm.quat_new(x, y, z, w);
         return Quat.__wrap(ret);
     }
@@ -1504,11 +1850,94 @@ export class Transform {
         return Transform.__wrap(ret);
     }
     /**
+    * @param {Vec3} position
+    * @returns {Transform}
+    */
+    static translation(position) {
+        _assertClass(position, Vec3);
+        const ptr0 = position.ptr;
+        position.ptr = 0;
+        const ret = wasm.transform_translation(ptr0);
+        return Transform.__wrap(ret);
+    }
+    /**
+    * @param {Transform} other
+    * @param {number} t
+    * @returns {Transform}
+    */
+    lerp(other, t) {
+        _assertClass(other, Transform);
+        const ret = wasm.transform_lerp(this.ptr, other.ptr, t);
+        return Transform.__wrap(ret);
+    }
+    /**
+    */
+    do_the_thing() {
+        wasm.transform_do_the_thing(this.ptr);
+    }
+    /**
     * @returns {Mat4}
     */
-    matrix() {
+    get matrix() {
         const ret = wasm.transform_matrix(this.ptr);
         return Mat4.__wrap(ret);
+    }
+    /**
+    * @param {Mat4} new_matrix
+    */
+    set matrix(new_matrix) {
+        _assertClass(new_matrix, Mat4);
+        const ptr0 = new_matrix.ptr;
+        new_matrix.ptr = 0;
+        wasm.transform_set_matrix(this.ptr, ptr0);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    get position() {
+        const ret = wasm.transform_position(this.ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} new_position
+    */
+    set position(new_position) {
+        _assertClass(new_position, Vec3);
+        const ptr0 = new_position.ptr;
+        new_position.ptr = 0;
+        wasm.transform_set_position(this.ptr, ptr0);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    get scale() {
+        const ret = wasm.transform_scale(this.ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} new_scale
+    */
+    set scale(new_scale) {
+        _assertClass(new_scale, Vec3);
+        const ptr0 = new_scale.ptr;
+        new_scale.ptr = 0;
+        wasm.transform_set_scale(this.ptr, ptr0);
+    }
+    /**
+    * @returns {Quat}
+    */
+    get rotation() {
+        const ret = wasm.transform_rotation(this.ptr);
+        return Quat.__wrap(ret);
+    }
+    /**
+    * @param {Quat} new_rotation
+    */
+    set rotation(new_rotation) {
+        _assertClass(new_rotation, Quat);
+        const ptr0 = new_rotation.ptr;
+        new_rotation.ptr = 0;
+        wasm.transform_set_rotation(this.ptr, ptr0);
     }
 }
 /**
@@ -1961,12 +2390,49 @@ export class Vec2 {
         return Vec2.__wrap(ret);
     }
     /**
+    * @param {Vec2} other
+    * @returns {Vec2}
+    */
+    add(other) {
+        _assertClass(other, Vec2);
+        const ret = wasm.vec2_add(this.ptr, other.ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * @param {Vec2} other
+    * @returns {Vec2}
+    */
+    sub(other) {
+        _assertClass(other, Vec2);
+        const ret = wasm.vec2_sub(this.ptr, other.ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Vec2}
+    */
+    mul(other) {
+        const ret = wasm.vec2_mul(this.ptr, other);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * @returns {string}
+    */
+    to_string() {
+        const retptr = 8;
+        const ret = wasm.vec2_to_string(retptr, this.ptr);
+        const memi32 = getInt32Memory();
+        const v0 = getStringFromWasm(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1]).slice();
+        wasm.__wbindgen_free(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1] * 1);
+        return v0;
+    }
+    /**
     * Creates a new `Vec2`.
     * @param {number} x
     * @param {number} y
     * @returns {Vec2}
     */
-    static new(x, y) {
+    constructor(x, y) {
         const ret = wasm.vec2_new(x, y);
         return Vec2.__wrap(ret);
     }
@@ -2158,6 +2624,419 @@ export class Vec3 {
         const ret = wasm.vec3_abs_diff_eq(ptr, ptr0, max_abs_diff);
         return ret !== 0;
     }
+    /**
+    * @returns {Vec3}
+    */
+    static zero() {
+        const ret = wasm.vec3_zero();
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    static one() {
+        const ret = wasm.vec3_one();
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {number} x
+    * @param {number} y
+    * @param {number} z
+    * @returns {Vec3}
+    */
+    constructor(x, y, z) {
+        const ret = wasm.vec3_new(x, y, z);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    static unit_x() {
+        const ret = wasm.vec3_unit_x();
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    static unit_y() {
+        const ret = wasm.vec3_unit_y();
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    static unit_z() {
+        const ret = wasm.vec3_unit_z();
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {number} v
+    * @returns {Vec3}
+    */
+    static splat(v) {
+        const ret = wasm.vec3_splat(v);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {number} w
+    * @returns {Vec4}
+    */
+    extend(w) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_extend(ptr, w);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @returns {Vec2}
+    */
+    truncate() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_truncate(ptr);
+        return Vec2.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    x() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_x(ptr);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    y() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_y(ptr);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    z() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_z(ptr);
+        return ret;
+    }
+    /**
+    * @param {number} x
+    */
+    set_x(x) {
+        wasm.vec3_set_x(this.ptr, x);
+    }
+    /**
+    * @param {number} y
+    */
+    set_y(y) {
+        wasm.vec3_set_y(this.ptr, y);
+    }
+    /**
+    * @param {number} z
+    */
+    set_z(z) {
+        wasm.vec3_set_z(this.ptr, z);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {number}
+    */
+    dot(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_dot(ptr, ptr0);
+        return ret;
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    cross(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_cross(ptr, ptr0);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    length() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_length(ptr);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    length_squared() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_length_squared(ptr);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    length_reciprocal() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_length_reciprocal(ptr);
+        return ret;
+    }
+    /**
+    * @returns {Vec3}
+    */
+    normalize() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_normalize(ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    min(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_min(ptr, ptr0);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    max(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_max(ptr, ptr0);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    min_element() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_min_element(ptr);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    max_element() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_max_element(ptr);
+        return ret;
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3Mask}
+    */
+    cmpeq(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_cmpeq(ptr, ptr0);
+        return Vec3Mask.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3Mask}
+    */
+    cmpne(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_cmpne(ptr, ptr0);
+        return Vec3Mask.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3Mask}
+    */
+    cmpge(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_cmpge(ptr, ptr0);
+        return Vec3Mask.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3Mask}
+    */
+    cmpgt(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_cmpgt(ptr, ptr0);
+        return Vec3Mask.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3Mask}
+    */
+    cmple(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_cmple(ptr, ptr0);
+        return Vec3Mask.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3Mask}
+    */
+    cmplt(other) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec3);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec3_cmplt(ptr, ptr0);
+        return Vec3Mask.__wrap(ret);
+    }
+    /**
+    * @returns {Vec3}
+    */
+    abs() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec3_abs(ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    add(other) {
+        _assertClass(other, Vec3);
+        const ret = wasm.vec3_add(this.ptr, other.ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {Vec3} other
+    * @returns {Vec3}
+    */
+    sub(other) {
+        _assertClass(other, Vec3);
+        const ret = wasm.vec3_sub(this.ptr, other.ptr);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Vec3}
+    */
+    mul(other) {
+        const ret = wasm.vec3_mul(this.ptr, other);
+        return Vec3.__wrap(ret);
+    }
+    /**
+    * @returns {string}
+    */
+    to_string() {
+        const retptr = 8;
+        const ret = wasm.vec3_to_string(retptr, this.ptr);
+        const memi32 = getInt32Memory();
+        const v0 = getStringFromWasm(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1]).slice();
+        wasm.__wbindgen_free(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1] * 1);
+        return v0;
+    }
+}
+/**
+*/
+export class Vec3Mask {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Vec3Mask.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_vec3mask_free(ptr);
+    }
+    /**
+    * @param {boolean} x
+    * @param {boolean} y
+    * @param {boolean} z
+    * @returns {Vec3Mask}
+    */
+    static new(x, y, z) {
+        const ret = wasm.vec3mask_new(x, y, z);
+        return Vec3Mask.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    bitmask() {
+        const ret = wasm.vec3mask_bitmask(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * @returns {boolean}
+    */
+    any() {
+        const ret = wasm.vec3mask_any(this.ptr);
+        return ret !== 0;
+    }
+    /**
+    * @returns {boolean}
+    */
+    all() {
+        const ret = wasm.vec3mask_all(this.ptr);
+        return ret !== 0;
+    }
+    /**
+    * @param {Vec3} if_true
+    * @param {Vec3} if_false
+    * @returns {Vec3}
+    */
+    select(if_true, if_false) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(if_true, Vec3);
+        const ptr0 = if_true.ptr;
+        if_true.ptr = 0;
+        _assertClass(if_false, Vec3);
+        const ptr1 = if_false.ptr;
+        if_false.ptr = 0;
+        const ret = wasm.vec3mask_select(ptr, ptr0, ptr1);
+        return Vec3.__wrap(ret);
+    }
 }
 /**
 */
@@ -2200,7 +3079,7 @@ export class Vec4 {
     * @param {number} w
     * @returns {Vec4}
     */
-    static new(x, y, z, w) {
+    constructor(x, y, z, w) {
         const ret = wasm.vec4_new(x, y, z, w);
         return Vec4.__wrap(ret);
     }
@@ -2589,6 +3468,121 @@ export class Vec4 {
         const ret = wasm.vec4_abs(ptr);
         return Vec4.__wrap(ret);
     }
+    /**
+    * @param {Vec4} other
+    * @returns {Vec4}
+    */
+    add(other) {
+        _assertClass(other, Vec4);
+        const ret = wasm.vec4_add(this.ptr, other.ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @param {Vec4} other
+    * @returns {Vec4}
+    */
+    sub(other) {
+        _assertClass(other, Vec4);
+        const ret = wasm.vec4_sub(this.ptr, other.ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @param {number} other
+    * @returns {Vec4}
+    */
+    mul(other) {
+        const ret = wasm.vec4_mul(this.ptr, other);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * @returns {string}
+    */
+    to_string() {
+        const retptr = 8;
+        const ret = wasm.vec4_to_string(retptr, this.ptr);
+        const memi32 = getInt32Memory();
+        const v0 = getStringFromWasm(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1]).slice();
+        wasm.__wbindgen_free(memi32[retptr / 4 + 0], memi32[retptr / 4 + 1] * 1);
+        return v0;
+    }
+    /**
+    * Returns a new `Vec4` with elements representing the sign of `self`.
+    *
+    * - `1.0` if the number is positive, `+0.0` or `INFINITY`
+    * - `-1.0` if the number is negative, `-0.0` or `NEG_INFINITY`
+    * @returns {Vec4}
+    */
+    sign() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_sign(ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Computes the reciprocal `1.0/n` of each element, returning the
+    * results in a new `Vec4`.
+    * @returns {Vec4}
+    */
+    reciprocal() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_reciprocal(ptr);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Performs a linear interpolation between `self` and `other` based on
+    * the value `s`.
+    *
+    * When `s` is `0.0`, the result will be equal to `self`.  When `s`
+    * is `1.0`, the result will be equal to `other`.
+    * @param {Vec4} other
+    * @param {number} s
+    * @returns {Vec4}
+    */
+    lerp(other, s) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_lerp(ptr, ptr0, s);
+        return Vec4.__wrap(ret);
+    }
+    /**
+    * Returns whether `self` is length `1.0` or not.
+    *
+    * Uses a precision threshold of `std::f32::EPSILON`.
+    * @returns {boolean}
+    */
+    is_normalized() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        const ret = wasm.vec4_is_normalized(ptr);
+        return ret !== 0;
+    }
+    /**
+    * Returns true if the absolute difference of all elements between `self`
+    * and `other` is less than or equal to `max_abs_diff`.
+    *
+    * This can be used to compare if two `Vec4`\'s contain similar elements. It
+    * works best when comparing with a known value. The `max_abs_diff` that
+    * should be used used depends on the values being compared against.
+    *
+    * For more on floating point comparisons see
+    * https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+    * @param {Vec4} other
+    * @param {number} max_abs_diff
+    * @returns {boolean}
+    */
+    abs_diff_eq(other, max_abs_diff) {
+        const ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(other, Vec4);
+        const ptr0 = other.ptr;
+        other.ptr = 0;
+        const ret = wasm.vec4_abs_diff_eq(ptr, ptr0, max_abs_diff);
+        return ret !== 0;
+    }
 }
 /**
 * A 4-dimensional vector mask.
@@ -2939,7 +3933,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper119 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper153 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -2947,7 +3941,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(28)(state.a, state.b);
+                    wasm.__wbg_function_table.get(30)(state.a, state.b);
                     state.a = 0;
                 }
             }

@@ -16,9 +16,7 @@ import * as wre from './pkg/wre_wasm.js';
 
 function init() {
     initWre().then(() => {
-        let eid = wre.create_entity();
-        let e = wre.get_entity(eid);
-        console.log(e.transform.matrix().to_flat_vec());
+        Scene.loadSceneAsync('./resources/scenes/easy.json');
     });
 }
 

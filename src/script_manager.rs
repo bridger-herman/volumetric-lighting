@@ -55,11 +55,6 @@ impl Update for ScriptManager {
     fn update(&mut self) {
         for (entity, script) in self.entity_scripts.iter_mut() {
             script.updateWrapper();
-
-            // let tf = script.getTransform().dyn_into::<Float32Array>().unwrap();
-            // let mut tf_vec = [0.0; 16];
-            // tf.copy_to(&mut tf_vec);
-            // wre_entities!(*entity, true).update_transform_matrix(&tf_vec);
         }
     }
 }

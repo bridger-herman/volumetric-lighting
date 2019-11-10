@@ -21,7 +21,29 @@ export class Scene {
                 let prefab = sceneObj.prefabs[sceneEntity.prefab];
 
                 let eid = wre.create_entity();
-                wre.set_color(eid, sceneEntity.color);
+                let entity = wre.get_entity(eid);
+                let tf = entity.transform;
+
+                tf.position = new wre.Vec3(
+                    sceneEntity.position[0],
+                    sceneEntity.position[1],
+                    sceneEntity.position[2],
+                );
+                tf.rotation = wre.Quat.from_rotation_ypr(
+                    sceneEntity.rotation[1],
+                    sceneEntity.rotation[0],
+                    sceneEntity.rotation[2],
+                );
+                tf.scale = new wre.Vec3(
+                    sceneEntity.scale[0],
+                    sceneEntity.scale[1],
+                    sceneEntity.scale[2],
+                );
+
+                entity.transform = tf;
+                wre.set_entity(eid, entity);
+
+                // wre.set_color(eid, sceneEntity.color);
                 loadResource(prefab.mesh).then((objText) => {
                     if (typeof prefab.mesh !== 'undefined') {
                         wre.add_mesh(eid, objText);
@@ -32,23 +54,6 @@ export class Scene {
                         // this?
                         let ScriptClass = eval(prefab.scripts[s]);
                         let script = new ScriptClass;
-
-                        script.transform.position = glm.vec3(
-                            sceneEntity.position[0],
-                            sceneEntity.position[1],
-                            sceneEntity.position[2],
-                        );
-                        script.transform.rotation = glm.vec3(
-                            sceneEntity.rotation[0],
-                            sceneEntity.rotation[1],
-                            sceneEntity.rotation[2],
-                        );
-                        script.transform.scale = glm.vec3(
-                            sceneEntity.scale[0],
-                            sceneEntity.scale[1],
-                            sceneEntity.scale[2],
-                        );
-
                         wre.add_script(eid, script);
                     }
                 });

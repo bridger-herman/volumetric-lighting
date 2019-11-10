@@ -9,12 +9,12 @@
 use std::collections::HashMap;
 use std::io::BufReader;
 
-use wasm_bindgen::JsCast;
-use web_sys::{WebGlProgram, WebGl2RenderingContext};
 use obj::{Obj, SimplePolygon};
+use wasm_bindgen::JsCast;
+use web_sys::{WebGl2RenderingContext, WebGlProgram};
 
-use crate::mesh::Mesh;
 use crate::entity::EntityId;
+use crate::mesh::Mesh;
 
 const SHADER_NAME: &str = "default2";
 
@@ -49,15 +49,20 @@ impl RenderSystem {
         context.use_program(Some(&self.shaders[SHADER_NAME]));
 
         context.clear_color(0.0, 0.0, 0.0, 1.0);
-        context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT |
-                      WebGl2RenderingContext::DEPTH_BUFFER_BIT);
+        context.clear(
+            WebGl2RenderingContext::COLOR_BUFFER_BIT
+                | WebGl2RenderingContext::DEPTH_BUFFER_BIT,
+        );
 
         for mesh in &self.meshes {
             context.bind_vertex_array(Some(&mesh.vao));
 
-
-            let model_matrix = wre_entities!(mesh.attached_to).transform.matrix().to_flat_vec();
-            let model_uniform_location = context.get_uniform_location(&self.shaders[SHADER_NAME], "uni_model");
+            let model_matrix = wre_entities!(mesh.attached_to)
+                .transform()
+                .matrix()
+                .to_flat_vec();
+            let model_uniform_location = context
+                .get_uniform_location(&self.shaders[SHADER_NAME], "uni_model");
             context.uniform_matrix4fv_with_f32_array(
                 model_uniform_location.as_ref(),
                 false,
@@ -66,7 +71,8 @@ impl RenderSystem {
 
             // let color = wre_entities!(mesh.attached_to).material.color;
             let color = [1.0, 0.0, 0.0, 1.0];
-            let color_uniform_location = context.get_uniform_location(&self.shaders[SHADER_NAME], "uni_color");
+            let color_uniform_location = context
+                .get_uniform_location(&self.shaders[SHADER_NAME], "uni_color");
             context.uniform4fv_with_f32_array(
                 color_uniform_location.as_ref(),
                 &color,
@@ -95,7 +101,8 @@ impl RenderSystem {
     pub fn add_obj_mesh(&mut self, eid: EntityId, obj_text: &str) {
         // Load the obj from a string
         let mut reader = BufReader::new(obj_text.as_bytes());
-        let obj_file: Obj<SimplePolygon> = Obj::load_buf(&mut reader).expect("Unable to load obj file");
+        let obj_file: Obj<SimplePolygon> =
+            Obj::load_buf(&mut reader).expect("Unable to load obj file");
 
         let document = web_sys::window().unwrap().document().unwrap();
         let canvas = document.get_element_by_id("canvas").unwrap();
@@ -135,8 +142,10 @@ impl RenderSystem {
         let vao = context.create_vertex_array().expect("failed to create vao");
         context.bind_vertex_array(Some(&vao));
 
-        let vert_vbo = context.create_buffer().expect("failed to create vert_vbo");
-        context.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vert_vbo));
+        let vert_vbo =
+            context.create_buffer().expect("failed to create vert_vbo");
+        context
+            .bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vert_vbo));
 
         // Note that `Float32Array::view` is somewhat dangerous (hence the
         // `unsafe`!). This is creating a raw view into our module's
@@ -166,8 +175,10 @@ impl RenderSystem {
             0,
         );
 
-        let norm_vbo = context.create_buffer().expect("failed to create norm_vbo");
-        context.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&norm_vbo));
+        let norm_vbo =
+            context.create_buffer().expect("failed to create norm_vbo");
+        context
+            .bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&norm_vbo));
 
         unsafe {
             let norm_array = js_sys::Float32Array::view(&norm_flat);

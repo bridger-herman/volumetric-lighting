@@ -8,8 +8,8 @@
 
 use wasm_bindgen::prelude::*;
 
-use crate::transform::Transform;
 use crate::material::Material;
+use crate::transform::Transform;
 
 pub type EntityId = usize;
 
@@ -17,7 +17,7 @@ pub type EntityId = usize;
 #[derive(Debug, Clone, Copy)]
 pub struct Entity {
     pub id: EntityId,
-    pub transform: Transform,
+    transform: Transform,
     // pub material: Material,
 }
 
@@ -32,7 +32,12 @@ impl Entity {
         }
     }
 
-    // pub fn update_transform_matrix(&mut self, matrix: &[f32; 16]) {
-        // // self.transform.matrix = *matrix;
-    // }
+    #[wasm_bindgen(getter)]
+    pub fn transform(&self) -> Transform {
+        self.transform
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_transform(&mut self, new_transform: Transform) {
+        self.transform = new_transform;
+    }
 }

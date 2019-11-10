@@ -18,12 +18,7 @@ pub struct EntityManager {
 impl EntityManager {
     pub fn create(&mut self) -> EntityId {
         let id = self.entities.len();
-        let e = Entity {
-            id,
-            transform: Transform::identity(),
-            // material: Material::default(),
-        };
-        self.entities.push(e);
+        self.entities.push(Entity::new(id));
 
         id
     }
