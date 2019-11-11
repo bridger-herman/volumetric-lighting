@@ -2,7 +2,7 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(28)(arg0, arg1);
+    wasm.__wbg_function_table.get(30)(arg0, arg1);
 }
 
 function _assertClass(instance, klass) {
@@ -10,6 +10,83 @@ function _assertClass(instance, klass) {
         throw new Error(`expected instance of ${klass.name}`);
     }
     return instance.ptr;
+}
+/**
+*/
+export function start() {
+    wasm.start();
+}
+
+const heap = new Array(32);
+
+heap.fill(undefined);
+
+heap.push(undefined, null, true, false);
+
+function getObject(idx) { return heap[idx]; }
+
+let heap_next = heap.length;
+
+function dropObject(idx) {
+    if (idx < 36) return;
+    heap[idx] = heap_next;
+    heap_next = idx;
+}
+
+function takeObject(idx) {
+    const ret = getObject(idx);
+    dropObject(idx);
+    return ret;
+}
+/**
+* @returns {any}
+*/
+export function create_entity() {
+    const ret = wasm.create_entity();
+    return takeObject(ret);
+}
+
+/**
+* @param {number} eid
+*/
+export function destroy_entity(eid) {
+    wasm.destroy_entity(eid);
+}
+
+/**
+* @param {number} id
+* @returns {Entity}
+*/
+export function get_entity(id) {
+    const ret = wasm.get_entity(id);
+    return Entity.__wrap(ret);
+}
+
+/**
+* @param {number} id
+* @param {Entity} entity
+*/
+export function set_entity(id, entity) {
+    _assertClass(entity, Entity);
+    const ptr0 = entity.ptr;
+    entity.ptr = 0;
+    wasm.set_entity(id, ptr0);
+}
+
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
+}
+/**
+* @param {number} eid
+* @param {any} script
+*/
+export function add_script(eid, script) {
+    wasm.add_script(eid, addHeapObject(script));
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -66,28 +143,28 @@ function passStringToWasm(arg) {
     WASM_VECTOR_LEN = offset;
     return ptr;
 }
-
-const heap = new Array(32);
-
-heap.fill(undefined);
-
-heap.push(undefined, null, true, false);
-
-function getObject(idx) { return heap[idx]; }
-
-let heap_next = heap.length;
-
-function dropObject(idx) {
-    if (idx < 36) return;
-    heap[idx] = heap_next;
-    heap_next = idx;
+/**
+* @param {string} name
+* @param {any} program
+*/
+export function add_shader(name, program) {
+    wasm.add_shader(passStringToWasm(name), WASM_VECTOR_LEN, addHeapObject(program));
 }
 
-function takeObject(idx) {
-    const ret = getObject(idx);
-    dropObject(idx);
-    return ret;
+/**
+* @param {number} eid
+* @param {string} obj_source
+*/
+export function add_mesh(eid, obj_source) {
+    wasm.add_mesh(eid, passStringToWasm(obj_source), WASM_VECTOR_LEN);
 }
+
+/**
+*/
+export function make_ready() {
+    wasm.make_ready();
+}
+
 /**
 * @param {string} source
 * @returns {any}
@@ -126,85 +203,6 @@ export function link_shader_program(vert_shader, frag_shader) {
         heap[stack_pointer++] = undefined;
         heap[stack_pointer++] = undefined;
     }
-}
-
-/**
-*/
-export function start() {
-    wasm.start();
-}
-
-/**
-* @returns {any}
-*/
-export function create_entity() {
-    const ret = wasm.create_entity();
-    return takeObject(ret);
-}
-
-/**
-* @param {number} eid
-*/
-export function destroy_entity(eid) {
-    wasm.destroy_entity(eid);
-}
-
-/**
-* @param {number} id
-* @returns {Entity}
-*/
-export function get_entity(id) {
-    const ret = wasm.get_entity(id);
-    return Entity.__wrap(ret);
-}
-
-/**
-* @param {number} id
-* @param {Entity} entity
-*/
-export function set_entity(id, entity) {
-    _assertClass(entity, Entity);
-    const ptr0 = entity.ptr;
-    entity.ptr = 0;
-    wasm.set_entity(id, ptr0);
-}
-
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
-}
-/**
-* @param {number} eid
-* @param {any} script
-*/
-export function add_script(eid, script) {
-    wasm.add_script(eid, addHeapObject(script));
-}
-
-/**
-* @param {string} name
-* @param {any} program
-*/
-export function add_shader(name, program) {
-    wasm.add_shader(passStringToWasm(name), WASM_VECTOR_LEN, addHeapObject(program));
-}
-
-/**
-* @param {number} eid
-* @param {string} obj_source
-*/
-export function add_mesh(eid, obj_source) {
-    wasm.add_mesh(eid, passStringToWasm(obj_source), WASM_VECTOR_LEN);
-}
-
-/**
-*/
-export function make_ready() {
-    wasm.make_ready();
 }
 
 let cachegetInt32Memory = null;
@@ -343,44 +341,40 @@ export class Entity {
         wasm.__wbg_set_entity_id(this.ptr, arg0);
     }
     /**
-    * @returns {Transform}
-    */
-    get transform() {
-        const ret = wasm.__wbg_get_entity_transform(this.ptr);
-        return Transform.__wrap(ret);
-    }
-    /**
-    * @param {Transform} arg0
-    */
-    set transform(arg0) {
-        _assertClass(arg0, Transform);
-        const ptr0 = arg0.ptr;
-        arg0.ptr = 0;
-        wasm.__wbg_set_entity_transform(this.ptr, ptr0);
-    }
-    /**
-    * @returns {Material}
-    */
-    get material() {
-        const ret = wasm.__wbg_get_entity_material(this.ptr);
-        return Material.__wrap(ret);
-    }
-    /**
-    * @param {Material} arg0
-    */
-    set material(arg0) {
-        _assertClass(arg0, Material);
-        const ptr0 = arg0.ptr;
-        arg0.ptr = 0;
-        wasm.__wbg_set_entity_material(this.ptr, ptr0);
-    }
-    /**
     * @param {number} id
     * @returns {Entity}
     */
     constructor(id) {
         const ret = wasm.entity_new(id);
         return Entity.__wrap(ret);
+    }
+    /**
+    * @returns {Transform}
+    */
+    get transform() {
+        const ret = wasm.entity_transform(this.ptr);
+        return Transform.__wrap(ret);
+    }
+    /**
+    * @param {Transform} tf
+    */
+    set transform(tf) {
+        _assertClass(tf, Transform);
+        wasm.entity_set_transform(this.ptr, tf.ptr);
+    }
+    /**
+    * @returns {Material}
+    */
+    get material() {
+        const ret = wasm.entity_material(this.ptr);
+        return Material.__wrap(ret);
+    }
+    /**
+    * @param {Material} mat
+    */
+    set material(mat) {
+        _assertClass(mat, Material);
+        wasm.entity_set_material(this.ptr, mat.ptr);
     }
 }
 /**
@@ -3732,6 +3726,10 @@ function init(module) {
     imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
         getObject(arg0).updateWrapper();
     };
+    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
+        const ret = getStringFromWasm(arg0, arg1);
+        return addHeapObject(ret);
+    };
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
         return addHeapObject(ret);
@@ -3751,10 +3749,6 @@ function init(module) {
     };
     imports.wbg.__wbindgen_cb_forget = function(arg0) {
         takeObject(arg0);
-    };
-    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
-        const ret = getStringFromWasm(arg0, arg1);
-        return addHeapObject(ret);
     };
     imports.wbg.__widl_instanceof_Window = function(arg0) {
         const ret = getObject(arg0) instanceof Window;
@@ -3978,7 +3972,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper177 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper179 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -3986,7 +3980,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(29)(state.a, state.b);
+                    wasm.__wbg_function_table.get(31)(state.a, state.b);
                     state.a = 0;
                 }
             }

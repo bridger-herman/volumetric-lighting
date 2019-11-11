@@ -44,9 +44,6 @@ export class BoardManager extends WreScript {
         // Gives int in range [0, 8]
         let boardCoords = [coordY2D + 4, coordX2D + 4];
 
-        console.log(`${coordX2D} ${coordY2D}`);
-        console.log(boardCoords);
-
         let checkBounds = (c) => {return c >= 0 && c < 9};
 
         if (checkBounds(boardCoords[0]) && checkBounds(boardCoords[1])) {
@@ -215,36 +212,36 @@ export class BoardManager extends WreScript {
             });
         }
 
-        this._board = easy;
+        this._board = nearlySolved;
 
         loadResource('./resources/models/small_sphere.obj').then((objText) => {
             this._objText = objText;
         });
 
-        // loadResource('./resources/models/small_sphere.obj').then((objText) => {
-            // for (let color in this._board) {
-                // for (let pairIndex in this._board[color]) {
-                    // let sphere = wre.create_entity();
-                    // let sphereEntity = wre.get_entity(sphere);
-                    // wre.add_mesh(sphere, objText);
-                    // let tf = sphereEntity.transform;
-                    // tf.position =
-                        // (new wre.Vec3(0.0, 0.0, 0.1))
-                                // .mul(this._board[color][pairIndex][0])
-                        // .add((new wre.Vec3(0.1, 0.0, 0.0))
-                                // .mul(this._board[color][pairIndex][1]))
-                        // .sub(new wre.Vec3(0.4, 0.0, 0.4));
-                    // sphereEntity.transform = tf;
-                    // sphereEntity.material = new wre.Material(new wre.Vec4(
-                        // this._colors[color][0],
-                        // this._colors[color][1],
-                        // this._colors[color][2],
-                        // this._colors[color][3],
-                    // ));
-                    // wre.set_entity(sphere, sphereEntity);
-                // }
-            // }
-        // })
+        loadResource('./resources/models/small_sphere.obj').then((objText) => {
+            for (let color in this._board) {
+                for (let pairIndex in this._board[color]) {
+                    let sphere = wre.create_entity();
+                    let sphereEntity = wre.get_entity(sphere);
+                    wre.add_mesh(sphere, objText);
+                    let tf = sphereEntity.transform;
+                    tf.position =
+                        (new wre.Vec3(0.0, 0.0, 0.1))
+                                .mul(this._board[color][pairIndex][0])
+                        .add((new wre.Vec3(0.1, 0.0, 0.0))
+                                .mul(this._board[color][pairIndex][1]))
+                        .sub(new wre.Vec3(0.4, 0.0, 0.4));
+                    sphereEntity.transform = tf;
+                    sphereEntity.material = new wre.Material(new wre.Vec4(
+                        this._colors[color][0],
+                        this._colors[color][1],
+                        this._colors[color][2],
+                        this._colors[color][3],
+                    ));
+                    wre.set_entity(sphere, sphereEntity);
+                }
+            }
+        })
     }
 
     update() {

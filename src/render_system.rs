@@ -58,7 +58,7 @@ impl RenderSystem {
             context.bind_vertex_array(Some(&mesh.vao));
 
             let model_matrix = wre_entities!(mesh.attached_to)
-                .transform
+                .transform()
                 .matrix()
                 .to_flat_vec();
             let model_uniform_location = context
@@ -70,7 +70,7 @@ impl RenderSystem {
             );
 
             let color: [f32; 4] =
-                wre_entities!(mesh.attached_to).material.color.into();
+                wre_entities!(mesh.attached_to).material().color.into();
             let color_uniform_location = context
                 .get_uniform_location(&self.shaders[SHADER_NAME], "uni_color");
             context.uniform4fv_with_f32_array(

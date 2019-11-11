@@ -24,11 +24,17 @@ export class WreScript {
     }
 
     updateWrapper() {
+        // Move the entity to JS
         this._entity = wre.get_entity(this._entityId);
+
         this.transform = this._entity.transform;
         this.update();
         this._entity.transform = this.transform;
+
+        // Move the entity back to Rust
         wre.set_entity(this._entityId, this._entity);
+        // BE CAREFUL, this._entity doesn't exist between here and when
+        // get_entity() is called at the top of updateWrapper()
     }
 
     getTransform() {
