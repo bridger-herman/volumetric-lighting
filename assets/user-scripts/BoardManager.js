@@ -60,11 +60,11 @@ export class BoardManager extends WreScript {
             startTransform.scale = new wre.Vec3(1.0, 1.0, 8.0);
 
             let midTransform = wre.Transform.identity();
-            midTransform.position = new wre.Vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
+            midTransform.position = new wre.Vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1);
             midTransform.scale = new wre.Vec3(1.0, 2.0, 1.0);
 
             let endTransform = wre.Transform.identity();
-            endTransform.position = new wre.Vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
+            endTransform.position = new wre.Vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1);
             endTransform.scale = new wre.Vec3(1.0, 1.0, 1.0);
 
             entity.material = new wre.Material(DEFAULT_SHADER_ID, new wre.Vec4(

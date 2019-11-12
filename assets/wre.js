@@ -9,7 +9,7 @@
 
 import * as wre from './pkg/wre_wasm.js';
 
-export const DEFAULT_SHADER = 'default2';
+export const DEFAULT_SHADER = 'phong_forward';
 export var DEFAULT_SHADER_ID = 0;
 
 export function initWre() {

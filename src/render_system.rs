@@ -61,15 +61,21 @@ impl RenderSystem {
                 | WebGl2RenderingContext::DEPTH_BUFFER_BIT,
         );
 
+        self.render_meshes();
+    }
+
+    /// Pass 1: Forward render all the meshes
+    fn render_meshes(&self) {
         for mesh in &self.meshes {
+            // Load the shader and VAO for this material and model
             let shader = &self.shaders
                 [wre_entities!(mesh.attached_to).material().shader_id];
             wre_gl!().use_program(Some(shader));
             wre_gl!().bind_vertex_array(Some(&mesh.vao));
 
+            // Send the model matrix to the GPU
             let model_matrix =
                 wre_entities!(mesh.attached_to).transform().matrix();
-
             let model_uniform_location =
                 wre_gl!().get_uniform_location(shader, "uni_model");
             wre_gl!().uniform_matrix4fv_with_f32_array(
@@ -78,8 +84,9 @@ impl RenderSystem {
                 &model_matrix.to_flat_vec(),
             );
 
+            // Send the normal matrix (inverse transpose of model matrix) to the
+            // GPU for calculating transform of normals
             let normal_matrix = model_matrix.inverse().transpose();
-
             let normal_uniform_location =
                 wre_gl!().get_uniform_location(shader, "uni_normal");
             wre_gl!().uniform_matrix4fv_with_f32_array(
@@ -88,6 +95,7 @@ impl RenderSystem {
                 &normal_matrix.to_flat_vec(),
             );
 
+            // Send the material's color to the GPU
             let color: [f32; 4] =
                 wre_entities!(mesh.attached_to).material().color.into();
             let color_uniform_location =
@@ -97,6 +105,7 @@ impl RenderSystem {
                 &color,
             );
 
+            // If there's a texture, send it to the GPU
             if let Some(texture_id) =
                 wre_entities!(mesh.attached_to).material().texture_id
             {
@@ -111,6 +120,7 @@ impl RenderSystem {
                 wre_gl!().uniform1i(tex_uniform_location.as_ref(), 0);
             }
 
+            // Draw the geometry
             wre_gl!().draw_arrays(
                 WebGl2RenderingContext::TRIANGLES,
                 0,
