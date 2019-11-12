@@ -85,6 +85,7 @@ function loadImageAsync(path) {
 }
 
 export async function loadImage(path) {
+    console.debug(`Loading image ${path}`);
     let img = await loadImageAsync(path);
     let canvas = document.createElement('canvas');
     canvas.width = img.width;
@@ -92,7 +93,6 @@ export async function loadImage(path) {
     let ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
     let dataUrl = canvas.toDataURL('image/png');
-    // let tex = wre.add_texture(dataUrl);
     canvas.remove();
     return dataUrl;
 }

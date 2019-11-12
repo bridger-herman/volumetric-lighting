@@ -28,7 +28,8 @@ impl Texture {
             error!("Invalid texture");
         }
         wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
-        wre_gl!().bind_texture(WebGl2RenderingContext::TEXTURE_2D, tex.as_ref());
+        wre_gl!()
+            .bind_texture(WebGl2RenderingContext::TEXTURE_2D, tex.as_ref());
 
         wre_gl!().tex_parameteri(
             WebGl2RenderingContext::TEXTURE_2D,
@@ -53,9 +54,9 @@ impl Texture {
 
         // Decode the png bytes
         let reader = BufReader::new(png_bytes);
-        let decoder =
-            png::Decoder::new(reader);
-        let (png_info, mut reader) = decoder.read_info().expect("Unable to decode png");
+        let decoder = png::Decoder::new(reader);
+        let (png_info, mut reader) =
+            decoder.read_info().expect("Unable to decode png");
         let mut buf = vec![0; png_info.buffer_size()];
         reader.next_frame(&mut buf).unwrap();
 
@@ -73,7 +74,7 @@ impl Texture {
             Some(&buf)
         ).unwrap();
         // unsafe {
-            // gl::GenerateMipmap(gl::TEXTURE_2D);
+        // gl::GenerateMipmap(gl::TEXTURE_2D);
         // }
 
         Texture {
@@ -88,4 +89,3 @@ impl Drop for Texture {
         wre_gl!().delete_texture(Some(&self.tex));
     }
 }
-

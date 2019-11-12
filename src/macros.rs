@@ -51,5 +51,5 @@ macro_rules! wre_render_system {
 macro_rules! wre_gl {
     () => {
         crate::state::WRE_GL.try_lock().unwrap().gl
-    }
+    };
 }

@@ -32,9 +32,7 @@ impl Default for WebGlContextWrapper {
             .dyn_into::<WebGl2RenderingContext>()
             .expect("Unable to get WebGL context");
 
-        Self {
-            gl
-        }
+        Self { gl }
     }
 }
 
@@ -43,6 +41,7 @@ unsafe impl Send for WebGlContextWrapper {}
 pub struct RenderSystem {
     meshes: Vec<Mesh>,
     textures: Vec<Texture>,
+    texture_paths: Vec<String>,
     shaders: Vec<WebGlProgram>,
     shader_names: Vec<String>,
     ready: bool,
@@ -63,16 +62,16 @@ impl RenderSystem {
         );
 
         for mesh in &self.meshes {
-            let shader = &self.shaders[wre_entities!(mesh.attached_to).material().shader_id];
+            let shader = &self.shaders
+                [wre_entities!(mesh.attached_to).material().shader_id];
             wre_gl!().use_program(Some(shader));
             wre_gl!().bind_vertex_array(Some(&mesh.vao));
 
-            let model_matrix = wre_entities!(mesh.attached_to)
-                .transform()
-                .matrix();
+            let model_matrix =
+                wre_entities!(mesh.attached_to).transform().matrix();
 
-            let model_uniform_location = wre_gl!()
-                .get_uniform_location(shader, "uni_model");
+            let model_uniform_location =
+                wre_gl!().get_uniform_location(shader, "uni_model");
             wre_gl!().uniform_matrix4fv_with_f32_array(
                 model_uniform_location.as_ref(),
                 false,
@@ -81,8 +80,8 @@ impl RenderSystem {
 
             let normal_matrix = model_matrix.inverse().transpose();
 
-            let normal_uniform_location = wre_gl!()
-                .get_uniform_location(shader, "uni_normal");
+            let normal_uniform_location =
+                wre_gl!().get_uniform_location(shader, "uni_normal");
             wre_gl!().uniform_matrix4fv_with_f32_array(
                 normal_uniform_location.as_ref(),
                 false,
@@ -91,20 +90,24 @@ impl RenderSystem {
 
             let color: [f32; 4] =
                 wre_entities!(mesh.attached_to).material().color.into();
-            let color_uniform_location = wre_gl!()
-                .get_uniform_location(shader, "uni_color");
+            let color_uniform_location =
+                wre_gl!().get_uniform_location(shader, "uni_color");
             wre_gl!().uniform4fv_with_f32_array(
                 color_uniform_location.as_ref(),
                 &color,
             );
 
-            if let Some(texture_id) = wre_entities!(mesh.attached_to).material().texture_id {
+            if let Some(texture_id) =
+                wre_entities!(mesh.attached_to).material().texture_id
+            {
                 wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
-                wre_gl!().bind_texture(WebGl2RenderingContext::TEXTURE_2D,
-                                       Some(&self.textures[texture_id].tex));
+                wre_gl!().bind_texture(
+                    WebGl2RenderingContext::TEXTURE_2D,
+                    Some(&self.textures[texture_id].tex),
+                );
 
-                let tex_uniform_location = wre_gl!()
-                    .get_uniform_location(shader, "uni_texture");
+                let tex_uniform_location =
+                    wre_gl!().get_uniform_location(shader, "uni_texture");
                 wre_gl!().uniform1i(tex_uniform_location.as_ref(), 0);
             }
 
@@ -133,14 +136,23 @@ impl RenderSystem {
     pub fn add_obj_mesh(&mut self, eid: EntityId, obj_text: &str) {
         let shader = &self.shaders[wre_entities!(eid).material().shader_id];
         wre_gl!().use_program(Some(shader));
-        self.meshes
-            .push(Mesh::from_obj_str(eid, obj_text));
+        self.meshes.push(Mesh::from_obj_str(eid, obj_text));
     }
 
-    pub fn add_texture(&mut self, png_bytes: &[u8]) -> TextureId {
-        let tex = Texture::init_from_image(self.textures.len(), png_bytes);
-        self.textures.push(tex);
-        self.textures.len() - 1
+    pub fn add_texture(&mut self, path: &str, png_bytes: &[u8]) -> TextureId {
+        // Check to see if the texture is already in the list
+        if let Some(index) = self.get_texture_id_by_path(path) {
+            index
+        } else {
+            let tex = Texture::init_from_image(self.textures.len(), png_bytes);
+            self.texture_paths.push(path.to_string());
+            self.textures.push(tex);
+            self.textures.len() - 1
+        }
+    }
+
+    pub fn get_texture_id_by_path(&self, path: &str) -> Option<TextureId> {
+        self.texture_paths.iter().position(|p| p == path)
     }
 }
 
@@ -149,6 +161,7 @@ impl Default for RenderSystem {
         wre_gl!().enable(WebGl2RenderingContext::DEPTH_TEST);
 
         Self {
+            texture_paths: Vec::default(),
             textures: Vec::default(),
             meshes: Vec::default(),
             shaders: Vec::default(),

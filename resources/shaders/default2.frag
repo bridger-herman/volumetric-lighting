@@ -16,23 +16,24 @@ uniform sampler2D uni_texture;
 out vec4 frag_color;
 
 void main() {
-    vec3 diffuse = vec3(0.0, 0.0, 0.0);
-    vec3 specular = vec3(0.0, 0.0, 0.0);
+    vec4 in_color = uni_color;
+
+    if (uni_color.a == 0.0) {
+        in_color = texture(uni_texture, vec2(uv.x, 1.0 - uv.y));
+    }
 
     // blinn-phong shading
     vec3 n = normalize(norm);
     vec3 v = normalize(-pos);
     vec3 h = normalize(lightDir + v);
 
-    vec3 outColor = vec3(0,0,0);
+    vec3 out_color = vec3(0);
     // ambient color
-    outColor += uni_color.xyz * ambient;
+    out_color += in_color.xyz * ambient;
     // diffuse color
-    outColor += uni_color.xyz * max(dot(lightDir, n), 0.0);
+    out_color += in_color.xyz * max(dot(lightDir, n), 0.0);
     // specular color
-    outColor += uni_color.xyz * pow(max(dot(h, n), 0.0), 5.0);
+    out_color += in_color.xyz * pow(max(dot(h, n), 0.0), 10.0);
 
-    frag_color = vec4(diffuse + specular, 1.0);
-    if (uni_color.a == 0.0) {
-        frag_color += texture(uni_texture, vec2(uv.x, 1.0 - uv.y));
+    frag_color = vec4(out_color, 1.0);
 }

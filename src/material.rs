@@ -17,13 +17,17 @@ use crate::texture::TextureId;
 pub struct Material {
     pub shader_id: usize,
     pub color: Vec4,
-    pub texture_id: Option<TextureId>
+    pub texture_id: Option<TextureId>,
 }
 
 #[wasm_bindgen]
 impl Material {
     #[wasm_bindgen(constructor)]
-    pub fn new(shader_id: usize, color: Vec4, texture_id: Option<TextureId>) -> Self {
+    pub fn new(
+        shader_id: usize,
+        color: Vec4,
+        texture_id: Option<TextureId>,
+    ) -> Self {
         Self {
             shader_id,
             color,

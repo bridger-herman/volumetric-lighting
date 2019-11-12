@@ -29,10 +29,7 @@ impl fmt::Debug for Mesh {
 }
 
 impl Mesh {
-    pub fn from_obj_str(
-        eid: EntityId,
-        obj_text: &str,
-    ) -> Self {
+    pub fn from_obj_str(eid: EntityId, obj_text: &str) -> Self {
         // Load the obj from a string
         let mut reader = BufReader::new(obj_text.as_bytes());
         let obj_file: Obj<SimplePolygon> =
@@ -68,11 +65,16 @@ impl Mesh {
         }
         let uv_flat: Vec<_> = uv.iter().flatten().cloned().collect();
 
-        let vao = wre_gl!().create_vertex_array().expect("failed to create vao");
+        let vao = wre_gl!()
+            .create_vertex_array()
+            .expect("failed to create vao");
         wre_gl!().bind_vertex_array(Some(&vao));
 
-        let vert_vbo = wre_gl!().create_buffer().expect("failed to create vert_vbo");
-        wre_gl!().bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vert_vbo));
+        let vert_vbo = wre_gl!()
+            .create_buffer()
+            .expect("failed to create vert_vbo");
+        wre_gl!()
+            .bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vert_vbo));
 
         // Note that `Float32Array::view` is somewhat dangerous (hence the
         // `unsafe`!). This is creating a raw view into our module's
@@ -102,8 +104,11 @@ impl Mesh {
             0,
         );
 
-        let norm_vbo = wre_gl!().create_buffer().expect("failed to create norm_vbo");
-        wre_gl!().bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&norm_vbo));
+        let norm_vbo = wre_gl!()
+            .create_buffer()
+            .expect("failed to create norm_vbo");
+        wre_gl!()
+            .bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&norm_vbo));
 
         unsafe {
             let norm_array = js_sys::Float32Array::view(&norm_flat);
@@ -125,8 +130,10 @@ impl Mesh {
             0,
         );
 
-        let uv_vbo = wre_gl!().create_buffer().expect("failed to create uv_vbo");
-        wre_gl!().bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&uv_vbo));
+        let uv_vbo =
+            wre_gl!().create_buffer().expect("failed to create uv_vbo");
+        wre_gl!()
+            .bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&uv_vbo));
 
         unsafe {
             let uv_array = js_sys::Float32Array::view(&uv_flat);

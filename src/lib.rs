@@ -6,11 +6,11 @@ extern crate log;
 extern crate wasm_logger;
 #[macro_use]
 extern crate lazy_static;
+extern crate base64;
 extern crate glam;
 extern crate instant;
 extern crate obj;
 extern crate png;
-extern crate base64;
 
 #[macro_use]
 pub mod macros;
@@ -34,8 +34,8 @@ use wasm_bindgen::prelude::*;
 use web_sys::WebGlProgram;
 
 use crate::entity::{Entity, EntityId};
-use crate::texture::TextureId;
 use crate::script_manager::WreScript;
+use crate::texture::TextureId;
 
 pub use glam::{Mat4, Quat, Vec3};
 
@@ -92,10 +92,16 @@ pub fn add_mesh(eid: EntityId, obj_source: &str) {
 }
 
 #[wasm_bindgen]
-pub fn add_texture(b64_bytes: &str) -> TextureId {
+pub fn add_texture(path: &str, b64_bytes: &str) -> TextureId {
     let header_end = b64_bytes.find(",").unwrap();
-    let png_bytes = base64::decode(&b64_bytes.as_bytes()[(header_end + 1)..]).unwrap();
-    wre_render_system!().add_texture(&png_bytes)
+    let png_bytes =
+        base64::decode(&b64_bytes.as_bytes()[(header_end + 1)..]).unwrap();
+    wre_render_system!().add_texture(path, &png_bytes)
+}
+
+#[wasm_bindgen]
+pub fn get_texture_id_by_path(path: &str) -> Option<TextureId> {
+    wre_render_system!().get_texture_id_by_path(path)
 }
 
 #[wasm_bindgen]

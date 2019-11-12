@@ -2,7 +2,7 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(51)(arg0, arg1);
+    wasm.__wbg_function_table.get(48)(arg0, arg1);
 }
 /**
 */
@@ -161,18 +161,13 @@ export function add_mesh(eid, obj_source) {
 }
 
 /**
+* @param {string} path
 * @param {string} b64_bytes
 * @returns {number}
 */
-export function add_texture(b64_bytes) {
-    const ret = wasm.add_texture(passStringToWasm(b64_bytes), WASM_VECTOR_LEN);
+export function add_texture(path, b64_bytes) {
+    const ret = wasm.add_texture(passStringToWasm(path), WASM_VECTOR_LEN, passStringToWasm(b64_bytes), WASM_VECTOR_LEN);
     return ret >>> 0;
-}
-
-/**
-*/
-export function make_ready() {
-    wasm.make_ready();
 }
 
 let cachegetInt32Memory = null;
@@ -181,6 +176,22 @@ function getInt32Memory() {
         cachegetInt32Memory = new Int32Array(wasm.memory.buffer);
     }
     return cachegetInt32Memory;
+}
+/**
+* @param {string} path
+* @returns {number}
+*/
+export function get_texture_id_by_path(path) {
+    const retptr = 8;
+    const ret = wasm.get_texture_id_by_path(retptr, passStringToWasm(path), WASM_VECTOR_LEN);
+    const memi32 = getInt32Memory();
+    return memi32[retptr / 4 + 0] === 0 ? undefined : memi32[retptr / 4 + 1] >>> 0;
+}
+
+/**
+*/
+export function make_ready() {
+    wasm.make_ready();
 }
 
 function isLikeNone(x) {
@@ -4041,7 +4052,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper246 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -4049,7 +4060,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(52)(state.a, state.b);
+                    wasm.__wbg_function_table.get(49)(state.a, state.b);
                     state.a = 0;
                 }
             }

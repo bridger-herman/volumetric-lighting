@@ -12,7 +12,7 @@ use std::sync::Mutex;
 
 use crate::entity_manager::EntityManager;
 use crate::frame::WreFrame;
-use crate::render_system::{WebGlContextWrapper, RenderSystem};
+use crate::render_system::{RenderSystem, WebGlContextWrapper};
 use crate::script_manager::ScriptManager;
 
 lazy_static! {

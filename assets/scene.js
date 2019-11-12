@@ -19,8 +19,12 @@ export async function loadSceneAsync(scenePath) {
         let sceneEntity = sceneObj.scene[i];
 
         if (typeof sceneEntity.texture !== 'undefined') {
-            let dataUrl = await loadImage(sceneEntity.texture);
-            var texId = wre.add_texture(dataUrl);
+            // Check if the texture already exists
+            var texId = wre.get_texture_id_by_path(sceneEntity.texture);
+            if (typeof texId === 'undefined') {
+                let dataUrl = await loadImage(sceneEntity.texture);
+                var texId = wre.add_texture(sceneEntity.texture, dataUrl);
+            }
         }
 
         let prefab = sceneObj.prefabs[sceneEntity.prefab];
