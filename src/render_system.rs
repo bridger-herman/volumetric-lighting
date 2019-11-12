@@ -69,14 +69,24 @@ impl RenderSystem {
 
             let model_matrix = wre_entities!(mesh.attached_to)
                 .transform()
-                .matrix()
-                .to_flat_vec();
+                .matrix();
+
             let model_uniform_location = wre_gl!()
                 .get_uniform_location(shader, "uni_model");
             wre_gl!().uniform_matrix4fv_with_f32_array(
                 model_uniform_location.as_ref(),
                 false,
-                &model_matrix,
+                &model_matrix.to_flat_vec(),
+            );
+
+            let normal_matrix = model_matrix.inverse().transpose();
+
+            let normal_uniform_location = wre_gl!()
+                .get_uniform_location(shader, "uni_normal");
+            wre_gl!().uniform_matrix4fv_with_f32_array(
+                normal_uniform_location.as_ref(),
+                false,
+                &normal_matrix.to_flat_vec(),
             );
 
             let color: [f32; 4] =

@@ -20,6 +20,7 @@ in vec3 in_pos;
 in vec3 in_norm;
 
 uniform mat4 uni_model;
+uniform mat4 uni_normal;
 
 out vec3 pos;
 out vec3 norm;
@@ -29,7 +30,7 @@ void main() {
     pos = final_pos.xyz;
 
     // normal must be multiplied by inverse transpose of the model matrix
-    norm = (transpose(inverse(uni_model)) * vec4(in_norm, 0)).xyz;
+    norm = (uni_normal * vec4(in_norm, 0)).xyz;
 
     gl_Position = final_pos;
 }
