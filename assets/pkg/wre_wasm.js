@@ -2,7 +2,14 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(48)(arg0, arg1);
+    wasm.__wbg_function_table.get(33)(arg0, arg1);
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
 }
 /**
 */
@@ -625,15 +632,6 @@ export class Mat2 {
     * @param {Mat2} other
     * @returns {Mat2}
     */
-    sub_mat2(other) {
-        _assertClass(other, Mat2);
-        const ret = wasm.mat2_sub_mat2(this.ptr, other.ptr);
-        return Mat2.__wrap(ret);
-    }
-    /**
-    * @param {Mat2} other
-    * @returns {Mat2}
-    */
     add_mat2(other) {
         _assertClass(other, Mat2);
         const ret = wasm.mat2_add_mat2(this.ptr, other.ptr);
@@ -660,6 +658,15 @@ export class Mat2 {
         const ptr1 = y_axis.ptr;
         y_axis.ptr = 0;
         const ret = wasm.mat2_new(ptr0, ptr1);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Mat2} other
+    * @returns {Mat2}
+    */
+    sub_mat2(other) {
+        _assertClass(other, Mat2);
+        const ret = wasm.mat2_sub_mat2(this.ptr, other.ptr);
         return Mat2.__wrap(ret);
     }
 }
@@ -3785,8 +3792,17 @@ function init(module) {
         const ret = getStringFromWasm(arg0, arg1);
         return addHeapObject(ret);
     };
+<<<<<<< Updated upstream
     imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
         getObject(arg0).updateWrapper();
+=======
+    imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
+        const ret = JSON.parse(getStringFromWasm(arg0, arg1));
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbindgen_cb_forget = function(arg0) {
+        takeObject(arg0);
+>>>>>>> Stashed changes
     };
     imports.wbg.__wbindgen_cb_drop = function(arg0) {
         const obj = takeObject(arg0).original;
@@ -3797,8 +3813,9 @@ function init(module) {
         const ret = false;
         return ret;
     };
-    imports.wbg.__wbindgen_cb_forget = function(arg0) {
-        takeObject(arg0);
+    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
+        const ret = getObject(arg0);
+        return addHeapObject(ret);
     };
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
@@ -4052,7 +4069,11 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
+<<<<<<< Updated upstream
     imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
+=======
+    imports.wbg.__wbindgen_closure_wrapper193 = function(arg0, arg1, arg2) {
+>>>>>>> Stashed changes
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -4060,7 +4081,11 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
+<<<<<<< Updated upstream
                     wasm.__wbg_function_table.get(49)(state.a, state.b);
+=======
+                    wasm.__wbg_function_table.get(34)(state.a, state.b);
+>>>>>>> Stashed changes
                     state.a = 0;
                 }
             }

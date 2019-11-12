@@ -47,6 +47,7 @@ export class BoardManager extends WreScript {
         let checkBounds = (c) => {return c >= 0 && c < 9};
 
         if (checkBounds(boardCoords[0]) && checkBounds(boardCoords[1])) {
+            // if the user clicks within the bounds, spawn new entity
             let valid = this.checkSpace(...boardCoords, this._currentColor);
 
             let eid = wre.create_entity();
