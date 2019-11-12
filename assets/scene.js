@@ -8,13 +8,13 @@
  */
 
 import * as wre from './pkg/wre_wasm.js'
-import { loadResource, WreScript } from './wre.js'
+import { loadTextResource, WreScript, DEFAULT_SHADER_ID } from './wre.js'
 import { MoveTest } from './user-scripts/moveTest.js'
 import { BoardManager } from './user-scripts/BoardManager.js'
 
 export class Scene {
     static loadSceneAsync(scenePath) {
-        return loadResource(scenePath).then((sceneText) => {
+        return loadTextResource(scenePath).then((sceneText) => {
             let sceneObj = JSON.parse(sceneText);
             for (let i in sceneObj.scene) {
                 let sceneEntity = sceneObj.scene[i];
@@ -41,7 +41,7 @@ export class Scene {
                 );
 
                 entity.transform = tf;
-                entity.material = new wre.Material(new wre.Vec4(
+                entity.material = new wre.Material(DEFAULT_SHADER_ID, new wre.Vec4(
                     sceneEntity.color[0],
                     sceneEntity.color[1],
                     sceneEntity.color[2],
@@ -49,7 +49,7 @@ export class Scene {
                 ));
                 wre.set_entity(eid, entity);
 
-                loadResource(prefab.mesh).then((objText) => {
+                loadTextResource(prefab.mesh).then((objText) => {
                     if (typeof prefab.mesh !== 'undefined') {
                         wre.add_mesh(eid, objText);
                     }

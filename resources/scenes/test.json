@@ -1,12 +1,13 @@
 {
     "prefabs": {
         "sphere": {
-            "mesh": "./resources/models/small_sphere.obj",
-            "scripts": ["WreScript"]
+            "mesh": "./resources/models/small_sphere.obj"
         },
         "board": {
-            "mesh": "./resources/models/board_segment.obj",
-            "scripts": ["WreScript"]
+            "mesh": "./resources/models/board_segment.obj"
+        },
+        "cube": {
+            "mesh": "./resources/models/cube.obj"
         },
         "boardManager": {
             "scripts": ["BoardManager"]
@@ -14,8 +15,8 @@
     },
     "scene": [
         {
-            "prefab": "boardManager",
-            "color": [0.0, 0.0, 0.0, 1.0],
+            "prefab": "cube",
+            "color": [0.0, 1.0, 0.0, 1.0],
             "position": [0, 0, 0],
             "rotation": [0, 0, 0],
             "scale": [1.0, 1.0, 1.0]

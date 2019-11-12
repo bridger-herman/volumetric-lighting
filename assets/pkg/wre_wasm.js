@@ -145,9 +145,11 @@ function passStringToWasm(arg) {
 /**
 * @param {string} name
 * @param {any} program
+* @returns {number}
 */
 export function add_shader(name, program) {
-    wasm.add_shader(passStringToWasm(name), WASM_VECTOR_LEN, addHeapObject(program));
+    const ret = wasm.add_shader(passStringToWasm(name), WASM_VECTOR_LEN, addHeapObject(program));
+    return ret >>> 0;
 }
 
 /**

@@ -9,8 +9,12 @@
 
 import * as wre from './pkg/wre_wasm.js';
 
+export const DEFAULT_SHADER = 'default2';
+export var DEFAULT_SHADER_ID = 0;
+
 export function initWre() {
-    return initShader('default2').then(() => {
+    return initShader(DEFAULT_SHADER).then((shaderId) => {
+        DEFAULT_SHADER_ID = shaderId;
         wre.make_ready();
     });
 }
@@ -48,25 +52,47 @@ export class WreScript {
 
 async function initShader(name) {
     let vertPromise =
-        loadResource(`./resources/shaders/${name}.vert`).then((shaderText) => {
+        loadTextResource(`./resources/shaders/${name}.vert`).then((shaderText) => {
             console.debug(`Compiling vert shader '${name}'`);
             return wre.compile_vert_shader(shaderText)
     });
     let fragPromise =
-        loadResource(`./resources/shaders/${name}.frag`).then((shaderText) => {
+        loadTextResource(`./resources/shaders/${name}.frag`).then((shaderText) => {
             console.debug(`Compiling frag shader '${name}'`);
             return wre.compile_frag_shader(shaderText)
     });
     return Promise.all([vertPromise, fragPromise]).then((shaders) => {
         console.debug(`Linking shader program '${name}'`);
         let program = wre.link_shader_program(...shaders);
-        wre.add_shader(name, program);
+        return wre.add_shader(name, program);
     });
 }
 
-export async function loadResource(path) {
+export async function loadTextResource(path) {
     console.debug(`Loading resource ${path}`);
     let response = await fetch(path);
     let text = await response.text();
     return text;
+}
+
+function loadImageAsync(path) {
+    return new Promise((resolve, reject) => {
+        let img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = path;
+    });
+}
+
+export async function loadImage(path) {
+    let img = await loadImageAsync(path);
+    let canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    let ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    let dataUrl = canvas.toDataURL('image/png');
+    // let tex = wre.add_texture(dataUrl);
+    canvas.remove();
+    return dataUrl;
 }

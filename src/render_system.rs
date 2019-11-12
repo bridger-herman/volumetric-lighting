@@ -13,9 +13,6 @@ use crate::entity::EntityId;
 use crate::mesh::Mesh;
 use crate::texture::{Texture, TextureId};
 
-const SHADER_NAME: &str = "default2";
-const SHADER_INDEX: usize = 0;
-
 pub struct WebGlContextWrapper {
     pub gl: WebGl2RenderingContext,
 }
@@ -45,7 +42,6 @@ unsafe impl Send for WebGlContextWrapper {}
 
 pub struct RenderSystem {
     meshes: Vec<Mesh>,
-    current_tid: TextureId,
     textures: Vec<Texture>,
     shaders: Vec<WebGlProgram>,
     shader_names: Vec<String>,
@@ -59,7 +55,6 @@ impl RenderSystem {
         if !self.ready {
             return;
         }
-        wre_gl!().use_program(Some(&self.shaders[SHADER_INDEX]));
 
         wre_gl!().clear_color(0.0, 0.0, 0.0, 1.0);
         wre_gl!().clear(
@@ -68,6 +63,8 @@ impl RenderSystem {
         );
 
         for mesh in &self.meshes {
+            let shader = &self.shaders[wre_entities!(mesh.attached_to).material().shader_id];
+            wre_gl!().use_program(Some(shader));
             wre_gl!().bind_vertex_array(Some(&mesh.vao));
 
             let model_matrix = wre_entities!(mesh.attached_to)
@@ -75,7 +72,7 @@ impl RenderSystem {
                 .matrix()
                 .to_flat_vec();
             let model_uniform_location = wre_gl!()
-                .get_uniform_location(&self.shaders[SHADER_INDEX], "uni_model");
+                .get_uniform_location(shader, "uni_model");
             wre_gl!().uniform_matrix4fv_with_f32_array(
                 model_uniform_location.as_ref(),
                 false,
@@ -85,7 +82,7 @@ impl RenderSystem {
             let color: [f32; 4] =
                 wre_entities!(mesh.attached_to).material().color.into();
             let color_uniform_location = wre_gl!()
-                .get_uniform_location(&self.shaders[SHADER_INDEX], "uni_color");
+                .get_uniform_location(shader, "uni_color");
             wre_gl!().uniform4fv_with_f32_array(
                 color_uniform_location.as_ref(),
                 &color,
@@ -107,24 +104,23 @@ impl RenderSystem {
         self.ready = true;
     }
 
-    pub fn add_shader(&mut self, name: &str, program: &WebGlProgram) {
+    pub fn add_shader(&mut self, name: &str, program: &WebGlProgram) -> usize {
         self.shaders.push(program.clone());
         self.shader_names.push(name.to_string());
+        self.shaders.len() - 1
     }
 
     pub fn add_obj_mesh(&mut self, eid: EntityId, obj_text: &str) {
-        wre_gl!().use_program(Some(&self.shaders[SHADER_INDEX]));
+        let shader = &self.shaders[wre_entities!(eid).material().shader_id];
+        wre_gl!().use_program(Some(shader));
         self.meshes
             .push(Mesh::from_obj_str(eid, obj_text));
-        debug!("Loaded mesh into entity {}", eid);
     }
 
     pub fn add_texture(&mut self, png_bytes: &[u8]) -> TextureId {
-        let id = self.current_tid;
-        let tex = Texture::init_from_image(id, png_bytes);
+        let tex = Texture::init_from_image(self.textures.len(), png_bytes);
         self.textures.push(tex);
-        self.current_tid += 1;
-        id
+        self.textures.len() - 1
     }
 }
 
@@ -133,7 +129,6 @@ impl Default for RenderSystem {
         wre_gl!().enable(WebGl2RenderingContext::DEPTH_TEST);
 
         Self {
-            current_tid: TextureId::default(),
             textures: Vec::default(),
             meshes: Vec::default(),
             shaders: Vec::default(),

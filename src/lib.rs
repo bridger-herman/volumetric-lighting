@@ -82,8 +82,8 @@ pub fn add_script(eid: EntityId, script: WreScript) {
 }
 
 #[wasm_bindgen]
-pub fn add_shader(name: &str, program: WebGlProgram) {
-    wre_render_system!().add_shader(name, &program);
+pub fn add_shader(name: &str, program: WebGlProgram) -> usize {
+    wre_render_system!().add_shader(name, &program)
 }
 
 #[wasm_bindgen]

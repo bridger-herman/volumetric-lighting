@@ -8,7 +8,7 @@
  */
 
 import * as wre from '../pkg/wre_wasm.js';
-import { WreScript, loadResource } from '../wre.js';
+import { WreScript, loadTextResource, DEFAULT_SHADER_ID} from '../wre.js';
 import { Ray } from '../ray.js';
 import { PlaceToken } from './placeToken.js';
 import { oneFromWin, nearlySolved, easy, challenging } from './boards.js'
@@ -66,7 +66,7 @@ export class BoardManager extends WreScript {
             endTransform.position = new wre.Vec3(coordX2D * 0.1, 0.0, coordY2D * 0.1); 
             endTransform.scale = new wre.Vec3(1.0, 1.0, 1.0);
 
-            entity.material = new wre.Material(new wre.Vec4(
+            entity.material = new wre.Material(DEFAULT_SHADER_ID, new wre.Vec4(
                 this._colors[this._currentColor][0],
                 this._colors[this._currentColor][1],
                 this._colors[this._currentColor][2],
@@ -214,11 +214,11 @@ export class BoardManager extends WreScript {
 
         this._board = nearlySolved;
 
-        loadResource('./resources/models/small_sphere.obj').then((objText) => {
+        loadTextResource('./resources/models/small_sphere.obj').then((objText) => {
             this._objText = objText;
         });
 
-        loadResource('./resources/models/small_sphere.obj').then((objText) => {
+        loadTextResource('./resources/models/small_sphere.obj').then((objText) => {
             for (let color in this._board) {
                 for (let pairIndex in this._board[color]) {
                     let sphere = wre.create_entity();
@@ -232,7 +232,7 @@ export class BoardManager extends WreScript {
                                 .mul(this._board[color][pairIndex][1]))
                         .sub(new wre.Vec3(0.4, 0.0, 0.4));
                     sphereEntity.transform = tf;
-                    sphereEntity.material = new wre.Material(new wre.Vec4(
+                    sphereEntity.material = new wre.Material(DEFAULT_SHADER_ID, new wre.Vec4(
                         this._colors[color][0],
                         this._colors[color][1],
                         this._colors[color][2],

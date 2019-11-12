@@ -8,7 +8,7 @@
  */
 
 import * as wre from '../pkg/wre_wasm.js';
-import { WreScript, loadResource } from '../wre.js';
+import { WreScript } from '../wre.js';
 
 export class PlaceToken extends WreScript {
     start() {
