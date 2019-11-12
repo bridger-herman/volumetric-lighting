@@ -58,6 +58,16 @@ impl Mesh {
         }
         let norm_flat: Vec<_> = norm.iter().flatten().cloned().collect();
 
+        // Collect the uv's into triangles
+        // TODO assuming only one group per object, and only one object per file
+        let mut uv = vec![];
+        for tri in &obj_file.objects[0].groups[0].polys {
+            uv.push(obj_file.texture[tri[0].1.unwrap()]);
+            uv.push(obj_file.texture[tri[1].1.unwrap()]);
+            uv.push(obj_file.texture[tri[2].1.unwrap()]);
+        }
+        let uv_flat: Vec<_> = uv.iter().flatten().cloned().collect();
+
         let vao = wre_gl!().create_vertex_array().expect("failed to create vao");
         wre_gl!().bind_vertex_array(Some(&vao));
 
@@ -109,6 +119,29 @@ impl Mesh {
         wre_gl!().vertex_attrib_pointer_with_i32(
             1,
             3,
+            WebGl2RenderingContext::FLOAT,
+            false,
+            0,
+            0,
+        );
+
+        let uv_vbo = wre_gl!().create_buffer().expect("failed to create uv_vbo");
+        wre_gl!().bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&uv_vbo));
+
+        unsafe {
+            let uv_array = js_sys::Float32Array::view(&uv_flat);
+
+            wre_gl!().buffer_data_with_array_buffer_view(
+                WebGl2RenderingContext::ARRAY_BUFFER,
+                &uv_array,
+                WebGl2RenderingContext::STATIC_DRAW,
+            );
+        }
+
+        wre_gl!().enable_vertex_attrib_array(2);
+        wre_gl!().vertex_attrib_pointer_with_i32(
+            2,
+            2,
             WebGl2RenderingContext::FLOAT,
             false,
             0,

@@ -23,11 +23,11 @@ pub struct Material {
 #[wasm_bindgen]
 impl Material {
     #[wasm_bindgen(constructor)]
-    pub fn new(shader_id: usize, color: Vec4) -> Self {
+    pub fn new(shader_id: usize, color: Vec4, texture_id: Option<TextureId>) -> Self {
         Self {
             shader_id,
             color,
-            texture_id: None,
+            texture_id,
         }
     }
 }

@@ -98,6 +98,16 @@ impl RenderSystem {
                 &color,
             );
 
+            if let Some(texture_id) = wre_entities!(mesh.attached_to).material().texture_id {
+                wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
+                wre_gl!().bind_texture(WebGl2RenderingContext::TEXTURE_2D,
+                                       Some(&self.textures[texture_id].tex));
+
+                let tex_uniform_location = wre_gl!()
+                    .get_uniform_location(shader, "uni_texture");
+                wre_gl!().uniform1i(tex_uniform_location.as_ref(), 0);
+            }
+
             wre_gl!().draw_arrays(
                 WebGl2RenderingContext::TRIANGLES,
                 0,
