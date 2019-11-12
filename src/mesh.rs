@@ -30,7 +30,6 @@ impl fmt::Debug for Mesh {
 
 impl Mesh {
     pub fn from_obj_str(
-        gl: &WebGl2RenderingContext,
         eid: EntityId,
         obj_text: &str,
     ) -> Self {
@@ -59,11 +58,11 @@ impl Mesh {
         }
         let norm_flat: Vec<_> = norm.iter().flatten().cloned().collect();
 
-        let vao = gl.create_vertex_array().expect("failed to create vao");
-        gl.bind_vertex_array(Some(&vao));
+        let vao = wre_gl!().create_vertex_array().expect("failed to create vao");
+        wre_gl!().bind_vertex_array(Some(&vao));
 
-        let vert_vbo = gl.create_buffer().expect("failed to create vert_vbo");
-        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vert_vbo));
+        let vert_vbo = wre_gl!().create_buffer().expect("failed to create vert_vbo");
+        wre_gl!().bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vert_vbo));
 
         // Note that `Float32Array::view` is somewhat dangerous (hence the
         // `unsafe`!). This is creating a raw view into our module's
@@ -76,15 +75,15 @@ impl Mesh {
         unsafe {
             let vert_array = js_sys::Float32Array::view(&pos_flat);
 
-            gl.buffer_data_with_array_buffer_view(
+            wre_gl!().buffer_data_with_array_buffer_view(
                 WebGl2RenderingContext::ARRAY_BUFFER,
                 &vert_array,
                 WebGl2RenderingContext::STATIC_DRAW,
             );
         }
 
-        gl.enable_vertex_attrib_array(0);
-        gl.vertex_attrib_pointer_with_i32(
+        wre_gl!().enable_vertex_attrib_array(0);
+        wre_gl!().vertex_attrib_pointer_with_i32(
             0,
             3,
             WebGl2RenderingContext::FLOAT,
@@ -93,21 +92,21 @@ impl Mesh {
             0,
         );
 
-        let norm_vbo = gl.create_buffer().expect("failed to create norm_vbo");
-        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&norm_vbo));
+        let norm_vbo = wre_gl!().create_buffer().expect("failed to create norm_vbo");
+        wre_gl!().bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&norm_vbo));
 
         unsafe {
             let norm_array = js_sys::Float32Array::view(&norm_flat);
 
-            gl.buffer_data_with_array_buffer_view(
+            wre_gl!().buffer_data_with_array_buffer_view(
                 WebGl2RenderingContext::ARRAY_BUFFER,
                 &norm_array,
                 WebGl2RenderingContext::STATIC_DRAW,
             );
         }
 
-        gl.enable_vertex_attrib_array(1);
-        gl.vertex_attrib_pointer_with_i32(
+        wre_gl!().enable_vertex_attrib_array(1);
+        wre_gl!().vertex_attrib_pointer_with_i32(
             1,
             3,
             WebGl2RenderingContext::FLOAT,

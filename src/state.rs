@@ -12,7 +12,7 @@ use std::sync::Mutex;
 
 use crate::entity_manager::EntityManager;
 use crate::frame::WreFrame;
-use crate::render_system::RenderSystem;
+use crate::render_system::{WebGlContextWrapper, RenderSystem};
 use crate::script_manager::ScriptManager;
 
 lazy_static! {
@@ -27,4 +27,7 @@ lazy_static! {
 
     /// Rendering system
     pub static ref WRE_RENDER_SYSTEM: Mutex<RenderSystem> = Mutex::new(RenderSystem::default());
+
+    /// WebGL state
+    pub static ref WRE_GL: Mutex<WebGlContextWrapper> = Mutex::new(WebGlContextWrapper::default());
 }

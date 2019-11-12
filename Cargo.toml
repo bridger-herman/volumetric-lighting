@@ -20,6 +20,7 @@ lazy_static = "1.4"
 glam = { version = "0.8", features = [ "serde" ], git = "https://github.com/bridger-herman/glam-rs.git" }
 instant = { version = "0.1", features = [ "now", "wasm-bindgen" ]  }
 obj = "0.9"
+png = "0.15"
 
 [dependencies.wasm-bindgen]
 version = "0.2.51"
@@ -37,6 +38,7 @@ features = [
     'WebGlProgram',
     'WebGlVertexArrayObject',
     'WebGlShader',
+    'WebGlTexture',
     'Window',
     'WebGlUniformLocation',
 ]

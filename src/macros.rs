@@ -46,3 +46,10 @@ macro_rules! wre_render_system {
         *crate::state::WRE_RENDER_SYSTEM.try_lock().unwrap()
     };
 }
+
+#[macro_export]
+macro_rules! wre_gl {
+    () => {
+        crate::state::WRE_GL.try_lock().unwrap().gl
+    }
+}

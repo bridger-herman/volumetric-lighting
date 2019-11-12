@@ -2,14 +2,7 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(25)(arg0, arg1);
-}
-
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-    return instance.ptr;
+    wasm.__wbg_function_table.get(48)(arg0, arg1);
 }
 /**
 */
@@ -62,6 +55,12 @@ export function get_entity(id) {
     return Entity.__wrap(ret);
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
+}
 /**
 * @param {number} id
 * @param {Entity} entity
@@ -160,11 +159,31 @@ export function add_mesh(eid, obj_source) {
 }
 
 /**
+* @param {string} b64_bytes
+* @returns {number}
+*/
+export function add_texture(b64_bytes) {
+    const ret = wasm.add_texture(passStringToWasm(b64_bytes), WASM_VECTOR_LEN);
+    return ret >>> 0;
+}
+
+/**
 */
 export function make_ready() {
     wasm.make_ready();
 }
 
+let cachegetInt32Memory = null;
+function getInt32Memory() {
+    if (cachegetInt32Memory === null || cachegetInt32Memory.buffer !== wasm.memory.buffer) {
+        cachegetInt32Memory = new Int32Array(wasm.memory.buffer);
+    }
+    return cachegetInt32Memory;
+}
+
+function isLikeNone(x) {
+    return x === undefined || x === null;
+}
 /**
 * @param {string} source
 * @returns {any}
@@ -205,14 +224,6 @@ export function link_shader_program(vert_shader, frag_shader) {
     }
 }
 
-let cachegetInt32Memory = null;
-function getInt32Memory() {
-    if (cachegetInt32Memory === null || cachegetInt32Memory.buffer !== wasm.memory.buffer) {
-        cachegetInt32Memory = new Int32Array(wasm.memory.buffer);
-    }
-    return cachegetInt32Memory;
-}
-
 let cachegetFloat32Memory = null;
 function getFloat32Memory() {
     if (cachegetFloat32Memory === null || cachegetFloat32Memory.buffer !== wasm.memory.buffer) {
@@ -238,12 +249,12 @@ function passArrayF32ToWasm(arg) {
     return ptr;
 }
 
-function isLikeNone(x) {
-    return x === undefined || x === null;
-}
-
 function handleError(e) {
     wasm.__wbindgen_exn_store(addHeapObject(e));
+}
+
+function getArrayU8FromWasm(ptr, len) {
+    return getUint8Memory().subarray(ptr / 1, ptr / 1 + len);
 }
 
 function debugString(val) {
@@ -1538,6 +1549,19 @@ export class Material {
         wasm.__wbg_material_free(ptr);
     }
     /**
+    * @returns {number}
+    */
+    get shader_id() {
+        const ret = wasm.__wbg_get_material_shader_id(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set shader_id(arg0) {
+        wasm.__wbg_set_material_shader_id(this.ptr, arg0);
+    }
+    /**
     * @returns {Vec4}
     */
     get color() {
@@ -1554,14 +1578,30 @@ export class Material {
         wasm.__wbg_set_material_color(this.ptr, ptr0);
     }
     /**
+    * @returns {number}
+    */
+    get texture_id() {
+        const retptr = 8;
+        const ret = wasm.__wbg_get_material_texture_id(retptr, this.ptr);
+        const memi32 = getInt32Memory();
+        return memi32[retptr / 4 + 0] === 0 ? undefined : memi32[retptr / 4 + 1] >>> 0;
+    }
+    /**
+    * @param {number | undefined} arg0
+    */
+    set texture_id(arg0) {
+        wasm.__wbg_set_material_texture_id(this.ptr, !isLikeNone(arg0), isLikeNone(arg0) ? 0 : arg0);
+    }
+    /**
+    * @param {number} shader_id
     * @param {Vec4} color
     * @returns {Material}
     */
-    constructor(color) {
+    constructor(shader_id, color) {
         _assertClass(color, Vec4);
         const ptr0 = color.ptr;
         color.ptr = 0;
-        const ret = wasm.material_new(ptr0);
+        const ret = wasm.material_new(shader_id, ptr0);
         return Material.__wrap(ret);
     }
 }
@@ -3720,15 +3760,19 @@ function init(module) {
     let result;
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        takeObject(arg0);
+    };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         const ret = getStringFromWasm(arg0, arg1);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
-        takeObject(arg0);
-    };
     imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
         getObject(arg0).updateWrapper();
+    };
+    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
+        const ret = getObject(arg0);
+        return addHeapObject(ret);
     };
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
@@ -3745,10 +3789,6 @@ function init(module) {
     };
     imports.wbg.__wbindgen_cb_forget = function(arg0) {
         takeObject(arg0);
-    };
-    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-        const ret = getObject(arg0);
-        return addHeapObject(ret);
     };
     imports.wbg.__widl_instanceof_Window = function(arg0) {
         const ret = getObject(arg0) instanceof Window;
@@ -3791,17 +3831,30 @@ function init(module) {
         const ret = getObject(arg0).createVertexArray();
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
+    imports.wbg.__widl_f_tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
+        try {
+            getObject(arg0).texImage2D(arg1 >>> 0, arg2, arg3, arg4, arg5, arg6, arg7 >>> 0, arg8 >>> 0, arg9 === 0 ? undefined : getArrayU8FromWasm(arg9, arg10));
+        } catch (e) {
+            handleError(e)
+        }
+    };
     imports.wbg.__widl_f_uniform4fv_with_f32_array_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).uniform4fv(getObject(arg1), getArrayF32FromWasm(arg2, arg3));
     };
     imports.wbg.__widl_f_uniform_matrix4fv_with_f32_array_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).uniformMatrix4fv(getObject(arg1), arg2 !== 0, getArrayF32FromWasm(arg3, arg4));
     };
+    imports.wbg.__widl_f_active_texture_WebGL2RenderingContext = function(arg0, arg1) {
+        getObject(arg0).activeTexture(arg1 >>> 0);
+    };
     imports.wbg.__widl_f_attach_shader_WebGL2RenderingContext = function(arg0, arg1, arg2) {
         getObject(arg0).attachShader(getObject(arg1), getObject(arg2));
     };
     imports.wbg.__widl_f_bind_buffer_WebGL2RenderingContext = function(arg0, arg1, arg2) {
         getObject(arg0).bindBuffer(arg1 >>> 0, getObject(arg2));
+    };
+    imports.wbg.__widl_f_bind_texture_WebGL2RenderingContext = function(arg0, arg1, arg2) {
+        getObject(arg0).bindTexture(arg1 >>> 0, getObject(arg2));
     };
     imports.wbg.__widl_f_clear_WebGL2RenderingContext = function(arg0, arg1) {
         getObject(arg0).clear(arg1 >>> 0);
@@ -3823,6 +3876,13 @@ function init(module) {
     imports.wbg.__widl_f_create_shader_WebGL2RenderingContext = function(arg0, arg1) {
         const ret = getObject(arg0).createShader(arg1 >>> 0);
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
+    };
+    imports.wbg.__widl_f_create_texture_WebGL2RenderingContext = function(arg0) {
+        const ret = getObject(arg0).createTexture();
+        return isLikeNone(ret) ? 0 : addHeapObject(ret);
+    };
+    imports.wbg.__widl_f_delete_texture_WebGL2RenderingContext = function(arg0, arg1) {
+        getObject(arg0).deleteTexture(getObject(arg1));
     };
     imports.wbg.__widl_f_draw_arrays_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).drawArrays(arg1 >>> 0, arg2, arg3);
@@ -3868,6 +3928,9 @@ function init(module) {
     };
     imports.wbg.__widl_f_shader_source_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).shaderSource(getObject(arg1), getStringFromWasm(arg2, arg3));
+    };
+    imports.wbg.__widl_f_tex_parameteri_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3) {
+        getObject(arg0).texParameteri(arg1 >>> 0, arg2 >>> 0, arg3);
     };
     imports.wbg.__widl_f_use_program_WebGL2RenderingContext = function(arg0, arg1) {
         getObject(arg0).useProgram(getObject(arg1));
@@ -3972,7 +4035,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper168 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper240 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -3980,7 +4043,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(26)(state.a, state.b);
+                    wasm.__wbg_function_table.get(49)(state.a, state.b);
                     state.a = 0;
                 }
             }

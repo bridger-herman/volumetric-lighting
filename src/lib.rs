@@ -9,6 +9,8 @@ extern crate lazy_static;
 extern crate glam;
 extern crate instant;
 extern crate obj;
+extern crate png;
+extern crate base64;
 
 #[macro_use]
 pub mod macros;
@@ -23,6 +25,7 @@ pub mod render_system;
 pub mod script_manager;
 pub mod shader;
 pub mod state;
+pub mod texture;
 pub mod traits;
 pub mod transform;
 pub mod window;
@@ -31,6 +34,7 @@ use wasm_bindgen::prelude::*;
 use web_sys::WebGlProgram;
 
 use crate::entity::{Entity, EntityId};
+use crate::texture::TextureId;
 use crate::script_manager::WreScript;
 
 pub use glam::{Mat4, Quat, Vec3};
@@ -87,10 +91,12 @@ pub fn add_mesh(eid: EntityId, obj_source: &str) {
     wre_render_system!().add_obj_mesh(eid, obj_source);
 }
 
-// #[wasm_bindgen]
-// pub fn set_color(eid: EntityId, color: JsValue) {
-// wre_entities!(eid, true).material.color = color.into_serde().unwrap();
-// }
+#[wasm_bindgen]
+pub fn add_texture(b64_bytes: &str) -> TextureId {
+    let header_end = b64_bytes.find(",").unwrap();
+    let png_bytes = base64::decode(&b64_bytes.as_bytes()[(header_end + 1)..]).unwrap();
+    wre_render_system!().add_texture(&png_bytes)
+}
 
 #[wasm_bindgen]
 pub fn make_ready() {

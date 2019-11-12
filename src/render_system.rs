@@ -6,22 +6,50 @@
 
 //! Renders with WebGL, using wasm-bindgen and web-sys
 
-use std::collections::HashMap;
-
 use wasm_bindgen::JsCast;
 use web_sys::{WebGl2RenderingContext, WebGlProgram};
 
 use crate::entity::EntityId;
 use crate::mesh::Mesh;
+use crate::texture::{Texture, TextureId};
 
 const SHADER_NAME: &str = "default2";
+const SHADER_INDEX: usize = 0;
 
-// #[derive(Default)]
+pub struct WebGlContextWrapper {
+    pub gl: WebGl2RenderingContext,
+}
+
+impl Default for WebGlContextWrapper {
+    fn default() -> Self {
+        let document = web_sys::window().unwrap().document().unwrap();
+        let canvas = document.get_element_by_id("canvas").unwrap();
+        let canvas: web_sys::HtmlCanvasElement = canvas
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .expect("Unable to get canvas");
+
+        let gl: WebGl2RenderingContext = canvas
+            .get_context("webgl2")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<WebGl2RenderingContext>()
+            .expect("Unable to get WebGL context");
+
+        Self {
+            gl
+        }
+    }
+}
+
+unsafe impl Send for WebGlContextWrapper {}
+
 pub struct RenderSystem {
     meshes: Vec<Mesh>,
-    shaders: HashMap<String, WebGlProgram>,
+    current_tid: TextureId,
+    textures: Vec<Texture>,
+    shaders: Vec<WebGlProgram>,
+    shader_names: Vec<String>,
     ready: bool,
-    gl: WebGl2RenderingContext,
 }
 
 unsafe impl Send for RenderSystem {}
@@ -31,25 +59,24 @@ impl RenderSystem {
         if !self.ready {
             return;
         }
-        self.gl.use_program(Some(&self.shaders[SHADER_NAME]));
+        wre_gl!().use_program(Some(&self.shaders[SHADER_INDEX]));
 
-        self.gl.clear_color(0.0, 0.0, 0.0, 1.0);
-        self.gl.clear(
+        wre_gl!().clear_color(0.0, 0.0, 0.0, 1.0);
+        wre_gl!().clear(
             WebGl2RenderingContext::COLOR_BUFFER_BIT
                 | WebGl2RenderingContext::DEPTH_BUFFER_BIT,
         );
 
         for mesh in &self.meshes {
-            self.gl.bind_vertex_array(Some(&mesh.vao));
+            wre_gl!().bind_vertex_array(Some(&mesh.vao));
 
             let model_matrix = wre_entities!(mesh.attached_to)
                 .transform()
                 .matrix()
                 .to_flat_vec();
-            let model_uniform_location = self
-                .gl
-                .get_uniform_location(&self.shaders[SHADER_NAME], "uni_model");
-            self.gl.uniform_matrix4fv_with_f32_array(
+            let model_uniform_location = wre_gl!()
+                .get_uniform_location(&self.shaders[SHADER_INDEX], "uni_model");
+            wre_gl!().uniform_matrix4fv_with_f32_array(
                 model_uniform_location.as_ref(),
                 false,
                 &model_matrix,
@@ -57,15 +84,14 @@ impl RenderSystem {
 
             let color: [f32; 4] =
                 wre_entities!(mesh.attached_to).material().color.into();
-            let color_uniform_location = self
-                .gl
-                .get_uniform_location(&self.shaders[SHADER_NAME], "uni_color");
-            self.gl.uniform4fv_with_f32_array(
+            let color_uniform_location = wre_gl!()
+                .get_uniform_location(&self.shaders[SHADER_INDEX], "uni_color");
+            wre_gl!().uniform4fv_with_f32_array(
                 color_uniform_location.as_ref(),
                 &color,
             );
 
-            self.gl.draw_arrays(
+            wre_gl!().draw_arrays(
                 WebGl2RenderingContext::TRIANGLES,
                 0,
                 mesh.num_vertices,
@@ -82,39 +108,37 @@ impl RenderSystem {
     }
 
     pub fn add_shader(&mut self, name: &str, program: &WebGlProgram) {
-        self.shaders.insert(name.to_string(), program.clone());
+        self.shaders.push(program.clone());
+        self.shader_names.push(name.to_string());
     }
 
     pub fn add_obj_mesh(&mut self, eid: EntityId, obj_text: &str) {
-        self.gl.use_program(Some(&self.shaders[SHADER_NAME]));
+        wre_gl!().use_program(Some(&self.shaders[SHADER_INDEX]));
         self.meshes
-            .push(Mesh::from_obj_str(&self.gl, eid, obj_text));
+            .push(Mesh::from_obj_str(eid, obj_text));
         debug!("Loaded mesh into entity {}", eid);
+    }
+
+    pub fn add_texture(&mut self, png_bytes: &[u8]) -> TextureId {
+        let id = self.current_tid;
+        let tex = Texture::init_from_image(id, png_bytes);
+        self.textures.push(tex);
+        self.current_tid += 1;
+        id
     }
 }
 
 impl Default for RenderSystem {
     fn default() -> Self {
-        let document = web_sys::window().unwrap().document().unwrap();
-        let canvas = document.get_element_by_id("canvas").unwrap();
-        let canvas: web_sys::HtmlCanvasElement = canvas
-            .dyn_into::<web_sys::HtmlCanvasElement>()
-            .expect("Unable to get canvas");
-
-        let gl = canvas
-            .get_context("webgl2")
-            .unwrap()
-            .unwrap()
-            .dyn_into::<WebGl2RenderingContext>()
-            .expect("Unable to get WebGL context");
-
-        gl.enable(WebGl2RenderingContext::DEPTH_TEST);
+        wre_gl!().enable(WebGl2RenderingContext::DEPTH_TEST);
 
         Self {
+            current_tid: TextureId::default(),
+            textures: Vec::default(),
             meshes: Vec::default(),
-            shaders: HashMap::default(),
+            shaders: Vec::default(),
+            shader_names: Vec::default(),
             ready: false,
-            gl,
         }
     }
 }

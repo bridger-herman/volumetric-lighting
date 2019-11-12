@@ -10,16 +10,24 @@ use wasm_bindgen::prelude::*;
 
 use glam::Vec4;
 
+use crate::texture::TextureId;
+
 #[wasm_bindgen]
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Material {
+    pub shader_id: usize,
     pub color: Vec4,
+    pub texture_id: Option<TextureId>
 }
 
 #[wasm_bindgen]
 impl Material {
     #[wasm_bindgen(constructor)]
-    pub fn new(color: Vec4) -> Self {
-        Self { color }
+    pub fn new(shader_id: usize, color: Vec4) -> Self {
+        Self {
+            shader_id,
+            color,
+            texture_id: None,
+        }
     }
 }
