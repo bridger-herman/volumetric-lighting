@@ -9,12 +9,15 @@
 
 import * as wre from './pkg/wre_wasm.js';
 
-export const DEFAULT_SHADER = 'phong_forward';
+export const SHADERS = ['phong_forward', 'colorblur'];
 export var DEFAULT_SHADER_ID = 0;
 
 export function initWre() {
-    return initShader(DEFAULT_SHADER).then((shaderId) => {
-        DEFAULT_SHADER_ID = shaderId;
+    let shaderPromises = [];
+    for (let i in SHADERS) {
+        shaderPromises.add(initShader(SHADERS[i]));
+    }
+    return Promise.all(shaderPromises).then((_) => {
         wre.make_ready();
     });
 }

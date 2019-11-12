@@ -12,6 +12,7 @@ use wasm_bindgen::JsCast;
 use crate::traits::Update;
 
 const TITLE: &str = "Graphics";
+pub const DEFAULT_WINDOW_SIZE: (usize, usize) = (1280, 720);
 
 pub fn init(target_fps: i32) -> Result<(), JsValue> {
     let window = web_sys::window().expect("window.rs: No window!");

@@ -15,7 +15,7 @@ use web_sys::{WebGl2RenderingContext, WebGlVertexArrayObject};
 use crate::entity::EntityId;
 
 pub struct Mesh {
-    pub attached_to: EntityId,
+    pub attached_to: Option<EntityId>,
 
     pub num_vertices: i32,
 
@@ -24,12 +24,12 @@ pub struct Mesh {
 
 impl fmt::Debug for Mesh {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Mesh(attached_to: {0})", self.attached_to)
+        write!(f, "Mesh(attached_to: {0:?})", self.attached_to)
     }
 }
 
 impl Mesh {
-    pub fn from_obj_str(eid: EntityId, obj_text: &str) -> Self {
+    pub fn from_obj_str(obj_text: &str, eid: Option<EntityId>) -> Self {
         // Load the obj from a string
         let mut reader = BufReader::new(obj_text.as_bytes());
         let obj_file: Obj<SimplePolygon> =

@@ -10,8 +10,10 @@ use wasm_bindgen::JsCast;
 use web_sys::{WebGl2RenderingContext, WebGlProgram};
 
 use crate::entity::EntityId;
+use crate::frame_buffer::FrameBuffer;
 use crate::mesh::Mesh;
 use crate::texture::{Texture, TextureId};
+use crate::window::DEFAULT_WINDOW_SIZE;
 
 pub struct WebGlContextWrapper {
     pub gl: WebGl2RenderingContext,
@@ -44,6 +46,7 @@ pub struct RenderSystem {
     texture_paths: Vec<String>,
     shaders: Vec<WebGlProgram>,
     shader_names: Vec<String>,
+    frame_buffer: FrameBuffer,
     ready: bool,
 }
 
@@ -60,22 +63,38 @@ impl RenderSystem {
             WebGl2RenderingContext::COLOR_BUFFER_BIT
                 | WebGl2RenderingContext::DEPTH_BUFFER_BIT,
         );
+        let (width, height) = DEFAULT_WINDOW_SIZE;
+        wre_gl!().viewport(0, 0, width as i32, height as i32);
 
+        self.frame_buffer.bind();
+
+        // Save a texture image of rendered meshes to the frame buffer
         self.render_meshes();
+
+        // Splat that texture onto the viewport
+        self.frame_buffer
+            .render(self.get_shader_by_name("colorblur").unwrap());
+
+        self.frame_buffer.unbind();
     }
 
     /// Pass 1: Forward render all the meshes
     fn render_meshes(&self) {
         for mesh in &self.meshes {
             // Load the shader and VAO for this material and model
-            let shader = &self.shaders
-                [wre_entities!(mesh.attached_to).material().shader_id];
+            let shader = &self.shaders[wre_entities!(mesh
+                .attached_to
+                .unwrap_or_default())
+            .material()
+            .shader_id];
             wre_gl!().use_program(Some(shader));
             wre_gl!().bind_vertex_array(Some(&mesh.vao));
 
             // Send the model matrix to the GPU
             let model_matrix =
-                wre_entities!(mesh.attached_to).transform().matrix();
+                wre_entities!(mesh.attached_to.unwrap_or_default())
+                    .transform()
+                    .matrix();
             let model_uniform_location =
                 wre_gl!().get_uniform_location(shader, "uni_model");
             wre_gl!().uniform_matrix4fv_with_f32_array(
@@ -97,7 +116,10 @@ impl RenderSystem {
 
             // Send the material's color to the GPU
             let color: [f32; 4] =
-                wre_entities!(mesh.attached_to).material().color.into();
+                wre_entities!(mesh.attached_to.unwrap_or_default())
+                    .material()
+                    .color
+                    .into();
             let color_uniform_location =
                 wre_gl!().get_uniform_location(shader, "uni_color");
             wre_gl!().uniform4fv_with_f32_array(
@@ -107,7 +129,9 @@ impl RenderSystem {
 
             // If there's a texture, send it to the GPU
             if let Some(texture_id) =
-                wre_entities!(mesh.attached_to).material().texture_id
+                wre_entities!(mesh.attached_to.unwrap_or_default())
+                    .material()
+                    .texture_id
             {
                 wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
                 wre_gl!().bind_texture(
@@ -143,10 +167,18 @@ impl RenderSystem {
         self.shaders.len() - 1
     }
 
+    pub fn get_shader_by_name(&self, name: &str) -> Option<&WebGlProgram> {
+        if let Some(index) = self.shader_names.iter().position(|n| n == name) {
+            Some(&self.shaders[index])
+        } else {
+            None
+        }
+    }
+
     pub fn add_obj_mesh(&mut self, eid: EntityId, obj_text: &str) {
         let shader = &self.shaders[wre_entities!(eid).material().shader_id];
         wre_gl!().use_program(Some(shader));
-        self.meshes.push(Mesh::from_obj_str(eid, obj_text));
+        self.meshes.push(Mesh::from_obj_str(obj_text, Some(eid)));
     }
 
     pub fn add_texture(&mut self, path: &str, png_bytes: &[u8]) -> TextureId {
@@ -168,6 +200,7 @@ impl RenderSystem {
 
 impl Default for RenderSystem {
     fn default() -> Self {
+        // Enable depth testing for proper object occlusion
         wre_gl!().enable(WebGl2RenderingContext::DEPTH_TEST);
 
         Self {
@@ -176,6 +209,7 @@ impl Default for RenderSystem {
             meshes: Vec::default(),
             shaders: Vec::default(),
             shader_names: Vec::default(),
+            frame_buffer: FrameBuffer::default(),
             ready: false,
         }
     }

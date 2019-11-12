@@ -18,6 +18,7 @@ pub mod macros;
 pub mod entity;
 pub mod entity_manager;
 pub mod frame;
+pub mod frame_buffer;
 pub mod frame_timer;
 pub mod material;
 pub mod mesh;
