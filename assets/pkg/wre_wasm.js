@@ -3,6 +3,7 @@ let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
 <<<<<<< HEAD
+<<<<<<< HEAD
     wasm.__wbg_function_table.get(7)(arg0, arg1);
 ||||||| constructed merge base
     wasm.__wbg_function_table.get(33)(arg0, arg1);
@@ -26,9 +27,29 @@ function _assertClass(instance, klass) {
 ||||||| constructed merge base
     wasm.__wbg_function_table.get(48)(arg0, arg1);
 =======
+||||||| constructed merge base
+<<<<<<< HEAD
+    wasm.__wbg_function_table.get(33)(arg0, arg1);
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
+||||||| constructed merge base
+    wasm.__wbg_function_table.get(48)(arg0, arg1);
+=======
+=======
+>>>>>>> Finalize simple framebuffer
     wasm.__wbg_function_table.get(2)(arg0, arg1);
+<<<<<<< HEAD
 >>>>>>> Add framebuffer wip
 >>>>>>> Add framebuffer wip
+||||||| constructed merge base
+>>>>>>> Add framebuffer wip
+=======
+>>>>>>> Finalize simple framebuffer
 }
 /**
 */
@@ -651,6 +672,15 @@ export class Mat2 {
     * @param {Mat2} other
     * @returns {Mat2}
     */
+    sub_mat2(other) {
+        _assertClass(other, Mat2);
+        const ret = wasm.mat2_sub_mat2(this.ptr, other.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Mat2} other
+    * @returns {Mat2}
+    */
     add_mat2(other) {
         _assertClass(other, Mat2);
         const ret = wasm.mat2_add_mat2(this.ptr, other.ptr);
@@ -677,15 +707,6 @@ export class Mat2 {
         const ptr1 = y_axis.ptr;
         y_axis.ptr = 0;
         const ret = wasm.mat2_new(ptr0, ptr1);
-        return Mat2.__wrap(ret);
-    }
-    /**
-    * @param {Mat2} other
-    * @returns {Mat2}
-    */
-    sub_mat2(other) {
-        _assertClass(other, Mat2);
-        const ret = wasm.mat2_sub_mat2(this.ptr, other.ptr);
         return Mat2.__wrap(ret);
     }
 }
@@ -3804,6 +3825,7 @@ function init(module) {
         takeObject(arg0);
     };
 <<<<<<< HEAD
+<<<<<<< HEAD
 ||||||| constructed merge base
     imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
         const ret = getObject(arg0);
@@ -3820,14 +3842,30 @@ function init(module) {
 =======
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
+||||||| constructed merge base
+    imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
+        const ret = JSON.parse(getStringFromWasm(arg0, arg1));
+=======
+    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
+        const ret = getObject(arg0);
+>>>>>>> Finalize simple framebuffer
         return addHeapObject(ret);
     };
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< Updated upstream
     imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
         getObject(arg0).updateWrapper();
 =======
 >>>>>>> Add framebuffer wip
+||||||| constructed merge base
+<<<<<<< HEAD
+<<<<<<< Updated upstream
+    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
+        getObject(arg0).updateWrapper();
+=======
+=======
+>>>>>>> Finalize simple framebuffer
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
         return addHeapObject(ret);
@@ -3835,6 +3873,7 @@ function init(module) {
     imports.wbg.__wbindgen_cb_forget = function(arg0) {
         takeObject(arg0);
 <<<<<<< HEAD
+<<<<<<< HEAD
 ||||||| constructed merge base
 >>>>>>> Stashed changes
 =======
@@ -3847,6 +3886,17 @@ function init(module) {
         takeObject(arg0);
 >>>>>>> Add framebuffer wip
 >>>>>>> Add framebuffer wip
+||||||| constructed merge base
+>>>>>>> Stashed changes
+||||||| constructed merge base
+    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
+        getObject(arg0).updateWrapper();
+=======
+    imports.wbg.__wbindgen_cb_forget = function(arg0) {
+        takeObject(arg0);
+>>>>>>> Add framebuffer wip
+=======
+>>>>>>> Finalize simple framebuffer
     };
     imports.wbg.__wbindgen_cb_drop = function(arg0) {
         const obj = takeObject(arg0).original;
@@ -3858,6 +3908,7 @@ function init(module) {
         return ret;
     };
 <<<<<<< HEAD
+<<<<<<< HEAD
     imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
         getObject(arg0).updateWrapper();
     };
@@ -3872,10 +3923,20 @@ function init(module) {
     imports.wbg.__wbindgen_cb_forget = function(arg0) {
         takeObject(arg0);
 =======
+||||||| constructed merge base
+<<<<<<< HEAD
+    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
+        const ret = getObject(arg0);
+        return addHeapObject(ret);
+||||||| constructed merge base
+    imports.wbg.__wbindgen_cb_forget = function(arg0) {
+        takeObject(arg0);
+=======
+=======
+>>>>>>> Finalize simple framebuffer
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         const ret = getStringFromWasm(arg0, arg1);
         return addHeapObject(ret);
->>>>>>> Add framebuffer wip
     };
 <<<<<<< HEAD
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
@@ -3887,11 +3948,19 @@ function init(module) {
     imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
         getObject(arg0).updateWrapper();
     };
+<<<<<<< HEAD
     imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
         const ret = getObject(arg0);
 >>>>>>> Add framebuffer wip
         return addHeapObject(ret);
     };
+||||||| constructed merge base
+    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
+        const ret = getObject(arg0);
+        return addHeapObject(ret);
+    };
+=======
+>>>>>>> Finalize simple framebuffer
     imports.wbg.__widl_instanceof_Window = function(arg0) {
         const ret = getObject(arg0) instanceof Window;
         return ret;
@@ -3933,6 +4002,9 @@ function init(module) {
         const ret = getObject(arg0).createVertexArray();
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
+    imports.wbg.__widl_f_draw_buffers_WebGL2RenderingContext = function(arg0, arg1) {
+        getObject(arg0).drawBuffers(getObject(arg1));
+    };
     imports.wbg.__widl_f_tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
         try {
             getObject(arg0).texImage2D(arg1 >>> 0, arg2, arg3, arg4, arg5, arg6, arg7 >>> 0, arg8 >>> 0, arg9 === 0 ? undefined : getArrayU8FromWasm(arg9, arg10));
@@ -3958,8 +4030,15 @@ function init(module) {
     imports.wbg.__widl_f_bind_framebuffer_WebGL2RenderingContext = function(arg0, arg1, arg2) {
         getObject(arg0).bindFramebuffer(arg1 >>> 0, getObject(arg2));
     };
+    imports.wbg.__widl_f_bind_renderbuffer_WebGL2RenderingContext = function(arg0, arg1, arg2) {
+        getObject(arg0).bindRenderbuffer(arg1 >>> 0, getObject(arg2));
+    };
     imports.wbg.__widl_f_bind_texture_WebGL2RenderingContext = function(arg0, arg1, arg2) {
         getObject(arg0).bindTexture(arg1 >>> 0, getObject(arg2));
+    };
+    imports.wbg.__widl_f_check_framebuffer_status_WebGL2RenderingContext = function(arg0, arg1) {
+        const ret = getObject(arg0).checkFramebufferStatus(arg1 >>> 0);
+        return ret;
     };
     imports.wbg.__widl_f_clear_WebGL2RenderingContext = function(arg0, arg1) {
         getObject(arg0).clear(arg1 >>> 0);
@@ -3980,6 +4059,10 @@ function init(module) {
     };
     imports.wbg.__widl_f_create_program_WebGL2RenderingContext = function(arg0) {
         const ret = getObject(arg0).createProgram();
+        return isLikeNone(ret) ? 0 : addHeapObject(ret);
+    };
+    imports.wbg.__widl_f_create_renderbuffer_WebGL2RenderingContext = function(arg0) {
+        const ret = getObject(arg0).createRenderbuffer();
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
     imports.wbg.__widl_f_create_shader_WebGL2RenderingContext = function(arg0, arg1) {
@@ -4007,6 +4090,9 @@ function init(module) {
     };
     imports.wbg.__widl_f_enable_vertex_attrib_array_WebGL2RenderingContext = function(arg0, arg1) {
         getObject(arg0).enableVertexAttribArray(arg1 >>> 0);
+    };
+    imports.wbg.__widl_f_framebuffer_renderbuffer_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3, arg4) {
+        getObject(arg0).framebufferRenderbuffer(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0, getObject(arg4));
     };
     imports.wbg.__widl_f_framebuffer_texture_2d_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3, arg4, arg5) {
         getObject(arg0).framebufferTexture2D(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0, getObject(arg4), arg5);
@@ -4043,6 +4129,9 @@ function init(module) {
     };
     imports.wbg.__widl_f_link_program_WebGL2RenderingContext = function(arg0, arg1) {
         getObject(arg0).linkProgram(getObject(arg1));
+    };
+    imports.wbg.__widl_f_renderbuffer_storage_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3, arg4) {
+        getObject(arg0).renderbufferStorage(arg1 >>> 0, arg2 >>> 0, arg3, arg4);
     };
     imports.wbg.__widl_f_shader_source_WebGL2RenderingContext = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).shaderSource(getObject(arg1), getStringFromWasm(arg2, arg3));
@@ -4130,6 +4219,10 @@ function init(module) {
         const ret = getObject(arg0).buffer;
         return addHeapObject(ret);
     };
+    imports.wbg.__wbg_newwithbyteoffsetandlength_65312ae9f476fdc1 = function(arg0, arg1, arg2) {
+        const ret = new Uint32Array(getObject(arg0), arg1 >>> 0, arg2 >>> 0);
+        return addHeapObject(ret);
+    };
     imports.wbg.__wbg_newwithbyteoffsetandlength_cc334f8597c0fca9 = function(arg0, arg1, arg2) {
         const ret = new Float32Array(getObject(arg0), arg1 >>> 0, arg2 >>> 0);
         return addHeapObject(ret);
@@ -4160,6 +4253,7 @@ function init(module) {
         return addHeapObject(ret);
     };
 <<<<<<< HEAD
+<<<<<<< HEAD
     imports.wbg.__wbindgen_closure_wrapper90 = function(arg0, arg1, arg2) {
 ||||||| constructed merge base
 <<<<<<< Updated upstream
@@ -4180,6 +4274,21 @@ function init(module) {
     imports.wbg.__wbindgen_closure_wrapper91 = function(arg0, arg1, arg2) {
 >>>>>>> Add framebuffer wip
 >>>>>>> Add framebuffer wip
+||||||| constructed merge base
+<<<<<<< HEAD
+<<<<<<< Updated upstream
+    imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
+=======
+    imports.wbg.__wbindgen_closure_wrapper193 = function(arg0, arg1, arg2) {
+>>>>>>> Stashed changes
+||||||| constructed merge base
+    imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
+=======
+    imports.wbg.__wbindgen_closure_wrapper91 = function(arg0, arg1, arg2) {
+>>>>>>> Add framebuffer wip
+=======
+    imports.wbg.__wbindgen_closure_wrapper105 = function(arg0, arg1, arg2) {
+>>>>>>> Finalize simple framebuffer
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -4187,6 +4296,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
+<<<<<<< HEAD
 <<<<<<< HEAD
                     wasm.__wbg_function_table.get(8)(state.a, state.b);
 ||||||| constructed merge base
@@ -4205,9 +4315,26 @@ function init(module) {
 ||||||| constructed merge base
                     wasm.__wbg_function_table.get(49)(state.a, state.b);
 =======
+||||||| constructed merge base
+<<<<<<< HEAD
+<<<<<<< Updated upstream
+                    wasm.__wbg_function_table.get(49)(state.a, state.b);
+=======
+                    wasm.__wbg_function_table.get(34)(state.a, state.b);
+>>>>>>> Stashed changes
+||||||| constructed merge base
+                    wasm.__wbg_function_table.get(49)(state.a, state.b);
+=======
+=======
+>>>>>>> Finalize simple framebuffer
                     wasm.__wbg_function_table.get(3)(state.a, state.b);
+<<<<<<< HEAD
 >>>>>>> Add framebuffer wip
 >>>>>>> Add framebuffer wip
+||||||| constructed merge base
+>>>>>>> Add framebuffer wip
+=======
+>>>>>>> Finalize simple framebuffer
                     state.a = 0;
                 }
             }

@@ -15,7 +15,7 @@ export var DEFAULT_SHADER_ID = 0;
 export function initWre() {
     let shaderPromises = [];
     for (let i in SHADERS) {
-        shaderPromises.add(initShader(SHADERS[i]));
+        shaderPromises.push(initShader(SHADERS[i]));
     }
     return Promise.all(shaderPromises).then((_) => {
         wre.make_ready();

@@ -58,6 +58,8 @@ impl RenderSystem {
             return;
         }
 
+        self.frame_buffer.bind();
+
         wre_gl!().clear_color(0.0, 0.0, 0.0, 1.0);
         wre_gl!().clear(
             WebGl2RenderingContext::COLOR_BUFFER_BIT
@@ -66,16 +68,13 @@ impl RenderSystem {
         let (width, height) = DEFAULT_WINDOW_SIZE;
         wre_gl!().viewport(0, 0, width as i32, height as i32);
 
-        self.frame_buffer.bind();
-
         // Save a texture image of rendered meshes to the frame buffer
         self.render_meshes();
+        self.frame_buffer.unbind();
 
         // Splat that texture onto the viewport
         self.frame_buffer
             .render(self.get_shader_by_name("colorblur").unwrap());
-
-        self.frame_buffer.unbind();
     }
 
     /// Pass 1: Forward render all the meshes
@@ -150,6 +149,8 @@ impl RenderSystem {
                 0,
                 mesh.num_vertices,
             );
+
+            wre_gl!().use_program(None);
         }
     }
 

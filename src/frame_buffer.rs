@@ -14,10 +14,10 @@ use crate::mesh::Mesh;
 use crate::window::DEFAULT_WINDOW_SIZE;
 
 const SCREEN_QUAD_OBJ: &str = "
-v -0.500000 -0.500000 0.000000
-v 0.500000 -0.500000 0.000000
-v -0.500000 0.500000 0.000000
-v 0.500000 0.500000 0.000000
+v -1.000000 -1.000000 0.000000
+v 1.000000 -1.000000 0.000000
+v -1.000000 1.000000 0.000000
+v 1.000000 1.000000 0.000000
 vt 1.000000 0.000000
 vt 0.000000 1.000000
 vt 0.000000 0.000000
@@ -35,7 +35,7 @@ pub struct FrameBuffer {
 
 impl FrameBuffer {
     pub fn bind(&self) {
-        wre_gl!().enable(WebGl2RenderingContext::CULL_FACE);
+        // wre_gl!().enable(WebGl2RenderingContext::CULL_FACE);
         wre_gl!().bind_framebuffer(
             WebGl2RenderingContext::FRAMEBUFFER,
             Some(&self.fbo),
@@ -44,11 +44,11 @@ impl FrameBuffer {
 
     pub fn unbind(&self) {
         wre_gl!().bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
-        wre_gl!().disable(WebGl2RenderingContext::CULL_FACE);
+        // wre_gl!().disable(WebGl2RenderingContext::CULL_FACE);
     }
 
     pub fn render(&self, screen_quad_shader: &WebGlProgram) {
-        self.bind();
+        wre_gl!().bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
 
         // Disable depth testing for screen-space quad drawing
         wre_gl!().depth_mask(false);
@@ -58,33 +58,10 @@ impl FrameBuffer {
         let (width, height) = DEFAULT_WINDOW_SIZE;
         wre_gl!().viewport(0, 0, width as i32, height as i32);
 
-        // Clear the screen from the previous render pass
-        wre_gl!().clear(
-            WebGl2RenderingContext::COLOR_BUFFER_BIT
-                | WebGl2RenderingContext::DEPTH_BUFFER_BIT,
-        );
-
-        // Clear out the depth buffer bit
-        // wre_gl!().blit_framebuffer(
-        // 0,
-        // 0,
-        // width,
-        // height,
-        // 0,
-        // 0,
-        // width,
-        // height,
-        // )
-        wre_gl!().bind_framebuffer(
-            WebGl2RenderingContext::READ_FRAMEBUFFER,
-            Some(&self.fbo),
-        );
-        wre_gl!()
-            .bind_framebuffer(WebGl2RenderingContext::DRAW_FRAMEBUFFER, None);
-
         wre_gl!().use_program(Some(screen_quad_shader));
+        wre_gl!().bind_vertex_array(Some(&self.screen_quad_mesh.vao));
 
-        wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
+        wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE1);
         wre_gl!().bind_texture(
             WebGl2RenderingContext::TEXTURE_2D,
             Some(&self.screen_texture),
@@ -93,14 +70,15 @@ impl FrameBuffer {
         // Send the rendered texture to the graphics card
         let image_uniform_location =
             wre_gl!().get_uniform_location(screen_quad_shader, "uni_image");
-        wre_gl!().uniform1i(image_uniform_location.as_ref(), 0);
+        wre_gl!().uniform1i(image_uniform_location.as_ref(), 1);
 
         wre_gl!().draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, 6);
 
         wre_gl!().depth_mask(true);
         wre_gl!().enable(WebGl2RenderingContext::DEPTH_TEST);
 
-        self.unbind();
+        wre_gl!().bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
+        wre_gl!().use_program(None);
     }
 }
 
@@ -114,7 +92,7 @@ impl Default for FrameBuffer {
             error!("Invalid texture");
         }
 
-        wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
+        wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE1);
         wre_gl!().bind_texture(
             WebGl2RenderingContext::TEXTURE_2D,
             screen_texture.as_ref(),
@@ -141,8 +119,8 @@ impl Default for FrameBuffer {
             WebGl2RenderingContext::LINEAR as i32,
         );
 
+        // Initialize the empty frame buffer texture
         let (width, height) = DEFAULT_WINDOW_SIZE;
-        let buf = vec![0; width * height];
         wre_gl!().
             tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array
         (
@@ -154,9 +132,10 @@ impl Default for FrameBuffer {
             0,
             WebGl2RenderingContext::RGBA,
             WebGl2RenderingContext::UNSIGNED_BYTE,
-            Some(&buf)
+            None,
         ).unwrap();
 
+        // Create the framebuffer
         let fbo = wre_gl!()
             .create_framebuffer()
             .expect("Unable to create framebuffer");
@@ -169,6 +148,43 @@ impl Default for FrameBuffer {
             screen_texture.as_ref(),
             0,
         );
+
+        // Attach to framebuffer
+        let buffers = [WebGl2RenderingContext::COLOR_ATTACHMENT0];
+        unsafe {
+            let buffer_array = js_sys::Uint32Array::view(&buffers);
+            wre_gl!().draw_buffers(&buffer_array);
+        }
+
+        // Create the render buffer to store the frame buffer
+        let rbo = wre_gl!()
+            .create_renderbuffer()
+            .expect("Unable to create render buffer");
+        wre_gl!().bind_renderbuffer(
+            WebGl2RenderingContext::RENDERBUFFER,
+            Some(&rbo),
+        );
+        wre_gl!().renderbuffer_storage(
+            WebGl2RenderingContext::RENDERBUFFER,
+            WebGl2RenderingContext::DEPTH_COMPONENT16,
+            width as i32,
+            height as i32,
+        );
+        wre_gl!().framebuffer_renderbuffer(
+            WebGl2RenderingContext::FRAMEBUFFER,
+            WebGl2RenderingContext::DEPTH_ATTACHMENT,
+            WebGl2RenderingContext::RENDERBUFFER,
+            Some(&rbo),
+        );
+
+        let status = wre_gl!()
+            .check_framebuffer_status(WebGl2RenderingContext::FRAMEBUFFER);
+        if status != WebGl2RenderingContext::FRAMEBUFFER_COMPLETE {
+            error!("Framebuffer is incomplete: {:#06x}", status);
+            panic!();
+        }
+
+        wre_gl!().bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
 
         Self {
             fbo,
