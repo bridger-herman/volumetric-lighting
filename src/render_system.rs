@@ -75,12 +75,6 @@ impl RenderSystem {
         // Splat that texture onto the viewport
         self.frame_buffer
             .render(self.get_shader_by_name("colorblur").unwrap());
-
-        self.frame_buffer
-            .render(self.get_shader_by_name("colorblur").unwrap());
-
-        self.frame_buffer
-            .render(self.get_shader_by_name("colorblur").unwrap());
     }
 
     /// Pass 1: Forward render all the meshes

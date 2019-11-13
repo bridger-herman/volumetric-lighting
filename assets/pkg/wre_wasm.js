@@ -2,62 +2,12 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(11)(arg0, arg1);
+    wasm.__wbg_function_table.get(2)(arg0, arg1);
 }
-
-let WASM_VECTOR_LEN = 0;
-
-let cachedTextEncoder = new TextEncoder('utf-8');
-
-const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
-    ? function (arg, view) {
-    return cachedTextEncoder.encodeInto(arg, view);
-}
-    : function (arg, view) {
-    const buf = cachedTextEncoder.encode(arg);
-    view.set(buf);
-    return {
-        read: arg.length,
-        written: buf.length
-    };
-});
-
-let cachegetUint8Memory = null;
-function getUint8Memory() {
-    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
-        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
-    }
-    return cachegetUint8Memory;
-}
-
-function passStringToWasm(arg) {
-
-    let len = arg.length;
-    let ptr = wasm.__wbindgen_malloc(len);
-
-    const mem = getUint8Memory();
-
-    let offset = 0;
-
-    for (; offset < len; offset++) {
-        const code = arg.charCodeAt(offset);
-        if (code > 0x7F) break;
-        mem[ptr + offset] = code;
-    }
-
-    if (offset !== len) {
-        if (offset !== 0) {
-            arg = arg.slice(offset);
-        }
-        ptr = wasm.__wbindgen_realloc(ptr, len, len = offset + arg.length * 3);
-        const view = getUint8Memory().subarray(ptr + offset, ptr + len);
-        const ret = encodeString(arg, view);
-
-        offset += ret.written;
-    }
-
-    WASM_VECTOR_LEN = offset;
-    return ptr;
+/**
+*/
+export function start() {
+    wasm.start();
 }
 
 const heap = new Array(32);
@@ -81,52 +31,6 @@ function takeObject(idx) {
     dropObject(idx);
     return ret;
 }
-/**
-* @param {string} source
-* @returns {any}
-*/
-export function compile_vert_shader(source) {
-    const ret = wasm.compile_vert_shader(passStringToWasm(source), WASM_VECTOR_LEN);
-    return takeObject(ret);
-}
-
-/**
-* @param {string} source
-* @returns {any}
-*/
-export function compile_frag_shader(source) {
-    const ret = wasm.compile_frag_shader(passStringToWasm(source), WASM_VECTOR_LEN);
-    return takeObject(ret);
-}
-
-let stack_pointer = 32;
-
-function addBorrowedObject(obj) {
-    if (stack_pointer == 1) throw new Error('out of js stack');
-    heap[--stack_pointer] = obj;
-    return stack_pointer;
-}
-/**
-* @param {any} vert_shader
-* @param {any} frag_shader
-* @returns {any}
-*/
-export function link_shader_program(vert_shader, frag_shader) {
-    try {
-        const ret = wasm.link_shader_program(addBorrowedObject(vert_shader), addBorrowedObject(frag_shader));
-        return takeObject(ret);
-    } finally {
-        heap[stack_pointer++] = undefined;
-        heap[stack_pointer++] = undefined;
-    }
-}
-
-/**
-*/
-export function start() {
-    wasm.start();
-}
-
 /**
 * @returns {any}
 */
@@ -184,6 +88,60 @@ export function add_script(eid, script) {
     wasm.add_script(eid, addHeapObject(script));
 }
 
+let WASM_VECTOR_LEN = 0;
+
+let cachedTextEncoder = new TextEncoder('utf-8');
+
+const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
+    ? function (arg, view) {
+    return cachedTextEncoder.encodeInto(arg, view);
+}
+    : function (arg, view) {
+    const buf = cachedTextEncoder.encode(arg);
+    view.set(buf);
+    return {
+        read: arg.length,
+        written: buf.length
+    };
+});
+
+let cachegetUint8Memory = null;
+function getUint8Memory() {
+    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
+        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
+    }
+    return cachegetUint8Memory;
+}
+
+function passStringToWasm(arg) {
+
+    let len = arg.length;
+    let ptr = wasm.__wbindgen_malloc(len);
+
+    const mem = getUint8Memory();
+
+    let offset = 0;
+
+    for (; offset < len; offset++) {
+        const code = arg.charCodeAt(offset);
+        if (code > 0x7F) break;
+        mem[ptr + offset] = code;
+    }
+
+    if (offset !== len) {
+        if (offset !== 0) {
+            arg = arg.slice(offset);
+        }
+        ptr = wasm.__wbindgen_realloc(ptr, len, len = offset + arg.length * 3);
+        const view = getUint8Memory().subarray(ptr + offset, ptr + len);
+        const ret = encodeString(arg, view);
+
+        offset += ret.written;
+    }
+
+    WASM_VECTOR_LEN = offset;
+    return ptr;
+}
 /**
 * @param {string} name
 * @param {any} program
@@ -238,6 +196,45 @@ export function make_ready() {
 
 function isLikeNone(x) {
     return x === undefined || x === null;
+}
+/**
+* @param {string} source
+* @returns {any}
+*/
+export function compile_vert_shader(source) {
+    const ret = wasm.compile_vert_shader(passStringToWasm(source), WASM_VECTOR_LEN);
+    return takeObject(ret);
+}
+
+/**
+* @param {string} source
+* @returns {any}
+*/
+export function compile_frag_shader(source) {
+    const ret = wasm.compile_frag_shader(passStringToWasm(source), WASM_VECTOR_LEN);
+    return takeObject(ret);
+}
+
+let stack_pointer = 32;
+
+function addBorrowedObject(obj) {
+    if (stack_pointer == 1) throw new Error('out of js stack');
+    heap[--stack_pointer] = obj;
+    return stack_pointer;
+}
+/**
+* @param {any} vert_shader
+* @param {any} frag_shader
+* @returns {any}
+*/
+export function link_shader_program(vert_shader, frag_shader) {
+    try {
+        const ret = wasm.link_shader_program(addBorrowedObject(vert_shader), addBorrowedObject(frag_shader));
+        return takeObject(ret);
+    } finally {
+        heap[stack_pointer++] = undefined;
+        heap[stack_pointer++] = undefined;
+    }
 }
 
 let cachegetFloat32Memory = null;
@@ -628,6 +625,15 @@ export class Mat2 {
     * @param {Mat2} other
     * @returns {Mat2}
     */
+    sub_mat2(other) {
+        _assertClass(other, Mat2);
+        const ret = wasm.mat2_sub_mat2(this.ptr, other.ptr);
+        return Mat2.__wrap(ret);
+    }
+    /**
+    * @param {Mat2} other
+    * @returns {Mat2}
+    */
     add_mat2(other) {
         _assertClass(other, Mat2);
         const ret = wasm.mat2_add_mat2(this.ptr, other.ptr);
@@ -654,15 +660,6 @@ export class Mat2 {
         const ptr1 = y_axis.ptr;
         y_axis.ptr = 0;
         const ret = wasm.mat2_new(ptr0, ptr1);
-        return Mat2.__wrap(ret);
-    }
-    /**
-    * @param {Mat2} other
-    * @returns {Mat2}
-    */
-    sub_mat2(other) {
-        _assertClass(other, Mat2);
-        const ret = wasm.mat2_sub_mat2(this.ptr, other.ptr);
         return Mat2.__wrap(ret);
     }
 }
@@ -3800,12 +3797,12 @@ function init(module) {
         const ret = false;
         return ret;
     };
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
-    };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         const ret = getStringFromWasm(arg0, arg1);
         return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
+        getObject(arg0).updateWrapper();
     };
     imports.wbg.__widl_instanceof_Window = function(arg0) {
         const ret = getObject(arg0) instanceof Window;
@@ -4098,7 +4095,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper123 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper105 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -4106,7 +4103,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-                    wasm.__wbg_function_table.get(12)(state.a, state.b);
+                    wasm.__wbg_function_table.get(3)(state.a, state.b);
                     state.a = 0;
                 }
             }
