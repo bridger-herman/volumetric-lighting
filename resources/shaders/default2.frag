@@ -35,5 +35,10 @@ void main() {
     // specular color
     out_color += in_color.xyz * pow(max(dot(h, n), 0.0), 10.0);
 
-    frag_color = vec4(out_color, 1.0);
+    if (uni_color.a == 0.5) {
+        frag_color = vec4(out_color, 0.5);
+    }
+    else {
+        frag_color = vec4(out_color, 1.0);
+    }
 }
