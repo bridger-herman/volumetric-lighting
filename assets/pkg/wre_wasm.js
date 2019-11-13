@@ -2,59 +2,62 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    wasm.__wbg_function_table.get(7)(arg0, arg1);
-||||||| constructed merge base
-    wasm.__wbg_function_table.get(33)(arg0, arg1);
+    wasm.__wbg_function_table.get(9)(arg0, arg1);
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
+let WASM_VECTOR_LEN = 0;
+
+let cachedTextEncoder = new TextEncoder('utf-8');
+
+const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
+    ? function (arg, view) {
+    return cachedTextEncoder.encodeInto(arg, view);
+}
+    : function (arg, view) {
+    const buf = cachedTextEncoder.encode(arg);
+    view.set(buf);
+    return {
+        read: arg.length,
+        written: buf.length
+    };
+});
+
+let cachegetUint8Memory = null;
+function getUint8Memory() {
+    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
+        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
     }
-    return instance.ptr;
-=======
-<<<<<<< HEAD
-    wasm.__wbg_function_table.get(33)(arg0, arg1);
+    return cachegetUint8Memory;
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-    return instance.ptr;
-||||||| constructed merge base
-    wasm.__wbg_function_table.get(48)(arg0, arg1);
-=======
-||||||| constructed merge base
-<<<<<<< HEAD
-    wasm.__wbg_function_table.get(33)(arg0, arg1);
-}
+function passStringToWasm(arg) {
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
+    let len = arg.length;
+    let ptr = wasm.__wbindgen_malloc(len);
+
+    const mem = getUint8Memory();
+
+    let offset = 0;
+
+    for (; offset < len; offset++) {
+        const code = arg.charCodeAt(offset);
+        if (code > 0x7F) break;
+        mem[ptr + offset] = code;
     }
-    return instance.ptr;
-||||||| constructed merge base
-    wasm.__wbg_function_table.get(48)(arg0, arg1);
-=======
-=======
->>>>>>> Finalize simple framebuffer
-    wasm.__wbg_function_table.get(2)(arg0, arg1);
-<<<<<<< HEAD
->>>>>>> Add framebuffer wip
->>>>>>> Add framebuffer wip
-||||||| constructed merge base
->>>>>>> Add framebuffer wip
-=======
->>>>>>> Finalize simple framebuffer
-}
-/**
-*/
-export function start() {
-    wasm.start();
+
+    if (offset !== len) {
+        if (offset !== 0) {
+            arg = arg.slice(offset);
+        }
+        ptr = wasm.__wbindgen_realloc(ptr, len, len = offset + arg.length * 3);
+        const view = getUint8Memory().subarray(ptr + offset, ptr + len);
+        const ret = encodeString(arg, view);
+
+        offset += ret.written;
+    }
+
+    WASM_VECTOR_LEN = offset;
+    return ptr;
 }
 
 const heap = new Array(32);
@@ -78,6 +81,52 @@ function takeObject(idx) {
     dropObject(idx);
     return ret;
 }
+/**
+* @param {string} source
+* @returns {any}
+*/
+export function compile_vert_shader(source) {
+    const ret = wasm.compile_vert_shader(passStringToWasm(source), WASM_VECTOR_LEN);
+    return takeObject(ret);
+}
+
+/**
+* @param {string} source
+* @returns {any}
+*/
+export function compile_frag_shader(source) {
+    const ret = wasm.compile_frag_shader(passStringToWasm(source), WASM_VECTOR_LEN);
+    return takeObject(ret);
+}
+
+let stack_pointer = 32;
+
+function addBorrowedObject(obj) {
+    if (stack_pointer == 1) throw new Error('out of js stack');
+    heap[--stack_pointer] = obj;
+    return stack_pointer;
+}
+/**
+* @param {any} vert_shader
+* @param {any} frag_shader
+* @returns {any}
+*/
+export function link_shader_program(vert_shader, frag_shader) {
+    try {
+        const ret = wasm.link_shader_program(addBorrowedObject(vert_shader), addBorrowedObject(frag_shader));
+        return takeObject(ret);
+    } finally {
+        heap[stack_pointer++] = undefined;
+        heap[stack_pointer++] = undefined;
+    }
+}
+
+/**
+*/
+export function start() {
+    wasm.start();
+}
+
 /**
 * @returns {any}
 */
@@ -135,60 +184,6 @@ export function add_script(eid, script) {
     wasm.add_script(eid, addHeapObject(script));
 }
 
-let WASM_VECTOR_LEN = 0;
-
-let cachedTextEncoder = new TextEncoder('utf-8');
-
-const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
-    ? function (arg, view) {
-    return cachedTextEncoder.encodeInto(arg, view);
-}
-    : function (arg, view) {
-    const buf = cachedTextEncoder.encode(arg);
-    view.set(buf);
-    return {
-        read: arg.length,
-        written: buf.length
-    };
-});
-
-let cachegetUint8Memory = null;
-function getUint8Memory() {
-    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
-        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
-    }
-    return cachegetUint8Memory;
-}
-
-function passStringToWasm(arg) {
-
-    let len = arg.length;
-    let ptr = wasm.__wbindgen_malloc(len);
-
-    const mem = getUint8Memory();
-
-    let offset = 0;
-
-    for (; offset < len; offset++) {
-        const code = arg.charCodeAt(offset);
-        if (code > 0x7F) break;
-        mem[ptr + offset] = code;
-    }
-
-    if (offset !== len) {
-        if (offset !== 0) {
-            arg = arg.slice(offset);
-        }
-        ptr = wasm.__wbindgen_realloc(ptr, len, len = offset + arg.length * 3);
-        const view = getUint8Memory().subarray(ptr + offset, ptr + len);
-        const ret = encodeString(arg, view);
-
-        offset += ret.written;
-    }
-
-    WASM_VECTOR_LEN = offset;
-    return ptr;
-}
 /**
 * @param {string} name
 * @param {any} program
@@ -243,45 +238,6 @@ export function make_ready() {
 
 function isLikeNone(x) {
     return x === undefined || x === null;
-}
-/**
-* @param {string} source
-* @returns {any}
-*/
-export function compile_vert_shader(source) {
-    const ret = wasm.compile_vert_shader(passStringToWasm(source), WASM_VECTOR_LEN);
-    return takeObject(ret);
-}
-
-/**
-* @param {string} source
-* @returns {any}
-*/
-export function compile_frag_shader(source) {
-    const ret = wasm.compile_frag_shader(passStringToWasm(source), WASM_VECTOR_LEN);
-    return takeObject(ret);
-}
-
-let stack_pointer = 32;
-
-function addBorrowedObject(obj) {
-    if (stack_pointer == 1) throw new Error('out of js stack');
-    heap[--stack_pointer] = obj;
-    return stack_pointer;
-}
-/**
-* @param {any} vert_shader
-* @param {any} frag_shader
-* @returns {any}
-*/
-export function link_shader_program(vert_shader, frag_shader) {
-    try {
-        const ret = wasm.link_shader_program(addBorrowedObject(vert_shader), addBorrowedObject(frag_shader));
-        return takeObject(ret);
-    } finally {
-        heap[stack_pointer++] = undefined;
-        heap[stack_pointer++] = undefined;
-    }
 }
 
 let cachegetFloat32Memory = null;
@@ -3824,80 +3780,6 @@ function init(module) {
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
     };
-<<<<<<< HEAD
-<<<<<<< HEAD
-||||||| constructed merge base
-    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-        const ret = getObject(arg0);
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
-        const ret = getStringFromWasm(arg0, arg1);
-        return addHeapObject(ret);
-    };
-<<<<<<< Updated upstream
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
-=======
-=======
-    imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
-        const ret = JSON.parse(getStringFromWasm(arg0, arg1));
-||||||| constructed merge base
-    imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
-        const ret = JSON.parse(getStringFromWasm(arg0, arg1));
-=======
-    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-        const ret = getObject(arg0);
->>>>>>> Finalize simple framebuffer
-        return addHeapObject(ret);
-    };
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
-=======
->>>>>>> Add framebuffer wip
-||||||| constructed merge base
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
-=======
-=======
->>>>>>> Finalize simple framebuffer
-    imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
-        const ret = JSON.parse(getStringFromWasm(arg0, arg1));
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_cb_forget = function(arg0) {
-        takeObject(arg0);
-<<<<<<< HEAD
-<<<<<<< HEAD
-||||||| constructed merge base
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-||||||| constructed merge base
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
-=======
-    imports.wbg.__wbindgen_cb_forget = function(arg0) {
-        takeObject(arg0);
->>>>>>> Add framebuffer wip
->>>>>>> Add framebuffer wip
-||||||| constructed merge base
->>>>>>> Stashed changes
-||||||| constructed merge base
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
-=======
-    imports.wbg.__wbindgen_cb_forget = function(arg0) {
-        takeObject(arg0);
->>>>>>> Add framebuffer wip
-=======
->>>>>>> Finalize simple framebuffer
-    };
     imports.wbg.__wbindgen_cb_drop = function(arg0) {
         const obj = takeObject(arg0).original;
         if (obj.cnt-- == 1) {
@@ -3907,60 +3789,24 @@ function init(module) {
         const ret = false;
         return ret;
     };
-<<<<<<< HEAD
-<<<<<<< HEAD
+    imports.wbg.__wbindgen_cb_forget = function(arg0) {
+        takeObject(arg0);
+    };
     imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
         getObject(arg0).updateWrapper();
     };
-||||||| constructed merge base
-=======
-<<<<<<< HEAD
->>>>>>> Add framebuffer wip
-    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-        const ret = getObject(arg0);
-        return addHeapObject(ret);
-||||||| constructed merge base
-    imports.wbg.__wbindgen_cb_forget = function(arg0) {
-        takeObject(arg0);
-=======
-||||||| constructed merge base
-<<<<<<< HEAD
-    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-        const ret = getObject(arg0);
-        return addHeapObject(ret);
-||||||| constructed merge base
-    imports.wbg.__wbindgen_cb_forget = function(arg0) {
-        takeObject(arg0);
-=======
-=======
->>>>>>> Finalize simple framebuffer
-    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
-        const ret = getStringFromWasm(arg0, arg1);
-        return addHeapObject(ret);
-    };
-<<<<<<< HEAD
-    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
-        const ret = getStringFromWasm(arg0, arg1);
-||||||| constructed merge base
     imports.wbg.__wbindgen_json_parse = function(arg0, arg1) {
         const ret = JSON.parse(getStringFromWasm(arg0, arg1));
-=======
-    imports.wbg.__wbg_updateWrapper_580cfe9e04d01cef = function(arg0) {
-        getObject(arg0).updateWrapper();
-    };
-<<<<<<< HEAD
-    imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-        const ret = getObject(arg0);
->>>>>>> Add framebuffer wip
         return addHeapObject(ret);
     };
-||||||| constructed merge base
+    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
+        const ret = getStringFromWasm(arg0, arg1);
+        return addHeapObject(ret);
+    };
     imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
         const ret = getObject(arg0);
         return addHeapObject(ret);
     };
-=======
->>>>>>> Finalize simple framebuffer
     imports.wbg.__widl_instanceof_Window = function(arg0) {
         const ret = getObject(arg0) instanceof Window;
         return ret;
@@ -4252,43 +4098,7 @@ function init(module) {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-<<<<<<< HEAD
-<<<<<<< HEAD
-    imports.wbg.__wbindgen_closure_wrapper90 = function(arg0, arg1, arg2) {
-||||||| constructed merge base
-<<<<<<< Updated upstream
-    imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
-=======
-    imports.wbg.__wbindgen_closure_wrapper193 = function(arg0, arg1, arg2) {
->>>>>>> Stashed changes
-=======
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
-=======
-    imports.wbg.__wbindgen_closure_wrapper193 = function(arg0, arg1, arg2) {
->>>>>>> Stashed changes
-||||||| constructed merge base
-    imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
-=======
-    imports.wbg.__wbindgen_closure_wrapper91 = function(arg0, arg1, arg2) {
->>>>>>> Add framebuffer wip
->>>>>>> Add framebuffer wip
-||||||| constructed merge base
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
-=======
-    imports.wbg.__wbindgen_closure_wrapper193 = function(arg0, arg1, arg2) {
->>>>>>> Stashed changes
-||||||| constructed merge base
-    imports.wbg.__wbindgen_closure_wrapper247 = function(arg0, arg1, arg2) {
-=======
-    imports.wbg.__wbindgen_closure_wrapper91 = function(arg0, arg1, arg2) {
->>>>>>> Add framebuffer wip
-=======
-    imports.wbg.__wbindgen_closure_wrapper105 = function(arg0, arg1, arg2) {
->>>>>>> Finalize simple framebuffer
+    imports.wbg.__wbindgen_closure_wrapper113 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -4296,45 +4106,7 @@ function init(module) {
                 return __wbg_elem_binding0(state.a, state.b, );
             } finally {
                 if (--state.cnt === 0) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    wasm.__wbg_function_table.get(8)(state.a, state.b);
-||||||| constructed merge base
-<<<<<<< Updated upstream
-                    wasm.__wbg_function_table.get(49)(state.a, state.b);
-=======
-                    wasm.__wbg_function_table.get(34)(state.a, state.b);
->>>>>>> Stashed changes
-=======
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-                    wasm.__wbg_function_table.get(49)(state.a, state.b);
-=======
-                    wasm.__wbg_function_table.get(34)(state.a, state.b);
->>>>>>> Stashed changes
-||||||| constructed merge base
-                    wasm.__wbg_function_table.get(49)(state.a, state.b);
-=======
-||||||| constructed merge base
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-                    wasm.__wbg_function_table.get(49)(state.a, state.b);
-=======
-                    wasm.__wbg_function_table.get(34)(state.a, state.b);
->>>>>>> Stashed changes
-||||||| constructed merge base
-                    wasm.__wbg_function_table.get(49)(state.a, state.b);
-=======
-=======
->>>>>>> Finalize simple framebuffer
-                    wasm.__wbg_function_table.get(3)(state.a, state.b);
-<<<<<<< HEAD
->>>>>>> Add framebuffer wip
->>>>>>> Add framebuffer wip
-||||||| constructed merge base
->>>>>>> Add framebuffer wip
-=======
->>>>>>> Finalize simple framebuffer
+                    wasm.__wbg_function_table.get(10)(state.a, state.b);
                     state.a = 0;
                 }
             }
