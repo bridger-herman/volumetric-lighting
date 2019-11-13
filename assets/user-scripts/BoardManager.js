@@ -80,7 +80,10 @@ export class BoardManager extends WreScript {
                 script.setKeyframe(endTransform, 1.0);
 
                 wre.add_script(eid, script);
+
+                // add this entity to the board and collection of eids
                 this._board[this._currentColor].push(boardCoords);
+                this._color_eids[this._currentColor].push(eid);
 
                 let win = Object.values(this._board).every((v) => v.length == 9);
                 if (win) {
@@ -173,6 +176,7 @@ export class BoardManager extends WreScript {
 
         this._upperLeft = topLeft.add(imagePlaneCenter);
 
+        // defining _colors instance variable
         this._colors = {
             "red": [0.584314, 0.109804, 0.0745098, 1.0],
             "orange": [0.666667, 0.278431, 0.0235294, 1.0],
@@ -183,6 +187,19 @@ export class BoardManager extends WreScript {
             "darkBlue": [0.121569, 0.345098, 0.596078, 1.0],
             "lightPurple": [0.45098, 0.380392, 0.560784, 1.0],
             "darkPurple": [0.2, 0.0823529, 0.317647, 1.0],
+        };
+
+        // defining _color_eids instance variable
+        this._color_eids = {
+            "red": [],
+            "orange": [],
+            "yellow": [],
+            "lightGreen": [],
+            "darkGreen": [],
+            "lightBlue": [],
+            "darkBlue": [],
+            "lightPurple": [],
+            "darkPurple": []
         };
 
         for (let colorName in this._colors) {
@@ -208,7 +225,8 @@ export class BoardManager extends WreScript {
                     buttons[i].style['background-color'] = '#000';
                 }
 
-                this._currentColor = clicked.id;
+                // change the background color of the currently clicked button
+                this._currentColor = clicked.id;    // id = string(color name)
                 clicked.style['background-color'] = '#DDD';
             });
         }
@@ -240,12 +258,54 @@ export class BoardManager extends WreScript {
                         this._colors[color][3],
                     ));
                     wre.set_entity(sphere, sphereEntity);
+
+                    // add this eid to our collection
+                    this._color_eids[color].push(sphere);
                 }
             }
         })
     }
 
     update() {
+        // loop through the pieces and change the alphas of all
+        // pieces back to 1.0
+        for (let color in this._color_eids) {
+            let eids = this._color_eids[color];
+
+            for(let j in eids) {
+                let eid = eids[j];
+                let entity = wre.get_entity(eid);
+
+                // make alpha 0.5 to indicate that we should blur this
+                entity.material = new wre.Material(DEFAULT_SHADER_ID,
+                    new wre.Vec4(
+                        this._colors[color][0],
+                        this._colors[color][1],
+                        this._colors[color][2],
+                        1.0
+                ));
+                wre.set_entity(eid, entity);
+            }
+        }
+
+        // loop through the pieces and change the alphas to 0.5 for all
+        // pieces that are the same color as currentColor
+        let matching_pieces = this._color_eids[this._currentColor];
+
+        for (let i in matching_pieces) {
+            let eid = matching_pieces[i];
+            let entity = wre.get_entity(eid);
+
+            // make alpha 0.5 to indicate that we should blur this
+            entity.material = new wre.Material(DEFAULT_SHADER_ID,
+                new wre.Vec4(
+                    this._colors[this._currentColor][0],
+                    this._colors[this._currentColor][1],
+                    this._colors[this._currentColor][2],
+                    0.5
+            ));
+            wre.set_entity(eid, entity);
+        }
     }
 }
 
