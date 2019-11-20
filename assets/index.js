@@ -10,7 +10,6 @@
 import { importWasm } from './loadWasm.js';
 import { initWre, loadTextResource, loadImage } from './wre.js'
 import { loadSceneAsync } from './scene.js'
-import { MoveTest } from './user-scripts/moveTest.js'
 import * as wre from './pkg/wre_wasm.js';
 
 

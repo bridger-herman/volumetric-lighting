@@ -9,7 +9,6 @@
 
 import * as wre from './pkg/wre_wasm.js'
 import { loadTextResource, loadImage, WreScript, DEFAULT_SHADER_ID } from './wre.js'
-import { MoveTest } from './user-scripts/moveTest.js'
 import { BoardManager } from './user-scripts/BoardManager.js'
 
 export async function loadSceneAsync(scenePath) {
