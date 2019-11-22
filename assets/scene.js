@@ -32,29 +32,39 @@ export async function loadSceneAsync(scenePath) {
         let entity = wre.get_entity(eid);
         let tf = entity.transform;
 
-        tf.position = new wre.Vec3(
-            sceneEntity.position[0],
-            sceneEntity.position[1],
-            sceneEntity.position[2],
-        );
-        tf.rotation = wre.Quat.from_rotation_ypr(
-            sceneEntity.rotation[1],
-            sceneEntity.rotation[0],
-            sceneEntity.rotation[2],
-        );
-        tf.scale = new wre.Vec3(
-            sceneEntity.scale[0],
-            sceneEntity.scale[1],
-            sceneEntity.scale[2],
-        );
+        if (typeof sceneEntity.position !== 'undefined') {
+            tf.position = new wre.Vec3(
+                sceneEntity.position[0],
+                sceneEntity.position[1],
+                sceneEntity.position[2],
+            );
+        }
+        if (typeof sceneEntity.rotation !== 'undefined') {
+            tf.rotation = wre.Quat.from_rotation_ypr(
+                sceneEntity.rotation[1],
+                sceneEntity.rotation[0],
+                sceneEntity.rotation[2],
+            );
+        }
+        if (typeof sceneEntity.scale !== 'undefined') {
+            tf.scale = new wre.Vec3(
+                sceneEntity.scale[0],
+                sceneEntity.scale[1],
+                sceneEntity.scale[2],
+            );
+        }
 
+        let color = wre.Vec4.zero();
+        if (typeof sceneEntity.color !== 'undefined') {
+            color = new wre.Vec4(
+                sceneEntity.color[0],
+                sceneEntity.color[1],
+                sceneEntity.color[2],
+                sceneEntity.color[3],
+            );
+        }
 
-        entity.material = new wre.Material(DEFAULT_SHADER_ID, new wre.Vec4(
-            sceneEntity.color[0],
-            sceneEntity.color[1],
-            sceneEntity.color[2],
-            sceneEntity.color[3],
-        ), texId);
+        entity.material = new wre.Material(DEFAULT_SHADER_ID, color, texId);
         entity.transform = tf;
         wre.set_entity(eid, entity);
 

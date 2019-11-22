@@ -1,4 +1,4 @@
-// frame.rs
+// time.rs
 //
 // Copyright (c) 2019, Univerisity of Minnesota
 //
@@ -14,7 +14,7 @@ use instant::Instant;
 use crate::traits::Update;
 
 #[derive(Debug)]
-pub struct FrameTimer {
+pub struct WreTime {
     current_time: Instant,
     pub dt: Duration,
     previous_time: Instant,
@@ -22,7 +22,7 @@ pub struct FrameTimer {
     frame_counter: usize,
 }
 
-impl FrameTimer {
+impl WreTime {
     pub fn second_elapsed(&mut self) -> Option<(usize, Duration)> {
         if self.current_time > self.fps_time + Duration::from_secs(1) {
             let fc = self.frame_counter;
@@ -35,7 +35,7 @@ impl FrameTimer {
     }
 }
 
-impl Default for FrameTimer {
+impl Default for WreTime {
     fn default() -> Self {
         Self {
             current_time: Instant::now(),
@@ -47,7 +47,7 @@ impl Default for FrameTimer {
     }
 }
 
-impl Update for FrameTimer {
+impl Update for WreTime {
     fn update(&mut self) {
         self.current_time = Instant::now();
         self.dt = self.current_time - self.previous_time;

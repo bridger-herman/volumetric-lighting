@@ -7,9 +7,9 @@
 //! Useful and necessary macros for the Wasm Rendering Engine
 
 #[macro_export]
-macro_rules! wre_frame {
+macro_rules! wre_time {
     () => {
-        *crate::state::WRE_FRAME.try_lock().unwrap()
+        *crate::state::WRE_TIME.try_lock().unwrap()
     };
 }
 

@@ -17,9 +17,7 @@ pub mod macros;
 
 pub mod entity;
 pub mod entity_manager;
-pub mod frame;
 pub mod frame_buffer;
-pub mod frame_timer;
 pub mod material;
 pub mod mesh;
 pub mod render_system;
@@ -27,6 +25,7 @@ pub mod script_manager;
 pub mod shader;
 pub mod state;
 pub mod texture;
+pub mod time;
 pub mod traits;
 pub mod transform;
 pub mod window;
@@ -51,10 +50,13 @@ pub fn start() -> Result<(), JsValue> {
     info!("Initialized window with target {}fps", TARGET_FPS);
 
     info!("{:?}", wre_render_system!().meshes());
-    // render_system::init()?;
-    // info!("Initialized WebGL render system");
 
     Ok(())
+}
+
+#[wasm_bindgen]
+pub fn time_dt() -> JsValue {
+    JsValue::from_serde(&wre_time!().dt).unwrap()
 }
 
 #[wasm_bindgen]

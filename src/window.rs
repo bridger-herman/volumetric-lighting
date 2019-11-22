@@ -28,9 +28,11 @@ pub fn init(target_fps: i32) -> Result<(), JsValue> {
 }
 
 pub fn one_frame() {
-    wre_frame!().timer.update();
+    wre_time!().update();
 
-    set_title(&format!("{} | dt = {:?}", TITLE, wre_frame!().timer.dt));
+    if let Some((fps, dt)) = wre_time!().second_elapsed() {
+        set_title(&format!("{} | {:?}fps, dt = {:?}", TITLE, fps, dt));
+    }
 
     wre_scripts!().update();
     wre_render_system!().render();
