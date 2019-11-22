@@ -6,7 +6,7 @@
 
 //! Transformation matrix for 3-space, stored in a 4x4 matrix
 
-use glam::{Mat4, Quat, Vec3};
+use glam::{Mat4, Quat, Vec3, Vec4};
 
 use wasm_bindgen::prelude::*;
 
@@ -109,5 +109,34 @@ impl Transform {
             self.rotation,
             self.position,
         );
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn right(&self) -> Vec3 {
+        self.matrix.x_axis().truncate()
+    }
+    #[wasm_bindgen(getter)]
+    pub fn up(&self) -> Vec3 {
+        self.matrix.y_axis().truncate()
+    }
+    #[wasm_bindgen(getter)]
+    pub fn forward(&self) -> Vec3 {
+        self.matrix.z_axis().truncate()
+    }
+
+    pub fn set_basis(&mut self, right: &Vec3, up: &Vec3, forward: &Vec3) {
+        self.matrix.set_x_axis(right.extend(0.0));
+        self.matrix.set_y_axis(up.extend(0.0));
+        self.matrix.set_z_axis(forward.extend(0.0));
+
+        // Extract the scale and rotation from the matrix
+        let scale = Vec3::new(self.matrix.x_axis().length(), self.matrix.y_axis().length(), self.matrix.z_axis().length());
+        let rotation_matrix = Mat4::new(
+            Vec4::new(self.matrix.x_axis().0 / scale.x(), self.matrix.x_axis().1 / scale.y(), self.matrix.x_axis().2 / scale.z(), 0.0),
+            Vec4::new(self.matrix.y_axis().0 / scale.x(), self.matrix.y_axis().1 / scale.y(), self.matrix.y_axis().2 / scale.z(), 0.0),
+            Vec4::new(self.matrix.z_axis().0 / scale.x(), self.matrix.z_axis().1 / scale.y(), self.matrix.z_axis().2 / scale.z(), 0.0),
+            Vec4::unit_w(),
+        );
+        self.rotation = Quat::from_rotation_mat4(&rotation_matrix);
     }
 }

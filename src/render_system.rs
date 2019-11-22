@@ -113,6 +113,16 @@ impl RenderSystem {
                 &normal_matrix.to_flat_vec(),
             );
 
+            // Send the camera's view matrix to the GPU
+            let view_matrix = wre_camera!().transform().matrix();
+            let view_uniform_location =
+                wre_gl!().get_uniform_location(shader, "uni_view");
+            wre_gl!().uniform_matrix4fv_with_f32_array(
+                view_uniform_location.as_ref(),
+                false,
+                &view_matrix.to_flat_vec(),
+            );
+
             // Send the material's color to the GPU
             let color: [f32; 4] =
                 wre_entities!(mesh.attached_to.unwrap_or_default())

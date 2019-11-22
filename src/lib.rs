@@ -15,6 +15,7 @@ extern crate png;
 #[macro_use]
 pub mod macros;
 
+pub mod camera;
 pub mod entity;
 pub mod entity_manager;
 pub mod frame_buffer;
@@ -37,7 +38,7 @@ use crate::entity::{Entity, EntityId};
 use crate::script_manager::WreScript;
 use crate::texture::TextureId;
 
-pub use glam::{Mat4, Quat, Vec3};
+pub use glam::{Mat4, Quat, Vec3, Vec2};
 
 const TARGET_FPS: i32 = 30;
 
@@ -57,6 +58,21 @@ pub fn start() -> Result<(), JsValue> {
 #[wasm_bindgen]
 pub fn time_dt() -> JsValue {
     JsValue::from_serde(&wre_time!().dt).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn start_moving_camera(direction: Vec3) {
+    wre_camera!().start_moving(direction);
+}
+
+#[wasm_bindgen]
+pub fn stop_moving_camera() {
+    wre_camera!().stop_moving();
+}
+
+#[wasm_bindgen]
+pub fn add_camera_rotation(delta: Vec2) {
+    wre_camera!().add_rotation(delta);
 }
 
 #[wasm_bindgen]

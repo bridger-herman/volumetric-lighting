@@ -12,7 +12,52 @@ import * as wre from './pkg/wre_wasm.js';
 export const SHADERS = ['phong_forward', 'colorblur'];
 export var DEFAULT_SHADER_ID = 0;
 
+function initCamera() {
+    let oldMousePosition = wre.Vec2.zero();
+
+    // Listen for mouse moves so we can move the camera
+    document.addEventListener('mousemove', (evt) => {
+        let currentMousePosition = new wre.Vec2((evt.clientY -
+            window.outerHeight / 2.0), (evt.clientX - window.outerWidth /
+                2.0));
+        let mouseDelta = currentMousePosition.sub(oldMousePosition);
+        wre.add_camera_rotation(mouseDelta);
+        oldMousePosition = currentMousePosition;
+    });
+
+    // Listen for keyboard events to start moving the camera
+    document.addEventListener('keydown', (evt) => {
+        switch (evt.key) {
+            case 'w':
+                wre.start_moving_camera(wre.Vec3.unit_z()); break;
+            case 'a':
+                wre.start_moving_camera(wre.Vec3.unit_x()); break;
+            case 's':
+                wre.start_moving_camera(wre.Vec3.unit_z().neg()); break;
+            case 'd':
+                wre.start_moving_camera(wre.Vec3.unit_x().neg()); break;
+            default: 
+                break;
+        }
+    });
+
+    // Listen for keyboard events to stop moving the camera
+    document.addEventListener('keyup', (evt) => {
+        switch (evt.key) {
+            case 'w':
+            case 'a':
+            case 's':
+            case 'd':
+                wre.stop_moving_camera();
+            default: 
+                break;
+        }
+    });
+}
+
 export function initWre() {
+    initCamera();
+
     let shaderPromises = [];
     for (let i in SHADERS) {
         shaderPromises.push(initShader(SHADERS[i]));

@@ -35,6 +35,7 @@ pub fn one_frame() {
     }
 
     wre_scripts!().update();
+    wre_camera!().update();
     wre_render_system!().render();
 }
 
