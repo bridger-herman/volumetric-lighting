@@ -17,6 +17,7 @@ use crate::texture::TextureId;
 pub struct Material {
     pub shader_id: usize,
     pub color: Vec4,
+    pub specular: Vec4,
     pub texture_id: Option<TextureId>,
 }
 
@@ -26,11 +27,19 @@ impl Material {
     pub fn new(
         shader_id: usize,
         color: Vec4,
+        specular: Option<Vec4>,
         texture_id: Option<TextureId>,
     ) -> Self {
+        let specular = specular.unwrap_or(Vec4::new(
+            color.x(),
+            color.y(),
+            color.z(),
+            100.0,
+        ));
         Self {
             shader_id,
             color,
+            specular,
             texture_id,
         }
     }

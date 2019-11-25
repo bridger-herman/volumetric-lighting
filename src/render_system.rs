@@ -6,11 +6,13 @@
 
 //! Renders with WebGL, using wasm-bindgen and web-sys
 
+use glam::Vec3;
 use wasm_bindgen::JsCast;
 use web_sys::{WebGl2RenderingContext, WebGlProgram};
 
 use crate::entity::EntityId;
 use crate::frame_buffer::FrameBuffer;
+use crate::light::PointLight;
 use crate::mesh::Mesh;
 use crate::texture::{Texture, TextureId};
 use crate::window::DEFAULT_WINDOW_SIZE;
@@ -41,6 +43,7 @@ impl Default for WebGlContextWrapper {
 unsafe impl Send for WebGlContextWrapper {}
 
 pub struct RenderSystem {
+    lights: Vec<PointLight>,
     meshes: Vec<Mesh>,
     textures: Vec<Texture>,
     texture_paths: Vec<String>,
@@ -89,6 +92,16 @@ impl RenderSystem {
             wre_gl!().use_program(Some(shader));
             wre_gl!().bind_vertex_array(Some(&mesh.vao));
 
+            // Send the camera position for lighting information
+            let camera_position: Vec<f32> =
+                wre_camera!().transform().position().into();
+            let camera_position_location =
+                wre_gl!().get_uniform_location(shader, "uni_camera_position");
+            wre_gl!().uniform3fv_with_f32_array(
+                camera_position_location.as_ref(),
+                &camera_position,
+            );
+
             // Send the model matrix to the GPU
             let model_matrix =
                 wre_entities!(mesh.attached_to.unwrap_or_default())
@@ -125,6 +138,40 @@ impl RenderSystem {
                 &projection_view.to_flat_vec(),
             );
 
+            // Send all the lights over to the shader
+            let num_light_location =
+                wre_gl!().get_uniform_location(shader, "uni_num_lights");
+            wre_gl!().uniform1i(
+                num_light_location.as_ref(),
+                self.lights.len() as i32,
+            );
+
+            let light_positions: Vec<f32> = self
+                .lights
+                .iter()
+                .map(|light| -> Vec<f32> { light.position.into() })
+                .flatten()
+                .collect();
+            let light_positions_location =
+                wre_gl!().get_uniform_location(shader, "uni_light_positions");
+            wre_gl!().uniform3fv_with_f32_array(
+                light_positions_location.as_ref(),
+                &light_positions,
+            );
+
+            let light_colors: Vec<f32> = self
+                .lights
+                .iter()
+                .map(|light| -> Vec<f32> { light.color.into() })
+                .flatten()
+                .collect();
+            let light_colors_location =
+                wre_gl!().get_uniform_location(shader, "uni_light_colors");
+            wre_gl!().uniform3fv_with_f32_array(
+                light_colors_location.as_ref(),
+                &light_colors,
+            );
+
             // Send the material's color to the GPU
             let color: [f32; 4] =
                 wre_entities!(mesh.attached_to.unwrap_or_default())
@@ -136,6 +183,19 @@ impl RenderSystem {
             wre_gl!().uniform4fv_with_f32_array(
                 color_uniform_location.as_ref(),
                 &color,
+            );
+
+            // Send the material's specularity to the GPU
+            let specular: [f32; 4] =
+                wre_entities!(mesh.attached_to.unwrap_or_default())
+                    .material()
+                    .specular
+                    .into();
+            let specular_uniform_location =
+                wre_gl!().get_uniform_location(shader, "uni_specular");
+            wre_gl!().uniform4fv_with_f32_array(
+                specular_uniform_location.as_ref(),
+                &specular,
             );
 
             // If there's a texture, send it to the GPU
@@ -172,6 +232,10 @@ impl RenderSystem {
 
     pub fn make_ready(&mut self) {
         self.ready = true;
+    }
+
+    pub fn add_light(&mut self, position: Vec3, color: Vec3) {
+        self.lights.push(PointLight::new(position, color));
     }
 
     pub fn add_shader(&mut self, name: &str, program: &WebGlProgram) -> usize {
@@ -217,6 +281,7 @@ impl Default for RenderSystem {
         wre_gl!().enable(WebGl2RenderingContext::DEPTH_TEST);
 
         Self {
+            lights: Vec::default(),
             texture_paths: Vec::default(),
             textures: Vec::default(),
             meshes: Vec::default(),

@@ -13,14 +13,13 @@ out vec3 norm;
 out vec2 uv;
 
 void main() {
-    vec4 final_pos = uni_projection_view * uni_model * vec4(in_pos, 1);
-    pos = final_pos.xyz;
+    vec4 frag_pos = uni_model * vec4(in_pos, 1.0);
+    pos = frag_pos.xyz;
+    gl_Position = uni_projection_view * frag_pos;
 
     // normal must be multiplied by inverse transpose of the model matrix
     norm = (uni_normal * vec4(in_norm, 0)).xyz;
 
     uv = in_uv;
-
-    gl_Position = final_pos;
 }
 

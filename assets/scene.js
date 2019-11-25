@@ -81,5 +81,9 @@ export async function loadSceneAsync(scenePath) {
                 wre.add_script(eid, script);
             }
         });
+
+        for (let i = 0; i < 5; i++) {
+            wre.add_light(wre.Vec3.unit_y().add(wre.Vec3.unit_x().mul(i - 2.5)), wre.Vec3.one().mul(0.3));
+        }
     }
 }

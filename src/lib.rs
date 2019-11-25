@@ -19,6 +19,7 @@ pub mod camera;
 pub mod entity;
 pub mod entity_manager;
 pub mod frame_buffer;
+pub mod light;
 pub mod material;
 pub mod mesh;
 pub mod render_system;
@@ -121,6 +122,11 @@ pub fn add_texture(path: &str, b64_bytes: &str) -> TextureId {
 #[wasm_bindgen]
 pub fn get_texture_id_by_path(path: &str) -> Option<TextureId> {
     wre_render_system!().get_texture_id_by_path(path)
+}
+
+#[wasm_bindgen]
+pub fn add_light(position: Vec3, color: Vec3) {
+    wre_render_system!().add_light(position, color);
 }
 
 #[wasm_bindgen]
