@@ -9,7 +9,7 @@
 
 import * as wre from './pkg/wre_wasm.js';
 
-export const SHADERS = ['phong_forward', 'colorblur'];
+export const SHADERS = ['phong_forward', 'emissive', 'colorblur'];
 export var DEFAULT_SHADER_ID = 0;
 
 function initCamera() {

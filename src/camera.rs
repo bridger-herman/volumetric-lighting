@@ -13,8 +13,8 @@ use glam::{Mat4, Quat, Vec2, Vec3};
 use crate::traits::Update;
 use crate::transform::Transform;
 
-const ANGULAR_VELOCITY: f32 = 0.002;
-const LINEAR_VELOCITY: f32 = 0.001;
+const ANGULAR_VELOCITY: f32 = 0.003;
+const LINEAR_VELOCITY: f32 = 0.002;
 
 #[derive(Debug)]
 pub struct Camera {

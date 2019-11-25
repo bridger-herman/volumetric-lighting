@@ -28,29 +28,29 @@ void main() {
 
     final_color = texture(uni_image, tex_coords);
 
-    // if the alpha of this pixel is 0.5, we want to blur this pixel
-    if (abs(final_color.a - 0.5) < 0.1) {
-        vec3 color = vec3(0.0);
-        float xx = 0.0, yy = 0.0;
+    // if the alpha of this pixel is bright, blur it
+    // if (final_color.a < 0.1) {
+        // vec3 color = vec3(0.0);
+        // float xx = 0.0, yy = 0.0;
 
-        // loop over kernel values
-        for (int y = 0; y < MAT_SIZE; y++) {
-            for (int x = 0; x < MAT_SIZE; x++) {
-                // clamp so that any edge values are oversampled
-                xx = clamp(tex_coords_pixels.x + (float(x) - 1.0), 0.0, float(size.x));
-                yy = clamp(tex_coords_pixels.y + (float(y) - 1.0), 0.0, float(size.y));
+        // // loop over kernel values
+        // for (int y = 0; y < MAT_SIZE; y++) {
+            // for (int x = 0; x < MAT_SIZE; x++) {
+                // // clamp so that any edge values are oversampled
+                // xx = clamp(tex_coords_pixels.x + (float(x) - 1.0), 0.0, float(size.x));
+                // yy = clamp(tex_coords_pixels.y + (float(y) - 1.0), 0.0, float(size.y));
 
-                vec2 kernel_coords = vec2(
-                    2.0 * (xx / float(size.x)),
-                    2.0 * (yy / float(size.y))
-                );
+                // vec2 kernel_coords = vec2(
+                    // 2.0 * (xx / float(size.x)),
+                    // 2.0 * (yy / float(size.y))
+                // );
 
-                color += gaussian_kernel[x + y * MAT_SIZE] * texture(uni_image, kernel_coords).xyz;
-            }
-        }
+                // color += gaussian_kernel[x + y * MAT_SIZE] * texture(uni_image, kernel_coords).xyz;
+            // }
+        // }
 
-        final_color = vec4(color, 1.0);
-    } else {
-        final_color.a = 1.0;
-    }
+        // final_color = vec4(color, 1.0);
+    // } else {
+        // final_color.a = 1.0;
+    // }
 }

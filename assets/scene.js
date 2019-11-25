@@ -8,8 +8,7 @@
  */
 
 import * as wre from './pkg/wre_wasm.js'
-import { loadTextResource, loadImage, WreScript, DEFAULT_SHADER_ID } from './wre.js'
-import { BoardManager } from './user-scripts/BoardManager.js'
+import { loadTextResource, loadImage, WreScript, DEFAULT_SHADER_ID, SHADERS } from './wre.js'
 
 export async function loadSceneAsync(scenePath) {
     let sceneText = await loadTextResource(scenePath);
@@ -64,7 +63,13 @@ export async function loadSceneAsync(scenePath) {
             );
         }
 
-        entity.material = new wre.Material(DEFAULT_SHADER_ID, color, texId);
+        let shader = DEFAULT_SHADER_ID;
+        if (typeof(sceneEntity.shader) !== 'undefined') {
+            shader = SHADERS.indexOf(sceneEntity.shader);
+        }
+
+        console.log(`Using shader ${shader} for entity ${eid}`);
+        entity.material = new wre.Material(shader, color, null, texId);
         entity.transform = tf;
         wre.set_entity(eid, entity);
 
@@ -82,8 +87,14 @@ export async function loadSceneAsync(scenePath) {
             }
         });
 
-        for (let i = 0; i < 5; i++) {
-            wre.add_light(wre.Vec3.unit_y().add(wre.Vec3.unit_x().mul(i - 2.5)), wre.Vec3.one().mul(0.3));
-        }
+    }
+
+    // Add all the lights to the scene (position and color)
+    for (let l in sceneObj.lights) {
+        let light = sceneObj.lights[l];
+        wre.add_light(
+            new wre.Vec3(light.position[0], light.position[1], light.position[2]),
+            new wre.Vec3(light.color[0], light.color[1], light.color[2]),
+        );
     }
 }
