@@ -38,7 +38,7 @@ use crate::entity::{Entity, EntityId};
 use crate::script_manager::WreScript;
 use crate::texture::TextureId;
 
-pub use glam::{Mat4, Quat, Vec3, Vec2};
+pub use glam::{Mat4, Quat, Vec2, Vec3};
 
 const TARGET_FPS: i32 = 30;
 

@@ -18,7 +18,7 @@ function initCamera() {
     // Listen for mouse moves so we can move the camera
     document.addEventListener('mousemove', (evt) => {
         let currentMousePosition = new wre.Vec2((evt.clientY -
-            window.outerHeight / 2.0), (evt.clientX - window.outerWidth /
+            window.outerHeight / 2.0), -(evt.clientX - window.outerWidth /
                 2.0));
         let mouseDelta = currentMousePosition.sub(oldMousePosition);
         wre.add_camera_rotation(mouseDelta);

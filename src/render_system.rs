@@ -114,7 +114,7 @@ impl RenderSystem {
             );
 
             // Send the camera's view matrix to the GPU
-            let view_matrix = wre_camera!().transform().matrix();
+            let view_matrix = wre_camera!().view_matrix();
             let view_uniform_location =
                 wre_gl!().get_uniform_location(shader, "uni_view");
             wre_gl!().uniform_matrix4fv_with_f32_array(

@@ -10,11 +10,11 @@
 
 use std::sync::Mutex;
 
+use crate::camera::Camera;
 use crate::entity_manager::EntityManager;
 use crate::render_system::{RenderSystem, WebGlContextWrapper};
 use crate::script_manager::ScriptManager;
 use crate::time::WreTime;
-use crate::camera::Camera;
 
 lazy_static! {
     /// Current frame information (timing, key presses, etc.)

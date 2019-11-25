@@ -130,11 +130,30 @@ impl Transform {
         self.matrix.set_z_axis(forward.extend(0.0));
 
         // Extract the scale and rotation from the matrix
-        let scale = Vec3::new(self.matrix.x_axis().length(), self.matrix.y_axis().length(), self.matrix.z_axis().length());
+        let scale = Vec3::new(
+            self.matrix.x_axis().length(),
+            self.matrix.y_axis().length(),
+            self.matrix.z_axis().length(),
+        );
         let rotation_matrix = Mat4::new(
-            Vec4::new(self.matrix.x_axis().0 / scale.x(), self.matrix.x_axis().1 / scale.y(), self.matrix.x_axis().2 / scale.z(), 0.0),
-            Vec4::new(self.matrix.y_axis().0 / scale.x(), self.matrix.y_axis().1 / scale.y(), self.matrix.y_axis().2 / scale.z(), 0.0),
-            Vec4::new(self.matrix.z_axis().0 / scale.x(), self.matrix.z_axis().1 / scale.y(), self.matrix.z_axis().2 / scale.z(), 0.0),
+            Vec4::new(
+                self.matrix.x_axis().0 / scale.x(),
+                self.matrix.x_axis().1 / scale.y(),
+                self.matrix.x_axis().2 / scale.z(),
+                0.0,
+            ),
+            Vec4::new(
+                self.matrix.y_axis().0 / scale.x(),
+                self.matrix.y_axis().1 / scale.y(),
+                self.matrix.y_axis().2 / scale.z(),
+                0.0,
+            ),
+            Vec4::new(
+                self.matrix.z_axis().0 / scale.x(),
+                self.matrix.z_axis().1 / scale.y(),
+                self.matrix.z_axis().2 / scale.z(),
+                0.0,
+            ),
             Vec4::unit_w(),
         );
         self.rotation = Quat::from_rotation_mat4(&rotation_matrix);
