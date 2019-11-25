@@ -62,6 +62,11 @@ pub fn time_dt() -> JsValue {
 }
 
 #[wasm_bindgen]
+pub fn set_camera_position(pos: Vec3) {
+    wre_camera!().set_position(pos);
+}
+
+#[wasm_bindgen]
 pub fn start_moving_camera(direction: Vec3) {
     wre_camera!().start_moving(direction);
 }

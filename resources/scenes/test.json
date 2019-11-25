@@ -9,6 +9,9 @@
             "scripts": []
         }
     },
+    "camera": {
+        "position": [0.0, 1.0, 0.0]
+    },
     "lights": [
         {
             "position": [0.0, 1.0, 0.0],

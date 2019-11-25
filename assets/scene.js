@@ -97,4 +97,13 @@ export async function loadSceneAsync(scenePath) {
             new wre.Vec3(light.color[0], light.color[1], light.color[2]),
         );
     }
+
+    if (typeof(sceneObj.camera) !== 'undefined') {
+        let pos = new wre.Vec3(
+            sceneObj.camera.position[0],
+            sceneObj.camera.position[1],
+            sceneObj.camera.position[2],
+        );
+        wre.set_camera_position(pos);
+    }
 }

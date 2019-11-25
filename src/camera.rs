@@ -49,6 +49,9 @@ impl Camera {
         self.rotation = rotation;
     }
 
+    pub fn set_position(&mut self, position: Vec3) {
+        self.transform.set_position(position);
+    }
     // Start moving in a direction (specified by the camera's basis)
     pub fn start_moving(&mut self, direction: Vec3) {
         self.velocity = direction * LINEAR_VELOCITY;
