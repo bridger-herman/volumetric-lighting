@@ -18,39 +18,41 @@ uniform sampler2D uni_image;
 
 out vec4 final_color;
 
+float luminosity(vec4 color) {
+    return 0.3 * color.r + 0.59 * color.g + 0.11 * color.b;
+}
+
 void main() {
-    // get texture size
+    // get texture size (in pixels)
     ivec2 size = textureSize(uni_image, 0);
 
-    // tex_coords is -1 to 1; convert to pixels
-    vec2 tex_coords_pixels = vec2(0.5 * tex_coords.x * float(size.x), 0.5 *
-            tex_coords.y * float(size.y));
+    // Find the current pixel coordinate
+    int pixel_x = int(tex_coords.x * float(size.x));
+    int pixel_y = int(tex_coords.y * float(size.y));
 
     final_color = texture(uni_image, tex_coords);
 
-    // if the alpha of this pixel is bright, blur it
-    // if (final_color.a < 0.1) {
-        // vec3 color = vec3(0.0);
-        // float xx = 0.0, yy = 0.0;
+    // loop over kernel values
+    vec3 color_sum = vec3(0.0);
+    int xx = 0, yy = 0;
+    for (int y = 0; y < MAT_SIZE; y++) {
+        for (int x = 0; x < MAT_SIZE; x++) {
+            int pixel_x_kernel = pixel_x + (x - MAT_SIZE / 2);
+            int pixel_y_kernel = pixel_y - (y - MAT_SIZE / 2);
+            // clamp so that any edge values are oversampled
+            xx = clamp(pixel_x_kernel, 0, size.x);
+            yy = clamp(pixel_y_kernel, 0, size.y);
 
-        // // loop over kernel values
-        // for (int y = 0; y < MAT_SIZE; y++) {
-            // for (int x = 0; x < MAT_SIZE; x++) {
-                // // clamp so that any edge values are oversampled
-                // xx = clamp(tex_coords_pixels.x + (float(x) - 1.0), 0.0, float(size.x));
-                // yy = clamp(tex_coords_pixels.y + (float(y) - 1.0), 0.0, float(size.y));
+            vec2 kernel_coord_in_tex_space = vec2(
+                (float(xx) / float(size.x)),
+                (float(yy) / float(size.y))
+            );
 
-                // vec2 kernel_coords = vec2(
-                    // 2.0 * (xx / float(size.x)),
-                    // 2.0 * (yy / float(size.y))
-                // );
+            color_sum += gaussian_kernel[x + y * MAT_SIZE] *
+                texture(uni_image, kernel_coord_in_tex_space).xyz;
+        }
+    }
 
-                // color += gaussian_kernel[x + y * MAT_SIZE] * texture(uni_image, kernel_coords).xyz;
-            // }
-        // }
-
-        // final_color = vec4(color, 1.0);
-    // } else {
-        // final_color.a = 1.0;
-    // }
+    float l = luminosity(final_color);
+    final_color = final_color * (1.0 - l) + vec4(color_sum, 1.0) * l;
 }

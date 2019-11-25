@@ -30,6 +30,5 @@ void main() {
     if (uni_color.a == 0.0) {
         color *= texture(uni_texture, vec2(uv.x, 1.0 - uv.y));
     }
-    color.a = 0.0;
 }
 
