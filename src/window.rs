@@ -8,11 +8,17 @@
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use web_sys::KeyboardEvent;
 
 use crate::traits::Update;
 
 const TITLE: &str = "Graphics";
 pub const DEFAULT_WINDOW_SIZE: (usize, usize) = (1280, 720);
+
+#[derive(Default)]
+pub struct WindowState {
+    pub paused: bool,
+}
 
 pub fn init(target_fps: i32) -> Result<(), JsValue> {
     let window = web_sys::window().expect("window.rs: No window!");
@@ -22,21 +28,41 @@ pub fn init(target_fps: i32) -> Result<(), JsValue> {
         1000 / target_fps,
     )?;
 
+    let pause_closure =
+        Closure::wrap(Box::new(toggle_pause) as Box<dyn Fn(JsValue)>);
+    window.add_event_listener_with_callback(
+        "keydown",
+        pause_closure.as_ref().unchecked_ref(),
+    )?;
+
     main_loop_closure.forget();
+    pause_closure.forget();
 
     Ok(())
 }
 
-pub fn one_frame() {
-    wre_time!().update();
-
-    if let Some((fps, dt)) = wre_time!().second_elapsed() {
-        set_title(&format!("{} | {:?}fps, dt = {:?}", TITLE, fps, dt));
+fn toggle_pause(evt: JsValue) {
+    let kb_event = evt.unchecked_into::<KeyboardEvent>();
+    if kb_event.key() == "Escape" {
+        let paused = wre_window!().paused;
+        wre_window!().paused = !paused;
     }
+}
 
-    wre_scripts!().update();
-    wre_camera!().update();
-    wre_render_system!().render();
+fn one_frame() {
+    if !wre_window!().paused {
+        wre_time!().update();
+
+        if let Some((fps, dt)) = wre_time!().second_elapsed() {
+            set_title(&format!("{} | {:?}fps, dt = {:?}", TITLE, fps, dt));
+        }
+
+        wre_scripts!().update();
+        wre_camera!().update();
+        wre_render_system!().render();
+    } else {
+        set_title(&format!("{} | Paused", TITLE));
+    }
 }
 
 fn set_title(title: &str) {

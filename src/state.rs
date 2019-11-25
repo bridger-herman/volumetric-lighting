@@ -15,6 +15,7 @@ use crate::entity_manager::EntityManager;
 use crate::render_system::{RenderSystem, WebGlContextWrapper};
 use crate::script_manager::ScriptManager;
 use crate::time::WreTime;
+use crate::window::WindowState;
 
 lazy_static! {
     /// Current frame information (timing, key presses, etc.)
@@ -34,4 +35,7 @@ lazy_static! {
 
     /// WebGL state
     pub static ref WRE_GL: Mutex<WebGlContextWrapper> = Mutex::new(WebGlContextWrapper::default());
+
+    // The window state (paused/not paused, etc.)
+    pub static ref WRE_WINDOW: Mutex<WindowState> = Mutex::new(WindowState::default());
 }

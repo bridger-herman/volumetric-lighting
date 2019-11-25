@@ -14,6 +14,13 @@ macro_rules! wre_time {
 }
 
 #[macro_export]
+macro_rules! wre_window {
+    () => {
+        *crate::state::WRE_WINDOW.try_lock().unwrap()
+    };
+}
+
+#[macro_export]
 macro_rules! wre_camera {
     () => {
         *crate::state::WRE_CAMERA.try_lock().unwrap()
