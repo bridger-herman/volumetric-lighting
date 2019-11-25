@@ -63,6 +63,9 @@ impl Camera {
     pub fn view_matrix(&self) -> Mat4 {
         self.view_matrix
     }
+    pub fn projection_matrix(&self) -> Mat4 {
+        self.projection_matrix
+    }
 }
 
 impl Default for Camera {

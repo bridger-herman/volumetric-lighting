@@ -113,14 +113,16 @@ impl RenderSystem {
                 &normal_matrix.to_flat_vec(),
             );
 
-            // Send the camera's view matrix to the GPU
+            // Send the camera's view/projection matrix to the GPU
             let view_matrix = wre_camera!().view_matrix();
-            let view_uniform_location =
-                wre_gl!().get_uniform_location(shader, "uni_view");
+            let projection_matrix = wre_camera!().projection_matrix();
+            let projection_view = projection_matrix * view_matrix;
+            let pv_uniform_location =
+                wre_gl!().get_uniform_location(shader, "uni_projection_view");
             wre_gl!().uniform_matrix4fv_with_f32_array(
-                view_uniform_location.as_ref(),
+                pv_uniform_location.as_ref(),
                 false,
-                &view_matrix.to_flat_vec(),
+                &projection_view.to_flat_vec(),
             );
 
             // Send the material's color to the GPU
