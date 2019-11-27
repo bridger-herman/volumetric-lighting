@@ -1,17 +1,7 @@
 {
     "prefabs": {
-        "sphere": {
-            "mesh": "./resources/models/small_sphere.obj",
-            "scripts": [],
-            "shader": "emissive"
-        },
         "cube": {
             "mesh": "./resources/models/textured-cube.obj",
-            "scripts": [],
-            "shader": "emissive"
-        },
-        "plane": {
-            "mesh": "./resources/models/plane.obj",
             "scripts": []
         }
     },
@@ -43,7 +33,8 @@
     "entities": [
         {
             "prefab": "cube",
-            "position": [0.0, 1.0, 0.0]
+            "position": [0.0, 0.0, 0.5],
+            "scale": [0.1, 0.1, 0.10]
         }
     ]
 }

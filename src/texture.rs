@@ -64,16 +64,19 @@ impl Texture {
             error_panic!("Unable to read png: {:?}", err);
         });
 
+        info!("Png info (buf size {}): {:#?}", buf.len(), png_info);
+
+        wre_gl!().pixel_storei(WebGl2RenderingContext::UNPACK_ALIGNMENT, 1);
         wre_gl!().
             tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array
         (
             WebGl2RenderingContext::TEXTURE_2D,
             0,
-            WebGl2RenderingContext::RGBA as i32,
+            WebGl2RenderingContext::RGB as i32,
             png_info.width as i32,
             png_info.height as i32,
             0,
-            WebGl2RenderingContext::RGBA,
+            WebGl2RenderingContext::RGB,
             WebGl2RenderingContext::UNSIGNED_BYTE,
             Some(&buf)
         ).unwrap_or_else(|err| {

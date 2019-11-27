@@ -13,6 +13,7 @@ in vec2 uv;
 uniform vec3 uni_camera_position;
 
 // Color/texture information
+uniform bool uni_use_texture;
 uniform vec4 uni_color;
 uniform vec4 uni_specular;
 uniform sampler2D uni_texture;
@@ -46,7 +47,7 @@ void main() {
 
     // Only use a texture if there is one
     color = vec4(diffuse + specular, 1.0);
-    if (uni_color.a == 0.0) {
+    if (uni_use_texture) {
         color *= texture(uni_texture, vec2(uv.x, 1.0 - uv.y));
     }
 }

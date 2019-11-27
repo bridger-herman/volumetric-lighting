@@ -27,7 +27,7 @@ out vec4 color;
 void main() {
     // Only use a texture if there is one
     color = uni_color;
-    if (uni_color.a == 0.0) {
+    if (uni_use_texture) {
         color *= texture(uni_texture, vec2(uv.x, 1.0 - uv.y));
     }
 }

@@ -213,7 +213,7 @@ impl RenderSystem {
                 if let Some(texture_id) =
                     wre_entities!(mesh.attached_to.unwrap_or_default())
                         .material()
-                        .texture_id
+                        .texture_id()
                 {
                     wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
                     wre_gl!().bind_texture(
@@ -224,6 +224,20 @@ impl RenderSystem {
                     let tex_uniform_location = wre_gl!()
                         .get_uniform_location(&shader.program, "uni_texture");
                     wre_gl!().uniform1i(tex_uniform_location.as_ref(), 0);
+
+                    let use_tex_uniform_location = wre_gl!()
+                        .get_uniform_location(
+                            &shader.program,
+                            "uni_use_texture",
+                        );
+                    wre_gl!().uniform1i(use_tex_uniform_location.as_ref(), 1);
+                } else {
+                    let use_tex_uniform_location = wre_gl!()
+                        .get_uniform_location(
+                            &shader.program,
+                            "uni_use_texture",
+                        );
+                    wre_gl!().uniform1i(use_tex_uniform_location.as_ref(), 0);
                 }
 
                 // Draw the geometry

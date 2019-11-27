@@ -12,6 +12,7 @@ use glam::{Quat, Vec3};
 use wasm_bindgen::prelude::*;
 
 use crate::light::PointLight;
+use crate::material::Material;
 use crate::mesh::Mesh;
 use crate::resources::{load_image_resource, load_text_resource};
 use crate::shader::{load_shader, Shader};
@@ -86,6 +87,9 @@ pub struct Scene {
     /// The textures in the scene (path, Texture)
     pub textures: HashMap<String, Texture>,
 
+    /// The obj materials available
+    pub materials: HashMap<String, Material>,
+
     /// The shaders that this scene's materials use (name, Shader)
     pub shaders: HashMap<String, Shader>,
 }
@@ -154,7 +158,7 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
 
             // Find the texture(s) associated with this object's material
             let mtl_name = prefab.mesh.replace("obj", "mtl");
-            let mtl_text_js = load_text_resource(mtl_name).await?;
+            let mtl_text_js = load_text_resource(mtl_name.clone()).await?;
             let mtl_text = mtl_text_js.as_string().unwrap_or_else(|| {
                 error_panic!("Unable to convert mtl to string");
             });
@@ -162,7 +166,7 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
                 .lines()
                 .find(|line| line.to_lowercase().starts_with("map_kd"));
 
-            if let Some(name) = texture_name {
+            let tex_id = if let Some(name) = texture_name {
                 // Mutate the texture name so it can be found on the server
                 let path = format!(
                     "./resources/textures/{}",
@@ -170,17 +174,26 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
                 );
 
                 // And only load the texture if it's not already there
-                if scene.textures.get(&path).is_none() {
+                if let Some(tex) = scene.textures.get(&path) {
+                    Some(tex.id)
+                } else {
+                    let tex_id = scene.textures.len();
                     let img_js = load_image_resource(path.clone()).await?;
 
                     let mut bytes = vec![0u8; img_js.length() as usize];
                     img_js.copy_to(&mut bytes);
-                    scene.textures.insert(
-                        path,
-                        Texture::init_from_image(scene.textures.len(), &bytes),
-                    );
+                    scene
+                        .textures
+                        .insert(path, Texture::init_from_image(tex_id, &bytes));
+                    Some(tex_id)
                 }
-            }
+            } else {
+                None
+            };
+
+            let mut material = Material::from_mtl_str(&mtl_text);
+            material.set_texture_id(tex_id);
+            scene.materials.insert(mtl_name, material);
         }
     }
 
@@ -203,6 +216,11 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
         let mesh_path = &scene.prefabs[&entity.prefab].mesh;
         let mut mesh = scene.meshes.get_mut(mesh_path).unwrap();
         mesh.attached_to = Some(eid);
+
+        // Add the material
+        let mtl_path = mesh_path.replace("obj", "mtl");
+        let material = scene.materials.get(&mtl_path).unwrap();
+        wre_entities_mut!(eid).set_material(material);
     }
 
     // The post-processing shader must be loaded before the scene can be
