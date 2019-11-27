@@ -3,6 +3,7 @@ extern crate serde_derive;
 extern crate wasm_bindgen;
 #[macro_use]
 extern crate log;
+#[macro_use]
 extern crate wasm_logger;
 #[macro_use]
 extern crate lazy_static;
@@ -23,6 +24,8 @@ pub mod light;
 pub mod material;
 pub mod mesh;
 pub mod render_system;
+pub mod resources;
+pub mod scene;
 pub mod script_manager;
 pub mod shader;
 pub mod state;

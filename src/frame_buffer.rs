@@ -84,7 +84,7 @@ impl FrameBuffer {
 
 impl Default for FrameBuffer {
     fn default() -> Self {
-        let screen_quad_mesh = Mesh::from_obj_str(SCREEN_QUAD_OBJ, None);
+        let screen_quad_mesh = Mesh::from_obj_str(SCREEN_QUAD_OBJ);
 
         // Create the framebuffer texture
         let screen_texture = wre_gl!().create_texture();

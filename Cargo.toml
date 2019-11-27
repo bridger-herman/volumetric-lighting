@@ -15,12 +15,14 @@ wasm-logger = {git = "https://github.com/bridger-herman/wasm-logger.git"}
 log = "0.4"
 serde = "1.0.59"
 serde_derive = "1.0.59"
+serde_json = "1.0.42"
 num-traits = "0.2.8"
 lazy_static = "1.4"
 glam = { version = "0.8", features = [ "serde" ], git = "https://github.com/bridger-herman/glam-rs.git" }
 instant = { version = "0.1", features = [ "now", "wasm-bindgen" ]  }
 obj = "0.9"
 png = "0.15"
+wasm-bindgen-futures = "0.4"
 
 [dependencies.wasm-bindgen]
 version = "0.2.51"
@@ -32,10 +34,14 @@ features = [
     'Document',
     'Element',
     'EventTarget',
+    'Headers',
     'HtmlCanvasElement',
     'KeyboardEvent',
+    'Request',
+    'RequestInit',
+    'RequestMode',
+    'Response',
     'WebGlBuffer',
-    'WebGlRenderingContext',
     'WebGl2RenderingContext',
     'WebGlProgram',
     'WebGlFramebuffer',

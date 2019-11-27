@@ -8,7 +8,7 @@
 
 use glam::Vec3;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PointLight {
     /// The light's position
     pub position: Vec3,

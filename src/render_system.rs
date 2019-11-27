@@ -255,7 +255,9 @@ impl RenderSystem {
     pub fn add_obj_mesh(&mut self, eid: EntityId, obj_text: &str) {
         let shader = &self.shaders[wre_entities!(eid).material().shader_id];
         wre_gl!().use_program(Some(shader));
-        self.meshes.push(Mesh::from_obj_str(obj_text, Some(eid)));
+        let mut mesh = Mesh::from_obj_str(obj_text);
+        mesh.attached_to = Some(eid);
+        self.meshes.push(mesh);
     }
 
     pub fn add_texture(&mut self, path: &str, png_bytes: &[u8]) -> TextureId {

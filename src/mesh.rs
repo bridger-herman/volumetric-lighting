@@ -29,7 +29,7 @@ impl fmt::Debug for Mesh {
 }
 
 impl Mesh {
-    pub fn from_obj_str(obj_text: &str, eid: Option<EntityId>) -> Self {
+    pub fn from_obj_str(obj_text: &str) -> Self {
         // Load the obj from a string
         let mut reader = BufReader::new(obj_text.as_bytes());
         let obj_file: Obj<SimplePolygon> =
@@ -156,7 +156,7 @@ impl Mesh {
         );
 
         Self {
-            attached_to: eid,
+            attached_to: None,
             num_vertices: (pos_flat.len() / 3) as i32,
             vao,
         }
