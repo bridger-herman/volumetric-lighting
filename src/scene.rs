@@ -10,15 +10,11 @@ use std::collections::HashMap;
 
 use glam::{Quat, Vec3};
 use wasm_bindgen::prelude::*;
-use web_sys::WebGlProgram;
 
-use crate::entity::Entity;
 use crate::light::PointLight;
 use crate::mesh::Mesh;
 use crate::resources::{load_image_resource, load_text_resource};
-use crate::shader::{
-    compile_frag_shader, compile_vert_shader, link_shader_program,
-};
+use crate::shader::{load_shader, Shader};
 use crate::texture::Texture;
 use crate::transform::Transform;
 
@@ -78,8 +74,8 @@ pub struct JsonScene {
 /// format (entities, meshes, textures)
 #[derive(Debug, Default)]
 pub struct Scene {
-    /// Entities in the scene
-    pub entities: Vec<Entity>,
+    /// Prefabs that are available to entities in the scene
+    prefabs: HashMap<String, JsonPrefab>,
 
     /// All the lights in the scene
     pub lights: Vec<PointLight>,
@@ -91,12 +87,34 @@ pub struct Scene {
     pub textures: HashMap<String, Texture>,
 
     /// The shaders that this scene's materials use (name, Shader)
-    pub shaders: HashMap<String, WebGlProgram>,
+    pub shaders: HashMap<String, Shader>,
+}
+
+impl Scene {
+    pub fn get_shader_by_id(&self, shader_id: usize) -> Option<&Shader> {
+        if let Some((_name, shader)) =
+            self.shaders.iter().find(|(_n, s)| s.id == shader_id)
+        {
+            Some(&shader)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_texture_by_id(&self, texture_id: usize) -> Option<&Texture> {
+        if let Some((_name, texture)) =
+            self.textures.iter().find(|(_n, t)| t.id == texture_id)
+        {
+            Some(&texture)
+        } else {
+            None
+        }
+    }
 }
 
 #[wasm_bindgen]
-pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
-    let scene_text_js = load_text_resource(path).await?;
+pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
+    let scene_text_js = load_text_resource(scene_path.clone()).await?;
     let scene_text_string = scene_text_js.as_string().unwrap_or_else(|| {
         error_panic!("Unable to convert to string");
     });
@@ -119,29 +137,8 @@ pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
         let shader_name =
             prefab.shader.clone().unwrap_or("phong_forward".to_string());
         if scene.shaders.get(&shader_name).is_none() {
-            let vert_shader_path =
-                format!("./resources/shaders/{}.vert", shader_name);
-            let frag_shader_path =
-                format!("./resources/shaders/{}.frag", shader_name);
-            let vert_shader_text_js =
-                load_text_resource(vert_shader_path).await?;
-            let vert_shader_text =
-                vert_shader_text_js.as_string().unwrap_or_else(|| {
-                    error_panic!("Unable to convert vert shader to string");
-                });
-            let frag_shader_text_js =
-                load_text_resource(frag_shader_path).await?;
-            let frag_shader_text =
-                frag_shader_text_js.as_string().unwrap_or_else(|| {
-                    error_panic!("Unable to convert frag shader to string");
-                });
-
-            let vert_shader = compile_vert_shader(&vert_shader_text);
-            let frag_shader = compile_frag_shader(&frag_shader_text);
-            let shader_program =
-                link_shader_program(&vert_shader, &frag_shader);
-
-            scene.shaders.insert(shader_name, shader_program);
+            let shader = load_shader(&shader_name, scene.shaders.len()).await?;
+            scene.shaders.insert(shader_name, shader);
         }
 
         // Don't load any mesh twice
@@ -163,10 +160,9 @@ pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
             });
             let texture_name = mtl_text
                 .lines()
-                .filter(|line| line.to_lowercase().starts_with("map_kd"))
-                .collect::<Vec<_>>();
+                .find(|line| line.to_lowercase().starts_with("map_kd"));
 
-            if let Some(name) = texture_name.get(0) {
+            if let Some(name) = texture_name {
                 // Mutate the texture name so it can be found on the server
                 let path = format!(
                     "./resources/textures/{}",
@@ -188,6 +184,9 @@ pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
         }
     }
 
+    // Move the prefabs over to the scene
+    scene.prefabs = json_scene.prefabs;
+
     // Populate the scene with entities
     for entity in &json_scene.entities {
         let rotation = entity.rotation.unwrap_or_default();
@@ -199,9 +198,18 @@ pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
 
         let eid = wre_entities!().create();
         wre_entities_mut!(eid).set_transform(&transform);
+
+        // Connect the mesh with this entity
+        let mesh_path = &scene.prefabs[&entity.prefab].mesh;
+        let mut mesh = scene.meshes.get_mut(mesh_path).unwrap();
+        mesh.attached_to = Some(eid);
     }
 
-    info!("Scene: {:#?}", scene);
+    // The post-processing shader must be loaded before the scene can be
+    // rendered!
+    wre_render_system!().load_post_processing_shader().await?;
+    wre_render_system!().add_scene(scene);
+    info!("Loaded Scene: {:?}", scene_path);
 
     Ok(())
 }

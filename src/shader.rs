@@ -10,6 +10,41 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlShader};
 
+use crate::resources::load_text_resource;
+
+#[derive(Debug)]
+pub struct Shader {
+    pub id: usize,
+    pub program: WebGlProgram,
+}
+
+pub async fn load_shader(
+    shader_name: &str,
+    id: usize,
+) -> Result<Shader, JsValue> {
+    let vert_shader_path = format!("./resources/shaders/{}.vert", shader_name);
+    let frag_shader_path = format!("./resources/shaders/{}.frag", shader_name);
+    let vert_shader_text_js = load_text_resource(vert_shader_path).await?;
+    let vert_shader_text =
+        vert_shader_text_js.as_string().unwrap_or_else(|| {
+            error_panic!("Unable to convert vert shader to string");
+        });
+    let frag_shader_text_js = load_text_resource(frag_shader_path).await?;
+    let frag_shader_text =
+        frag_shader_text_js.as_string().unwrap_or_else(|| {
+            error_panic!("Unable to convert frag shader to string");
+        });
+
+    let vert_shader = compile_vert_shader(&vert_shader_text);
+    let frag_shader = compile_frag_shader(&frag_shader_text);
+    let shader_program = link_shader_program(&vert_shader, &frag_shader);
+
+    Ok(Shader {
+        id,
+        program: shader_program,
+    })
+}
+
 #[wasm_bindgen]
 pub fn compile_vert_shader(source: &str) -> WebGlShader {
     compile_shader(WebGl2RenderingContext::VERTEX_SHADER, source)

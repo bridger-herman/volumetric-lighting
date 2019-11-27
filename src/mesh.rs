@@ -155,9 +155,12 @@ impl Mesh {
             0,
         );
 
+        let num_vertices = (pos_flat.len() / 3) as i32;
+        info!("Initialized mesh ({} vertices)", num_vertices);
+
         Self {
             attached_to: None,
-            num_vertices: (pos_flat.len() / 3) as i32,
+            num_vertices,
             vao,
         }
     }

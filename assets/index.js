@@ -8,16 +8,15 @@
  */
 
 import { importWasm } from './loadWasm.js';
-import { initWre, loadTextResource, loadImage } from './wre.js'
-import { loadSceneAsync } from './scene.js'
+import { initWre } from './wre.js'
 import * as wre from './pkg/wre_wasm.js';
 
 
 function init() {
-    wre.load_scene_async('./resources/scenes/new-format.json');
-    // initWre().then(() => {
-        // loadSceneAsync('./resources/scenes/test.json');
-    // });
+    wre.load_scene_async('./resources/scenes/new-format.json').then(() => {
+        wre.init_window();
+        initWre();
+    });
 }
 
 window.onload = () => importWasm().then(init);

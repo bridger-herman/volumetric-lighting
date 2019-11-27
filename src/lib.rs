@@ -36,11 +36,9 @@ pub mod transform;
 pub mod window;
 
 use wasm_bindgen::prelude::*;
-use web_sys::WebGlProgram;
 
 use crate::entity::{Entity, EntityId};
 use crate::script_manager::WreScript;
-use crate::texture::TextureId;
 
 pub use glam::{Mat4, Quat, Vec2, Vec3};
 
@@ -51,10 +49,13 @@ pub fn start() -> Result<(), JsValue> {
     wasm_logger::init_with_level(log::Level::Info)
         .map_err(|_| JsValue::from("Failed to initialize logger"))?;
 
+    Ok(())
+}
+
+#[wasm_bindgen]
+pub fn init_window() -> Result<(), JsValue> {
     window::init(TARGET_FPS)?;
     info!("Initialized window with target {}fps", TARGET_FPS);
-
-    info!("{:?}", wre_render_system!().meshes());
 
     Ok(())
 }
@@ -107,37 +108,4 @@ pub fn set_entity(id: EntityId, entity: Entity) {
 #[wasm_bindgen]
 pub fn add_script(eid: EntityId, script: WreScript) {
     wre_scripts!().add_script(eid, script)
-}
-
-#[wasm_bindgen]
-pub fn add_shader(name: &str, program: WebGlProgram) -> usize {
-    wre_render_system!().add_shader(name, &program)
-}
-
-#[wasm_bindgen]
-pub fn add_mesh(eid: EntityId, obj_source: &str) {
-    wre_render_system!().add_obj_mesh(eid, obj_source);
-}
-
-#[wasm_bindgen]
-pub fn add_texture(path: &str, b64_bytes: &str) -> TextureId {
-    let header_end = b64_bytes.find(",").unwrap();
-    let png_bytes =
-        base64::decode(&b64_bytes.as_bytes()[(header_end + 1)..]).unwrap();
-    wre_render_system!().add_texture(path, &png_bytes)
-}
-
-#[wasm_bindgen]
-pub fn get_texture_id_by_path(path: &str) -> Option<TextureId> {
-    wre_render_system!().get_texture_id_by_path(path)
-}
-
-#[wasm_bindgen]
-pub fn add_light(position: Vec3, color: Vec3) {
-    wre_render_system!().add_light(position, color);
-}
-
-#[wasm_bindgen]
-pub fn make_ready() {
-    wre_render_system!().make_ready();
 }
