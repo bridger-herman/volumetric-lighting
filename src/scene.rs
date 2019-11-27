@@ -8,7 +8,7 @@
 
 use std::collections::HashMap;
 
-use glam::Vec3;
+use glam::{Quat, Vec3};
 use wasm_bindgen::prelude::*;
 use web_sys::WebGlProgram;
 
@@ -20,6 +20,7 @@ use crate::shader::{
     compile_frag_shader, compile_vert_shader, link_shader_program,
 };
 use crate::texture::Texture;
+use crate::transform::Transform;
 
 /// A prefab loaded from the scene file
 #[derive(Debug, Serialize, Deserialize)]
@@ -185,6 +186,19 @@ pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
                 }
             }
         }
+    }
+
+    // Populate the scene with entities
+    for entity in &json_scene.entities {
+        let rotation = entity.rotation.unwrap_or_default();
+        let transform = Transform::new(
+            entity.position.unwrap_or_default(),
+            Quat::from_rotation_ypr(rotation.y(), rotation.z(), rotation.x()),
+            entity.scale.unwrap_or_default(),
+        );
+
+        let eid = wre_entities!().create();
+        wre_entities_mut!(eid).set_transform(&transform);
     }
 
     info!("Scene: {:#?}", scene);

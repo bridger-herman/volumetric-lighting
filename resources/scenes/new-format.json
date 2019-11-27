@@ -5,7 +5,7 @@
             "scripts": [],
             "shader": "emissive"
         },
-        "sphere": {
+        "cube": {
             "mesh": "./resources/models/textured-cube.obj",
             "scripts": [],
             "shader": "emissive"
@@ -42,52 +42,8 @@
     ],
     "entities": [
         {
-            "prefab": "plane",
-            "color": [1.0, 0.9, 0.7, 0.0],
-            "texture": "./resources/img/wood.png",
-            "position": [0.0, 0.0, 0],
-            "rotation": [0, 0, 0],
-            "scale": [5.0, 5.0, 5.0]
-        },
-        {
-            "prefab": "sphere",
-            "color": [5.0, 5.0, 5.0, 1.0],
-            "shader": "emissive",
-            "position": [1.0, 1.0, 0.0],
-            "rotation": [0, 0, 0],
-            "scale": [0.3, 0.3, 0.3]
-        },
-        {
-            "prefab": "sphere",
-            "color": [5.0, 5.0, 5.0, 1.0],
-            "shader": "emissive",
-            "position": [-1.0, 1.0, 0.0],
-            "rotation": [0, 0, 0],
-            "scale": [0.3, 0.3, 0.3]
-        },
-        {
-            "prefab": "sphere",
-            "color": [5.0, 5.0, 5.0, 1.0],
-            "shader": "emissive",
-            "position": [0.0, 1.0, 0.0],
-            "rotation": [0, 0, 0],
-            "scale": [0.3, 0.3, 0.3]
-        },
-        {
-            "prefab": "sphere",
-            "color": [5.0, 5.0, 5.0, 1.0],
-            "shader": "emissive",
-            "position": [0.0, 1.0, 1.0],
-            "rotation": [0, 0, 0],
-            "scale": [0.3, 0.3, 0.3]
-        },
-        {
-            "prefab": "sphere",
-            "color": [5.0, 5.0, 5.0, 1.0],
-            "shader": "emissive",
-            "position": [0.0, 1.0, -1.0],
-            "rotation": [0, 0, 0],
-            "scale": [0.3, 0.3, 0.3]
+            "prefab": "cube",
+            "position": [0.0, 1.0, 0.0]
         }
     ]
 }
