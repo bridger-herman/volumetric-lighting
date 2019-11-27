@@ -5,6 +5,11 @@
             "scripts": [],
             "shader": "emissive"
         },
+        "sphere": {
+            "mesh": "./resources/models/textured-cube.obj",
+            "scripts": [],
+            "shader": "emissive"
+        },
         "plane": {
             "mesh": "./resources/models/plane.obj",
             "scripts": []

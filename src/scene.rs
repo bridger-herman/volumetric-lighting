@@ -15,7 +15,7 @@ use web_sys::WebGlProgram;
 use crate::entity::Entity;
 use crate::light::PointLight;
 use crate::mesh::Mesh;
-use crate::resources::load_text_resource;
+use crate::resources::{load_image_resource, load_text_resource};
 use crate::shader::{
     compile_frag_shader, compile_vert_shader, link_shader_program,
 };
@@ -109,8 +109,11 @@ pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
     // Default scene (populated by contents of json scene)
     let mut scene = Scene::default();
 
+    // Move the lights over
+    scene.lights = json_scene.lights;
+
     // Load all the information about the prefabs (meshes, materials, shaders)
-    for (name, prefab) in json_scene.prefabs.iter() {
+    for (_name, prefab) in json_scene.prefabs.iter() {
         // Don't load any shaders twice
         let shader_name =
             prefab.shader.clone().unwrap_or("phong_forward".to_string());
@@ -123,13 +126,13 @@ pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
                 load_text_resource(vert_shader_path).await?;
             let vert_shader_text =
                 vert_shader_text_js.as_string().unwrap_or_else(|| {
-                    error_panic!("Unable to convert obj to string");
+                    error_panic!("Unable to convert vert shader to string");
                 });
             let frag_shader_text_js =
                 load_text_resource(frag_shader_path).await?;
             let frag_shader_text =
                 frag_shader_text_js.as_string().unwrap_or_else(|| {
-                    error_panic!("Unable to convert obj to string");
+                    error_panic!("Unable to convert frag shader to string");
                 });
 
             let vert_shader = compile_vert_shader(&vert_shader_text);
@@ -150,6 +153,37 @@ pub async fn load_scene_async(path: String) -> Result<(), JsValue> {
             scene
                 .meshes
                 .insert(prefab.mesh.clone(), Mesh::from_obj_str(&obj_text));
+
+            // Find the texture(s) associated with this object's material
+            let mtl_name = prefab.mesh.replace("obj", "mtl");
+            let mtl_text_js = load_text_resource(mtl_name).await?;
+            let mtl_text = mtl_text_js.as_string().unwrap_or_else(|| {
+                error_panic!("Unable to convert mtl to string");
+            });
+            let texture_name = mtl_text
+                .lines()
+                .filter(|line| line.to_lowercase().starts_with("map_kd"))
+                .collect::<Vec<_>>();
+
+            if let Some(name) = texture_name.get(0) {
+                // Mutate the texture name so it can be found on the server
+                let path = format!(
+                    "./resources/textures/{}",
+                    name.split_whitespace().collect::<Vec<_>>()[1]
+                );
+
+                // And only load the texture if it's not already there
+                if scene.textures.get(&path).is_none() {
+                    let img_js = load_image_resource(path.clone()).await?;
+
+                    let mut bytes = vec![0u8; img_js.length() as usize];
+                    img_js.copy_to(&mut bytes);
+                    scene.textures.insert(
+                        path,
+                        Texture::init_from_image(scene.textures.len(), &bytes),
+                    );
+                }
+            }
         }
     }
 

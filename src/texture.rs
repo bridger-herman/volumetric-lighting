@@ -25,7 +25,7 @@ impl Texture {
         // Set up the texture
         let tex = wre_gl!().create_texture();
         if tex.is_none() {
-            error!("Invalid texture");
+            error_panic!("Invalid WebGl texture");
         }
         wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
         wre_gl!()
@@ -56,9 +56,13 @@ impl Texture {
         let reader = BufReader::new(png_bytes);
         let decoder = png::Decoder::new(reader);
         let (png_info, mut reader) =
-            decoder.read_info().expect("Unable to decode png");
+            decoder.read_info().unwrap_or_else(|err| {
+                error_panic!("Unable to decode png: {:?}", err);
+            });
         let mut buf = vec![0; png_info.buffer_size()];
-        reader.next_frame(&mut buf).unwrap();
+        reader.next_frame(&mut buf).unwrap_or_else(|err| {
+            error_panic!("Unable to read png: {:?}", err);
+        });
 
         wre_gl!().
             tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array
@@ -72,7 +76,9 @@ impl Texture {
             WebGl2RenderingContext::RGBA,
             WebGl2RenderingContext::UNSIGNED_BYTE,
             Some(&buf)
-        ).unwrap();
+        ).unwrap_or_else(|err| {
+            error_panic!("Unable to create tex_image_2d: {:?}", err);
+        });
         // unsafe {
         // gl::GenerateMipmap(gl::TEXTURE_2D);
         // }

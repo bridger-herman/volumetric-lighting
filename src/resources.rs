@@ -51,17 +51,21 @@ pub async fn load_image_resource(path: String) -> Result<Uint8Array, JsValue> {
 
     let request = Request::new_with_str_and_init(&path, &opts)?;
 
-    let window = web_sys::window().unwrap();
+    let window = web_sys::window().unwrap_or_else(|| {
+        error_panic!("Unable to get DOM window");
+    });
     let resp_value =
         JsFuture::from(window.fetch_with_request(&request)).await?;
 
-    assert!(resp_value.is_instance_of::<Response>());
-    let resp: Response = resp_value.dyn_into().unwrap();
+    let resp: Response = resp_value.dyn_into().unwrap_or_else(|err| {
+        error_panic!("Response is not a Response: {:?}", err);
+    });
 
     // Convert this other `Promise` into a rust `Future`.
     let js_array = JsFuture::from(resp.array_buffer()?).await?;
-    assert!(js_array.is_instance_of::<ArrayBuffer>());
-    let array_buffer: ArrayBuffer = js_array.dyn_into().unwrap();
+    let array_buffer: ArrayBuffer = js_array.dyn_into().unwrap_or_else(|err| {
+        error_panic!("Response is not an ArrayBuffer: {:?}", err);
+    });
 
     let bytes = Uint8Array::new(&array_buffer);
     Ok(bytes)
