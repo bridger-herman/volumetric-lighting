@@ -259,7 +259,7 @@ impl RenderSystem {
 
     /// Load the post-processing shaders
     pub async fn load_post_processing_shader(&mut self) -> Result<(), JsValue> {
-        let post_pro_name = "colorblur";
+        let post_pro_name = "volumetric";
         let shader = load_shader(post_pro_name, usize::max_value()).await?;
         self.post_processing_shader = Some(shader);
         info!("Initialized post processing shader {}", post_pro_name);

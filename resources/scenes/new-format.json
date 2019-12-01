@@ -3,6 +3,14 @@
         "cube": {
             "mesh": "./resources/models/textured-cube.obj",
             "scripts": []
+        },
+        "plane": {
+            "mesh": "./resources/models/plane.obj",
+            "scripts": []
+        },
+        "sphere_smooth": {
+            "mesh": "./resources/models/sky_sphere.obj",
+            "scripts": []
         }
     },
     "camera": {
@@ -34,7 +42,17 @@
         {
             "prefab": "cube",
             "position": [0.0, 0.0, 0.5],
-            "scale": [0.1, 0.1, 0.10]
+            "scale": [0.1, 0.1, 0.1]
+        },
+        {
+            "prefab": "plane",
+            "position": [0.0, 0.0, 0.0],
+            "scale": [5, 5, 5]
+        },
+        {
+            "prefab": "sphere_smooth",
+            "position": [0.0, 0.0, 0.0],
+            "scale": [5, 5, 5]
         }
     ]
 }

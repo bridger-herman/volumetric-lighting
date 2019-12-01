@@ -5,12 +5,14 @@ precision mediump float;
 const int MAX_LIGHTS = 64;
 const float ambient = 0.1;
 
-in vec3 norm;
 in vec3 pos;
+in vec4 cam_space_pos;
+in vec3 norm;
 in vec2 uv;
 
 // The camera's position
 uniform vec3 uni_camera_position;
+uniform vec3 uni_camera_forward;
 
 // Color/texture information
 uniform bool uni_use_texture;
@@ -23,10 +25,7 @@ uniform int uni_num_lights;
 uniform vec3 uni_light_positions[MAX_LIGHTS];
 uniform vec3 uni_light_colors[MAX_LIGHTS];
 
-// TEXTURE1 for frame buffer
-layout(location = 0) out vec4 color;
-// TEXTURE2 for frame buffer
-layout(location = 1) out vec4 position;
+out vec4 color;
 
 void main() {
     vec3 n = normalize(norm);
@@ -53,7 +52,7 @@ void main() {
     if (uni_use_texture) {
         color *= texture(uni_texture, vec2(uv.x, 1.0 - uv.y));
     }
-
-    position = vec4(pos, 1.0);
+    color = vec4(vec3(calculate_halo(pos - vec3(0.0, 1.0, 0.0))), 1.0);
+    // color += 1.0 * vec4(vec3(calculate_halo(pos - vec3(0.0, 1.0, 0.0))), 1.0);
 }
 

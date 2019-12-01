@@ -46,8 +46,9 @@ const TARGET_FPS: i32 = 30;
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
-    wasm_logger::init_with_level(log::Level::Info)
+    wasm_logger::init_with_level(log::Level::Trace)
         .map_err(|_| JsValue::from("Failed to initialize logger"))?;
+    info!("Initialized WRE with log level {}", log::Level::Trace);
 
     Ok(())
 }

@@ -14,7 +14,8 @@ const int MAT_SIZE = 5;
 
 in vec2 tex_coords;
 
-uniform sampler2D uni_image;
+uniform sampler2D uni_color_texture;
+uniform sampler2D uni_position_texture;
 
 out vec4 final_color;
 
@@ -24,13 +25,13 @@ float luminosity(vec4 color) {
 
 void main() {
     // get texture size (in pixels)
-    ivec2 size = textureSize(uni_image, 0);
+    ivec2 size = textureSize(uni_color_texture, 0);
 
     // Find the current pixel coordinate
     int pixel_x = int(tex_coords.x * float(size.x));
     int pixel_y = int(tex_coords.y * float(size.y));
 
-    final_color = texture(uni_image, tex_coords);
+    final_color = texture(uni_color_texture, tex_coords);
 
     // loop over kernel values
     vec3 color_sum = vec3(0.0);
@@ -49,7 +50,7 @@ void main() {
             );
 
             color_sum += gaussian_kernel[x + y * MAT_SIZE] *
-                texture(uni_image, kernel_coord_in_tex_space).xyz;
+                texture(uni_color_texture, kernel_coord_in_tex_space).xyz;
         }
     }
 

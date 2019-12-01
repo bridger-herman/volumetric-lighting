@@ -33,7 +33,9 @@ impl Mesh {
         // Load the obj from a string
         let mut reader = BufReader::new(obj_text.as_bytes());
         let obj_file: Obj<SimplePolygon> =
-            Obj::load_buf(&mut reader).expect("Unable to load obj file");
+            Obj::load_buf(&mut reader).unwrap_or_else(|err| {
+                error_panic!("Unable to load obj file: {:?}", err);
+            });
 
         // Collect the positions into triangles
         // TODO assuming only one group per object, and only one object per file
