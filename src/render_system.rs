@@ -81,173 +81,175 @@ impl RenderSystem {
         if let Some(scene) = &self.scene {
             for (_path, mesh) in &scene.meshes {
                 // Don't render anything that's not attached to an entity
-                if mesh.attached_to.is_none() {
-                    warn!("Mesh {} not attached", _path);
-                    return;
-                }
+                for eid in &mesh.attached_to {
+                    // Load the shader and VAO for this material and model
+                    let shader_id = wre_entities!(*eid).material().shader_id;
+                    let shader = scene
+                        .get_shader_by_id(shader_id)
+                        .unwrap_or_else(|| {
+                            error_panic!("No shader with id: {}", shader_id);
+                        });
+                    wre_gl!().use_program(Some(&shader.program));
+                    wre_gl!().bind_vertex_array(Some(&mesh.vao));
 
-                // Load the shader and VAO for this material and model
-                let shader_id = wre_entities!(mesh.attached_to.unwrap())
-                    .material()
-                    .shader_id;
-                let shader =
-                    scene.get_shader_by_id(shader_id).unwrap_or_else(|| {
-                        error_panic!("No shader with id: {}", shader_id);
-                    });
-                wre_gl!().use_program(Some(&shader.program));
-                wre_gl!().bind_vertex_array(Some(&mesh.vao));
-
-                // Send the camera position for lighting information
-                let camera_position: Vec<f32> =
-                    wre_camera!().transform().position().into();
-                let camera_position_location = wre_gl!().get_uniform_location(
-                    &shader.program,
-                    "uni_camera_position",
-                );
-                wre_gl!().uniform3fv_with_f32_array(
-                    camera_position_location.as_ref(),
-                    &camera_position,
-                );
-
-                // Send the model matrix to the GPU
-                let model_matrix =
-                    wre_entities!(mesh.attached_to.unwrap_or_default())
-                        .transform()
-                        .matrix();
-                let model_uniform_location = wre_gl!()
-                    .get_uniform_location(&shader.program, "uni_model");
-                wre_gl!().uniform_matrix4fv_with_f32_array(
-                    model_uniform_location.as_ref(),
-                    false,
-                    &model_matrix.to_flat_vec(),
-                );
-
-                // Send the normal matrix (inverse transpose of model matrix) to the
-                // GPU for calculating transform of normals
-                let normal_matrix = model_matrix.inverse().transpose();
-                let normal_uniform_location = wre_gl!()
-                    .get_uniform_location(&shader.program, "uni_normal");
-                wre_gl!().uniform_matrix4fv_with_f32_array(
-                    normal_uniform_location.as_ref(),
-                    false,
-                    &normal_matrix.to_flat_vec(),
-                );
-
-                // Send the camera's view/projection matrix to the GPU
-                let view_matrix = wre_camera!().view_matrix();
-                let projection_matrix = wre_camera!().projection_matrix();
-                let projection_view = projection_matrix * view_matrix;
-                let pv_uniform_location = wre_gl!().get_uniform_location(
-                    &shader.program,
-                    "uni_projection_view",
-                );
-                wre_gl!().uniform_matrix4fv_with_f32_array(
-                    pv_uniform_location.as_ref(),
-                    false,
-                    &projection_view.to_flat_vec(),
-                );
-
-                // Send all the lights over to the shader
-                let num_light_location = wre_gl!()
-                    .get_uniform_location(&shader.program, "uni_num_lights");
-                wre_gl!().uniform1i(
-                    num_light_location.as_ref(),
-                    scene.lights.len() as i32,
-                );
-
-                let light_positions: Vec<f32> = scene
-                    .lights
-                    .iter()
-                    .map(|light| -> Vec<f32> { light.position.into() })
-                    .flatten()
-                    .collect();
-                let light_positions_location = wre_gl!().get_uniform_location(
-                    &shader.program,
-                    "uni_light_positions",
-                );
-                wre_gl!().uniform3fv_with_f32_array(
-                    light_positions_location.as_ref(),
-                    &light_positions,
-                );
-
-                let light_colors: Vec<f32> = scene
-                    .lights
-                    .iter()
-                    .map(|light| -> Vec<f32> { light.color.into() })
-                    .flatten()
-                    .collect();
-                let light_colors_location = wre_gl!()
-                    .get_uniform_location(&shader.program, "uni_light_colors");
-                wre_gl!().uniform3fv_with_f32_array(
-                    light_colors_location.as_ref(),
-                    &light_colors,
-                );
-
-                // Send the material's color to the GPU
-                let color: [f32; 4] =
-                    wre_entities!(mesh.attached_to.unwrap_or_default())
-                        .material()
-                        .color
-                        .into();
-                let color_uniform_location = wre_gl!()
-                    .get_uniform_location(&shader.program, "uni_color");
-                wre_gl!().uniform4fv_with_f32_array(
-                    color_uniform_location.as_ref(),
-                    &color,
-                );
-
-                // Send the material's specularity to the GPU
-                let specular: [f32; 4] =
-                    wre_entities!(mesh.attached_to.unwrap_or_default())
-                        .material()
-                        .specular
-                        .into();
-                let specular_uniform_location = wre_gl!()
-                    .get_uniform_location(&shader.program, "uni_specular");
-                wre_gl!().uniform4fv_with_f32_array(
-                    specular_uniform_location.as_ref(),
-                    &specular,
-                );
-
-                // If there's a texture, send it to the GPU
-                if let Some(texture_id) =
-                    wre_entities!(mesh.attached_to.unwrap_or_default())
-                        .material()
-                        .texture_id()
-                {
-                    wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE0);
-                    wre_gl!().bind_texture(
-                        WebGl2RenderingContext::TEXTURE_2D,
-                        Some(&scene.get_texture_by_id(texture_id).unwrap().tex),
+                    // Send the camera position for lighting information
+                    let camera_position: Vec<f32> =
+                        wre_camera!().transform().position().into();
+                    let camera_position_location = wre_gl!()
+                        .get_uniform_location(
+                            &shader.program,
+                            "uni_camera_position",
+                        );
+                    wre_gl!().uniform3fv_with_f32_array(
+                        camera_position_location.as_ref(),
+                        &camera_position,
                     );
 
-                    let tex_uniform_location = wre_gl!()
-                        .get_uniform_location(&shader.program, "uni_texture");
-                    wre_gl!().uniform1i(tex_uniform_location.as_ref(), 0);
+                    // Send the model matrix to the GPU
+                    let model_matrix = wre_entities!(*eid).transform().matrix();
+                    let model_uniform_location = wre_gl!()
+                        .get_uniform_location(&shader.program, "uni_model");
+                    wre_gl!().uniform_matrix4fv_with_f32_array(
+                        model_uniform_location.as_ref(),
+                        false,
+                        &model_matrix.to_flat_vec(),
+                    );
 
-                    let use_tex_uniform_location = wre_gl!()
+                    // Send the normal matrix (inverse transpose of model matrix) to the
+                    // GPU for calculating transform of normals
+                    let normal_matrix = model_matrix.inverse().transpose();
+                    let normal_uniform_location = wre_gl!()
+                        .get_uniform_location(&shader.program, "uni_normal");
+                    wre_gl!().uniform_matrix4fv_with_f32_array(
+                        normal_uniform_location.as_ref(),
+                        false,
+                        &normal_matrix.to_flat_vec(),
+                    );
+
+                    // Send the camera's view/projection matrix to the GPU
+                    let view_matrix = wre_camera!().view_matrix();
+                    let projection_matrix = wre_camera!().projection_matrix();
+                    let projection_view = projection_matrix * view_matrix;
+                    let pv_uniform_location = wre_gl!().get_uniform_location(
+                        &shader.program,
+                        "uni_projection_view",
+                    );
+                    wre_gl!().uniform_matrix4fv_with_f32_array(
+                        pv_uniform_location.as_ref(),
+                        false,
+                        &projection_view.to_flat_vec(),
+                    );
+
+                    // Send all the lights over to the shader
+                    let num_light_location = wre_gl!().get_uniform_location(
+                        &shader.program,
+                        "uni_num_lights",
+                    );
+                    wre_gl!().uniform1i(
+                        num_light_location.as_ref(),
+                        scene.lights.len() as i32,
+                    );
+
+                    let light_positions: Vec<f32> = scene
+                        .lights
+                        .iter()
+                        .map(|light| -> Vec<f32> { light.position.into() })
+                        .flatten()
+                        .collect();
+                    let light_positions_location = wre_gl!()
                         .get_uniform_location(
                             &shader.program,
-                            "uni_use_texture",
+                            "uni_light_positions",
                         );
-                    wre_gl!().uniform1i(use_tex_uniform_location.as_ref(), 1);
-                } else {
-                    let use_tex_uniform_location = wre_gl!()
-                        .get_uniform_location(
-                            &shader.program,
-                            "uni_use_texture",
+                    wre_gl!().uniform3fv_with_f32_array(
+                        light_positions_location.as_ref(),
+                        &light_positions,
+                    );
+
+                    let light_colors: Vec<f32> = scene
+                        .lights
+                        .iter()
+                        .map(|light| -> Vec<f32> { light.color.into() })
+                        .flatten()
+                        .collect();
+                    let light_colors_location = wre_gl!().get_uniform_location(
+                        &shader.program,
+                        "uni_light_colors",
+                    );
+                    wre_gl!().uniform3fv_with_f32_array(
+                        light_colors_location.as_ref(),
+                        &light_colors,
+                    );
+
+                    // Send the material's color to the GPU
+                    let color: [f32; 4] =
+                        wre_entities!(*eid).material().color.into();
+                    let color_uniform_location = wre_gl!()
+                        .get_uniform_location(&shader.program, "uni_color");
+                    wre_gl!().uniform4fv_with_f32_array(
+                        color_uniform_location.as_ref(),
+                        &color,
+                    );
+
+                    // Send the material's specularity to the GPU
+                    let specular: [f32; 4] =
+                        wre_entities!(*eid).material().specular.into();
+                    let specular_uniform_location = wre_gl!()
+                        .get_uniform_location(&shader.program, "uni_specular");
+                    wre_gl!().uniform4fv_with_f32_array(
+                        specular_uniform_location.as_ref(),
+                        &specular,
+                    );
+
+                    // If there's a texture, send it to the GPU
+                    if let Some(texture_id) =
+                        wre_entities!(*eid).material().texture_id()
+                    {
+                        wre_gl!()
+                            .active_texture(WebGl2RenderingContext::TEXTURE0);
+                        wre_gl!().bind_texture(
+                            WebGl2RenderingContext::TEXTURE_2D,
+                            Some(
+                                &scene
+                                    .get_texture_by_id(texture_id)
+                                    .unwrap()
+                                    .tex,
+                            ),
                         );
-                    wre_gl!().uniform1i(use_tex_uniform_location.as_ref(), 0);
+
+                        let tex_uniform_location = wre_gl!()
+                            .get_uniform_location(
+                                &shader.program,
+                                "uni_texture",
+                            );
+                        wre_gl!().uniform1i(tex_uniform_location.as_ref(), 0);
+
+                        let use_tex_uniform_location = wre_gl!()
+                            .get_uniform_location(
+                                &shader.program,
+                                "uni_use_texture",
+                            );
+                        wre_gl!()
+                            .uniform1i(use_tex_uniform_location.as_ref(), 1);
+                    } else {
+                        let use_tex_uniform_location = wre_gl!()
+                            .get_uniform_location(
+                                &shader.program,
+                                "uni_use_texture",
+                            );
+                        wre_gl!()
+                            .uniform1i(use_tex_uniform_location.as_ref(), 0);
+                    }
+
+                    // Draw the geometry
+                    wre_gl!().draw_arrays(
+                        WebGl2RenderingContext::TRIANGLES,
+                        0,
+                        mesh.num_vertices,
+                    );
+
+                    wre_gl!().use_program(None);
                 }
-
-                // Draw the geometry
-                wre_gl!().draw_arrays(
-                    WebGl2RenderingContext::TRIANGLES,
-                    0,
-                    mesh.num_vertices,
-                );
-
-                wre_gl!().use_program(None);
             }
         }
     }

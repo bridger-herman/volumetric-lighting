@@ -214,8 +214,11 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
 
         // Connect the mesh with this entity
         let mesh_path = &scene.prefabs[&entity.prefab].mesh;
-        let mut mesh = scene.meshes.get_mut(mesh_path).unwrap();
-        mesh.attached_to = Some(eid);
+        let mesh = scene.meshes.get_mut(mesh_path).unwrap_or_else(|| {
+            error_panic!("Mesh {:?} not loaded from a prefab", mesh_path);
+        });
+        trace!("Attached mesh {:?} to entity {:?}", mesh_path, eid);
+        mesh.attached_to.push(eid);
 
         // Add the material
         let mtl_path = mesh_path.replace("obj", "mtl");

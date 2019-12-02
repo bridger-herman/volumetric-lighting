@@ -70,10 +70,9 @@ impl FrameBuffer {
         );
 
         // Send the rendered colors to the graphics card
-        let color_uniform_location =
-            wre_gl!().get_uniform_location(screen_quad_shader, "uni_color_texture");
+        let color_uniform_location = wre_gl!()
+            .get_uniform_location(screen_quad_shader, "uni_color_texture");
         wre_gl!().uniform1i(color_uniform_location.as_ref(), 1);
-
 
         // Bind the position texture
         wre_gl!().active_texture(WebGl2RenderingContext::TEXTURE2);
@@ -83,17 +82,15 @@ impl FrameBuffer {
         );
 
         // Send the rendered positions to the graphics card
-        let position_uniform_location =
-            wre_gl!().get_uniform_location(screen_quad_shader, "uni_position_texture");
+        let position_uniform_location = wre_gl!()
+            .get_uniform_location(screen_quad_shader, "uni_position_texture");
         wre_gl!().uniform1i(position_uniform_location.as_ref(), 2);
 
         // Send the camera position
         let camera_position: Vec<f32> =
             wre_camera!().transform().position().into();
-        let camera_position_location = wre_gl!().get_uniform_location(
-            screen_quad_shader,
-            "uni_camera_position",
-        );
+        let camera_position_location = wre_gl!()
+            .get_uniform_location(screen_quad_shader, "uni_camera_position");
         wre_gl!().uniform3fv_with_f32_array(
             camera_position_location.as_ref(),
             &camera_position,
@@ -102,10 +99,8 @@ impl FrameBuffer {
         // Send the camera forward
         let camera_forward: Vec<f32> =
             wre_camera!().transform().forward().into();
-        let camera_forward_location = wre_gl!().get_uniform_location(
-            screen_quad_shader,
-            "uni_camera_forward",
-        );
+        let camera_forward_location = wre_gl!()
+            .get_uniform_location(screen_quad_shader, "uni_camera_forward");
         wre_gl!().uniform3fv_with_f32_array(
             camera_forward_location.as_ref(),
             &camera_forward,
@@ -250,7 +245,10 @@ impl Default for FrameBuffer {
         );
 
         // Attach to framebuffer
-        let buffers = [WebGl2RenderingContext::COLOR_ATTACHMENT0, WebGl2RenderingContext::COLOR_ATTACHMENT1];
+        let buffers = [
+            WebGl2RenderingContext::COLOR_ATTACHMENT0,
+            WebGl2RenderingContext::COLOR_ATTACHMENT1,
+        ];
         unsafe {
             let buffer_array = js_sys::Uint32Array::view(&buffers);
             wre_gl!().draw_buffers(&buffer_array);

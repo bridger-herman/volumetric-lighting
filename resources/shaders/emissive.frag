@@ -13,6 +13,7 @@ in vec2 uv;
 uniform vec3 uni_camera_position;
 
 // Color/texture information
+uniform bool uni_use_texture;
 uniform vec4 uni_color;
 uniform vec4 uni_specular;
 uniform sampler2D uni_texture;
@@ -22,7 +23,10 @@ uniform int uni_num_lights;
 uniform vec3 uni_light_positions[MAX_LIGHTS];
 uniform vec3 uni_light_colors[MAX_LIGHTS];
 
-out vec4 color;
+// TEXTURE1 for frame buffer
+layout(location = 0) out vec4 color;
+// TEXTURE2 for frame buffer
+layout(location = 1) out vec4 position;
 
 void main() {
     // Only use a texture if there is one

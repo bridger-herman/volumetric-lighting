@@ -64,8 +64,6 @@ impl Texture {
             error_panic!("Unable to read png: {:?}", err);
         });
 
-        info!("Png info (buf size {}): {:#?}", buf.len(), png_info);
-
         wre_gl!().pixel_storei(WebGl2RenderingContext::UNPACK_ALIGNMENT, 1);
         wre_gl!().
             tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array
