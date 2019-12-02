@@ -2,11 +2,27 @@
 
 precision mediump float;
 
-// Volume radius
-const float R2 = 1.0;
-const float recipR2 = 1.0;
-const float recip3R2 = 0.333333;
-const float normalizer = 0.75;
+// Halo constants
+const int MAX_HALOS = 64;
+
+// The radius squared
+const float R2 = 0.25;
+// 1/(r^2)
+const float recipR2 = 4.0;
+// 1/(3 * r^2)
+const float recip3R2 = 1.333333;
+// 3/(4 * r)
+const float normalizer = 1.5;
+
+// Halo definitions
+const int num_halos = 5;
+const vec3[] halo_positions = vec3[](
+    vec3(0.0, 1.0, 2.0),
+    vec3(0.0, 1.0, -2.0),
+    vec3(0.0, 1.0, 0.0),
+    vec3(2.0, 1.0, 0.0),
+    vec3(-2.0, 1.0, 0.0)
+);
 
 in vec2 tex_coords;
 
@@ -26,7 +42,7 @@ float calculate_halo(vec3 pobject, float depth) {
     float m = sqrt(max(pv * pv - v2 * (p2 - R2), 0.0));
 
     // TODO: actually use depth?
-    float t0 = 1.0 + depth / dot(uni_camera_forward, vdir);
+    float t0 = 0.0;
 
     // Calculate clamped limits of integration
     float t1 = clamp((pv - m) / v2, t0, 100.0);
@@ -43,7 +59,12 @@ float calculate_halo(vec3 pobject, float depth) {
 
 void main() {
     vec4 position = texture(uni_position_texture, tex_coords);
-    float halo = calculate_halo(position.xyz - vec3(0, 1, 0), position.w);
-    vec4 halo_color = vec4(vec3(halo), 1.0);
-    final_color = 0.5 * halo_color + 0.5 * texture(uni_color_texture, tex_coords);
+    vec4 halo_color = vec4(0.0);
+    for (int i = 0; i < num_halos; i++) {
+        float halo = calculate_halo(position.xyz - halo_positions[i],
+                position.w);
+        halo_color += vec4(vec3(halo), 1.0);
+    }
+    final_color = 0.5 * halo_color * halo_color + 0.5 *
+        texture(uni_color_texture, tex_coords);
 }
