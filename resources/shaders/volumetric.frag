@@ -18,18 +18,15 @@ uniform sampler2D uni_position_texture;
 out vec4 final_color;
 
 // From Chapter 10, Advanced Rendering
-float calculate_halo(vec3 pobject) {
+float calculate_halo(vec3 pobject, float depth) {
     vec3 vdir = normalize(uni_camera_position - pobject);
     float v2 = dot(vdir, vdir);
     float p2 = dot(pobject, pobject);
     float pv = -dot(pobject, vdir);
     float m = sqrt(max(pv * pv - v2 * (p2 - R2), 0.0));
 
-    // Read z0
-    // vec2 depth = gl_FragCoord.zw;
-    // float t0 = 1.0 + (depth.x + depth.y) / dot(uni_camera_forward, vdir);
-    // vec2 depth = cam_space_pos.zw;
-    float t0 = 1.0 + (2.0) / dot(uni_camera_forward, vdir);
+    // TODO: actually use depth?
+    float t0 = 1.0 + depth / dot(uni_camera_forward, vdir);
 
     // Calculate clamped limits of integration
     float t1 = clamp((pv - m) / v2, t0, 100.0);
@@ -46,7 +43,7 @@ float calculate_halo(vec3 pobject) {
 
 void main() {
     vec4 position = texture(uni_position_texture, tex_coords);
-    float halo = calculate_halo(position.xyz - vec3(0, 1, 0));
-    final_color = vec4(vec3(halo), 1.0);
-    // final_color = halo * texture(uni_color_texture, tex_coords);
+    float halo = calculate_halo(position.xyz - vec3(0, 1, 0), position.w);
+    vec4 halo_color = vec4(vec3(halo), 1.0);
+    final_color = 0.5 * halo_color + 0.5 * texture(uni_color_texture, tex_coords);
 }
