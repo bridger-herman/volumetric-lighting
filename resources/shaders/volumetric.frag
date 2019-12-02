@@ -34,7 +34,7 @@ uniform sampler2D uni_position_texture;
 out vec4 final_color;
 
 // From Chapter 10, Advanced Rendering
-float calculate_halo(vec3 pobject, float depth) {
+float calculate_halo(vec3 pobject) {
     vec3 vdir = normalize(uni_camera_position - pobject);
     float v2 = dot(vdir, vdir);
     float p2 = dot(pobject, pobject);
@@ -61,8 +61,7 @@ void main() {
     vec4 position = texture(uni_position_texture, tex_coords);
     vec4 halo_color = vec4(0.0);
     for (int i = 0; i < num_halos; i++) {
-        float halo = calculate_halo(position.xyz - halo_positions[i],
-                position.w);
+        float halo = calculate_halo(position.xyz - halo_positions[i]);
         halo_color += vec4(vec3(halo), 1.0);
     }
     final_color = 0.5 * halo_color * halo_color + 0.5 *

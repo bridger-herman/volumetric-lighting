@@ -142,7 +142,7 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
             prefab.shader.clone().unwrap_or("phong_forward".to_string());
         if scene.shaders.get(&shader_name).is_none() {
             let shader = load_shader(&shader_name, scene.shaders.len()).await?;
-            scene.shaders.insert(shader_name, shader);
+            scene.shaders.insert(shader_name.clone(), shader);
         }
 
         // Don't load any mesh twice
@@ -193,6 +193,7 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
 
             let mut material = Material::from_mtl_str(&mtl_text);
             material.set_texture_id(tex_id);
+            material.shader_id = scene.shaders[&shader_name].id;
             scene.materials.insert(mtl_name, material);
         }
     }
@@ -220,7 +221,7 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
         trace!("Attached mesh {:?} to entity {:?}", mesh_path, eid);
         mesh.attached_to.push(eid);
 
-        // Add the material
+        // Add the material and connect it with the shader
         let mtl_path = mesh_path.replace("obj", "mtl");
         let material = scene.materials.get(&mtl_path).unwrap();
         wre_entities_mut!(eid).set_material(material);
