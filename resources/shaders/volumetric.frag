@@ -2,17 +2,19 @@
 
 precision mediump float;
 
+// Camera constants (copied from camera.rs)
+const float near_plane = 0.1;
+const float aspect = 16.0 / 9.0;
+const float vert_half_angle = radians(45.0);
+const float viewport_height = 2.0 * tan(vert_half_angle);
+const float viewport_width = viewport_height * aspect;
+
+const float MAX_T = 10.0;
+const float STEP_T = 1.0;
+
 // Halo constants
 const int MAX_HALOS = 64;
-
-// The radius squared
-const float R2 = 0.25;
-// 1/(r^2)
-const float recipR2 = 4.0;
-// 1/(3 * r^2)
-const float recip3R2 = 1.333333;
-// 3/(4 * r)
-const float normalizer = 1.5;
+const float HALO_POWER = 0.01;
 
 // Halo definitions
 const int num_halos = 5;
@@ -28,42 +30,59 @@ in vec2 tex_coords;
 
 uniform vec3 uni_camera_position;
 uniform vec3 uni_camera_forward;
+uniform vec3 uni_camera_up;
+uniform vec3 uni_camera_right;
+uniform mat4 uni_camera_inv_proj;
 uniform sampler2D uni_color_texture;
 uniform sampler2D uni_position_texture;
 
 out vec4 final_color;
 
-// From Chapter 10, Advanced Rendering
-float calculate_halo(vec3 pobject) {
-    vec3 vdir = normalize(uni_camera_position - pobject);
-    float v2 = dot(vdir, vdir);
-    float p2 = dot(pobject, pobject);
-    float pv = -dot(pobject, vdir);
-    float m = sqrt(max(pv * pv - v2 * (p2 - R2), 0.0));
+vec3 eval_ray(vec3 ray_start, vec3 ray_dir, float t) {
+    return ray_start + ray_dir * t;
+}
 
-    // TODO: actually use depth?
-    float t0 = 0.0;
+float sphere_integral(vec3 ray_start, vec3 ray_dir, vec3 sphere_center, float
+        sphere_radius) {
+    // Solve the quadratic to see if ray intersects sphere
+    vec3 start_to_center = ray_start - sphere_center;
+    float a = dot(ray_dir, ray_dir);
+    float b = 2.0 * dot(ray_dir, start_to_center);
+    float c = dot(start_to_center, start_to_center) - sphere_radius *
+        sphere_radius;
 
-    // Calculate clamped limits of integration
-    float t1 = clamp((pv - m) / v2, t0, 100.0);
-    float t2 = clamp((pv + m) / v2, t0, 100.0);
-    float u1 = t1 * t1;
-    float u2 = t2 * t2;
+    float discriminant = b * b - 4.0 * a * c;
 
-    // Evaluate density integral, normalize, and square
-    float B = ((1.0 - p2 * recipR2) * (t2 - t1) + pv * recipR2 * (u2 - u1) -
-            v2 * recip3R2 * (t2 * u2 - t1 * u1)) * normalizer;
+    if (discriminant < 0.0) {
+        return 0.0;
+    }
 
-    return B * B * v2;
+    // Calculate the intersection t values and points
+    float sqrt_disc = sqrt(discriminant);
+    float t1 = (-b + sqrt_disc) / (2.0 * a);
+    float t2 = (-b - sqrt_disc) / (2.0 * a);
+    vec3 p1 = eval_ray(ray_start, ray_dir, t1);
+    vec3 p2 = eval_ray(ray_start, ray_dir, t2);
+
+    return length(p2 - p1);
 }
 
 void main() {
-    vec4 position = texture(uni_position_texture, tex_coords);
+    // Coords in range [-1, 1]
+    vec2 device_coords = tex_coords * 2.0 - 1.0;
+
+    // Calculate the ray between eye and pixel on near plane
+    vec4 un_normalized_world = uni_camera_inv_proj * vec4(device_coords, 0.0,
+            1.0);
+    vec3 world_space_coords = vec3(un_normalized_world.xyz /
+            un_normalized_world.w);
+    vec3 ray_dir = normalize(world_space_coords.xyz - uni_camera_position);
+
     vec4 halo_color = vec4(0.0);
     for (int i = 0; i < num_halos; i++) {
-        float halo = calculate_halo(position.xyz - halo_positions[i]);
-        halo_color += vec4(vec3(halo), 1.0);
+        float halo_value = sphere_integral(uni_camera_position,
+                ray_dir, halo_positions[i], 1.0);
+        halo_color += vec4(vec3(halo_value), 1.0);
     }
-    final_color = 0.5 * halo_color * halo_color + 0.5 *
-        texture(uni_color_texture, tex_coords);
+    final_color = 0.1 * halo_color + texture(uni_color_texture, tex_coords);
 }

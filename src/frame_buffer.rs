@@ -96,6 +96,18 @@ impl FrameBuffer {
             &camera_position,
         );
 
+        // Send the camera's inverse projection matrix
+        let camera_proj = wre_camera!().projection_matrix();
+        let camera_view = wre_camera!().view_matrix();
+        let camera_inv_proj = (camera_proj * camera_view).inverse();
+        let camera_inv_proj_location = wre_gl!()
+            .get_uniform_location(screen_quad_shader, "uni_camera_inv_proj");
+        wre_gl!().uniform_matrix4fv_with_f32_array(
+            camera_inv_proj_location.as_ref(),
+            false,
+            &camera_inv_proj.to_flat_vec(),
+        );
+
         // Send the camera forward
         let camera_forward: Vec<f32> =
             wre_camera!().transform().forward().into();
@@ -104,6 +116,26 @@ impl FrameBuffer {
         wre_gl!().uniform3fv_with_f32_array(
             camera_forward_location.as_ref(),
             &camera_forward,
+        );
+
+        // Send the camera right
+        let camera_right: Vec<f32> =
+            wre_camera!().transform().right().into();
+        let camera_right_location = wre_gl!()
+            .get_uniform_location(screen_quad_shader, "uni_camera_right");
+        wre_gl!().uniform3fv_with_f32_array(
+            camera_right_location.as_ref(),
+            &camera_right,
+        );
+
+        // Send the camera up
+        let camera_up: Vec<f32> =
+            wre_camera!().transform().up().into();
+        let camera_up_location = wre_gl!()
+            .get_uniform_location(screen_quad_shader, "uni_camera_up");
+        wre_gl!().uniform3fv_with_f32_array(
+            camera_up_location.as_ref(),
+            &camera_up,
         );
 
         wre_gl!().draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, 6);
