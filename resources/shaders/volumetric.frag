@@ -42,8 +42,8 @@ vec3 eval_ray(vec3 ray_start, vec3 ray_dir, float t) {
     return ray_start + ray_dir * t;
 }
 
-float sphere_integral(vec3 ray_start, vec3 ray_dir, vec3 sphere_center, float
-        sphere_radius) {
+float sphere_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
+        sphere_center, float sphere_radius) {
     // Solve the quadratic to see if ray intersects sphere
     vec3 start_to_center = ray_start - sphere_center;
     float a = dot(ray_dir, ray_dir);
@@ -52,22 +52,22 @@ float sphere_integral(vec3 ray_start, vec3 ray_dir, vec3 sphere_center, float
         sphere_radius;
 
     float discriminant = b * b - 4.0 * a * c;
-
-    if (discriminant < 0.0) {
-        return 0.0;
-    }
+    discriminant = max(discriminant, 0.0);
 
     // Calculate the intersection t values and points
     float sqrt_disc = sqrt(discriminant);
     float t1 = (-b + sqrt_disc) / (2.0 * a);
     float t2 = (-b - sqrt_disc) / (2.0 * a);
-    vec3 p1 = eval_ray(ray_start, ray_dir, t1);
-    vec3 p2 = eval_ray(ray_start, ray_dir, t2);
+    t1 = clamp(t1, 0.0, frag_depth);
+    t2 = clamp(t2, 0.0, frag_depth);
 
-    return length(p2 - p1);
+    float l = t1 - t2;
+    return (l * l) / (sphere_radius);
 }
 
 void main() {
+    vec4 position = texture(uni_position_texture, tex_coords);
+
     // Coords in range [-1, 1]
     vec2 device_coords = tex_coords * 2.0 - 1.0;
 
@@ -80,9 +80,14 @@ void main() {
 
     vec4 halo_color = vec4(0.0);
     for (int i = 0; i < num_halos; i++) {
-        float halo_value = sphere_integral(uni_camera_position,
-                ray_dir, halo_positions[i], 1.0);
+        float halo_value = sphere_integral(
+            position.w,
+            uni_camera_position,
+            ray_dir,
+            halo_positions[i],
+            0.3
+        );
         halo_color += vec4(vec3(halo_value), 1.0);
     }
-    final_color = 0.1 * halo_color + texture(uni_color_texture, tex_coords);
+    final_color = halo_color + texture(uni_color_texture, tex_coords);
 }

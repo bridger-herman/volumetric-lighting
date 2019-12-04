@@ -54,6 +54,6 @@ void main() {
         color *= texture(uni_texture, vec2(uv.x, 1.0 - uv.y));
     }
 
-    position = vec4(pos, gl_FragCoord.z);
+    position = vec4(pos, gl_FragCoord.z / gl_FragCoord.w);
 }
 
