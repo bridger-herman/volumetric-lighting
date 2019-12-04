@@ -2,15 +2,7 @@
 
 precision mediump float;
 
-// Camera constants (copied from camera.rs)
-const float near_plane = 0.1;
-const float aspect = 16.0 / 9.0;
-const float vert_half_angle = radians(45.0);
-const float viewport_height = 2.0 * tan(vert_half_angle);
-const float viewport_width = viewport_height * aspect;
-
-const float MAX_T = 10.0;
-const float STEP_T = 1.0;
+const float INFINITY = 1e10;
 
 // Halo constants
 const int MAX_HALOS = 64;
@@ -42,7 +34,7 @@ vec3 eval_ray(vec3 ray_start, vec3 ray_dir, float t) {
     return ray_start + ray_dir * t;
 }
 
-float sphere_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
+float sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
         sphere_center, float sphere_radius) {
     // Solve the quadratic to see if ray intersects sphere
     vec3 start_to_center = ray_start - sphere_center;
@@ -61,8 +53,28 @@ float sphere_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
     t1 = clamp(t1, 0.0, frag_depth);
     t2 = clamp(t2, 0.0, frag_depth);
 
-    float l = t1 - t2;
+    float l = abs(t1 - t2);
     return (l * l) / (sphere_radius);
+}
+
+// Inspiration: part 2 of
+// https://tavianator.com/fast-branchless-raybounding-box-intersections/
+float box_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
+        box_min, vec3 box_max) {
+    float tmin = -INFINITY, tmax = INFINITY;
+    vec3 ray_dir_inv = 1.0 / ray_dir;
+
+    for (int i = 0; i < 3; ++i) {
+        float t1 = (box_min[i] - ray_start[i])*ray_dir_inv[i];
+        float t2 = (box_max[i] - ray_start[i])*ray_dir_inv[i];
+
+        tmin = max(tmin, min(t1, t2));
+        tmax = min(tmax, max(t1, t2));
+    }
+
+    float l = max(tmax - max(tmin, 0.0), 0.0);
+    float r = length(box_max - box_min);
+    return (l * l) / (r * r);
 }
 
 void main() {
@@ -80,13 +92,21 @@ void main() {
 
     vec4 halo_color = vec4(0.0);
     for (int i = 0; i < num_halos; i++) {
-        float halo_value = sphere_integral(
+        float box_radius = 0.3;
+        float halo_value = box_integral(
             position.w,
             uni_camera_position,
             ray_dir,
-            halo_positions[i],
-            0.3
+            halo_positions[i] - vec3(box_radius),
+            halo_positions[i] + vec3(box_radius)
         );
+        // float halo_value = sphere_halo(
+            // position.w,
+            // uni_camera_position,
+            // ray_dir,
+            // halo_positions[i],
+            // 0.3
+        // );
         halo_color += vec4(vec3(halo_value), 1.0);
     }
     final_color = halo_color + texture(uni_color_texture, tex_coords);
