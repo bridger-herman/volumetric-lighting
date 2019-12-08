@@ -77,6 +77,26 @@ float box_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
     return (l * l) / (r * r);
 }
 
+// http://www.iquilezles.org/www/articles/intersectors/intersectors.htm
+float cyl_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
+        cb, vec3 ca, float radius) {
+    vec3 oc = ray_start - cb;
+    float card = dot(ca, ray_dir);
+    float caoc = dot(ca, oc);
+    float a = 1.0 - card * card;
+    float b = dot(oc, ray_dir) - caoc * card;
+    float c = dot(oc, oc) - caoc * caoc - radius * radius;
+    float h = b * b - a * c;
+    h = clamp(h, 0.0, frag_depth);
+    float h2 = sqrt(h);
+    float t1 = (-b - h2) / a;
+    float t2 = (-b + h2) / a;
+    t1 = clamp(t1, 0.0, frag_depth);
+    t2 = clamp(t2, 0.0, frag_depth);
+    float l = abs(t2 - t1);
+    return (0.5 * l * l) / radius;
+}
+
 void main() {
     vec4 position = texture(uni_position_texture, tex_coords);
 
@@ -93,12 +113,20 @@ void main() {
     vec4 halo_color = vec4(0.0);
     for (int i = 0; i < num_halos; i++) {
         float box_radius = 0.3;
-        float halo_value = box_integral(
+        // float halo_value = box_integral(
+            // position.w,
+            // uni_camera_position,
+            // ray_dir,
+            // halo_positions[i] - vec3(box_radius),
+            // halo_positions[i] + vec3(box_radius)
+        // );
+        float halo_value = cyl_integral(
             position.w,
             uni_camera_position,
             ray_dir,
-            halo_positions[i] - vec3(box_radius),
-            halo_positions[i] + vec3(box_radius)
+            halo_positions[i],
+            vec3(0, 1, 0),
+            0.3
         );
         // float halo_value = sphere_halo(
             // position.w,
