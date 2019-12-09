@@ -34,8 +34,8 @@ vec3 eval_ray(vec3 ray_start, vec3 ray_dir, float t) {
     return ray_start + ray_dir * t;
 }
 
-float sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
-        sphere_center, float sphere_radius) {
+vec3 sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
+        sphere_center, float sphere_radius, vec3 halo_color) {
     // Solve the quadratic to see if ray intersects sphere
     vec3 start_to_center = ray_start - sphere_center;
     float a = dot(ray_dir, ray_dir);
@@ -54,32 +54,12 @@ float sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
     t2 = clamp(t2, 0.0, frag_depth);
 
     float l = abs(t1 - t2);
-    return (l * l) / (sphere_radius);
-}
-
-// Inspiration: part 2 of
-// https://tavianator.com/fast-branchless-raybounding-box-intersections/
-float box_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
-        box_min, vec3 box_max) {
-    float tmin = -INFINITY, tmax = INFINITY;
-    vec3 ray_dir_inv = 1.0 / ray_dir;
-
-    for (int i = 0; i < 3; ++i) {
-        float t1 = (box_min[i] - ray_start[i])*ray_dir_inv[i];
-        float t2 = (box_max[i] - ray_start[i])*ray_dir_inv[i];
-
-        tmin = max(tmin, min(t1, t2));
-        tmax = min(tmax, max(t1, t2));
-    }
-
-    float l = max(tmax - max(tmin, 0.0), 0.0);
-    float r = length(box_max - box_min);
-    return (l * l) / (r * r);
+    return halo_color * ((l * l) / (sphere_radius));
 }
 
 // http://www.iquilezles.org/www/articles/intersectors/intersectors.htm
-float cyl_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
-        cb, vec3 ca, float radius) {
+vec3 cyl_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
+        cb, vec3 ca, float radius, vec3 halo_color) {
     vec3 oc = ray_start - cb;
     float card = dot(ca, ray_dir);
     float caoc = dot(ca, oc);
@@ -94,7 +74,7 @@ float cyl_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
     t1 = clamp(t1, 0.0, frag_depth);
     t2 = clamp(t2, 0.0, frag_depth);
     float l = abs(t2 - t1);
-    return (0.5 * l * l) / radius;
+    return halo_color * ((l * l) / radius);
 }
 
 void main() {
@@ -110,32 +90,27 @@ void main() {
             un_normalized_world.w);
     vec3 ray_dir = normalize(world_space_coords.xyz - uni_camera_position);
 
-    vec4 halo_color = vec4(0.0);
+    // Add the spot light halo
+    vec3 halo_value = cyl_integral(
+        position.w,
+        uni_camera_position,
+        ray_dir,
+        vec3(3, 1, 3),
+        vec3(0, -1, 0),
+        0.8,
+        vec3(0.2)
+    );
+
+    // Add the sphere halos
     for (int i = 0; i < num_halos; i++) {
-        float box_radius = 0.3;
-        // float halo_value = box_integral(
-            // position.w,
-            // uni_camera_position,
-            // ray_dir,
-            // halo_positions[i] - vec3(box_radius),
-            // halo_positions[i] + vec3(box_radius)
-        // );
-        float halo_value = cyl_integral(
+        halo_value += sphere_halo(
             position.w,
             uni_camera_position,
             ray_dir,
             halo_positions[i],
-            vec3(0, 1, 0),
-            0.3
+            0.3,
+            vec3(0.5, 0.0, 0.5)
         );
-        // float halo_value = sphere_halo(
-            // position.w,
-            // uni_camera_position,
-            // ray_dir,
-            // halo_positions[i],
-            // 0.3
-        // );
-        halo_color += vec4(vec3(halo_value), 1.0);
     }
-    final_color = halo_color + texture(uni_color_texture, tex_coords);
+    final_color = vec4(halo_value, 1.0) + texture(uni_color_texture, tex_coords);
 }

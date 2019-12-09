@@ -5,8 +5,8 @@ precision mediump float;
 const int MAX_LIGHTS = 64;
 const float ambient = 0.1;
 
-in vec3 norm;
 in vec3 pos;
+in vec3 norm;
 in vec2 uv;
 
 // The camera's position
@@ -28,12 +28,42 @@ layout(location = 0) out vec4 color;
 // TEXTURE2 for frame buffer
 layout(location = 1) out vec4 position;
 
+const vec4 spot_color = vec4(1);
+const vec3 spot_position = vec3(3, 1, 3);
+const vec3 spot_direction = vec3(0, -1, 0);
+const float spot_angle_inside = radians(45.0);
+const float spot_angle_outside = radians(48.0);
+
 void main() {
     vec3 n = normalize(norm);
 
     vec3 diffuse = vec3(0.0, 0.0, 0.0);
     vec3 specular = vec3(0.0, 0.0, 0.0);
 
+    // Spot light direction parameters
+    vec3 dir_to_light = spot_position - pos;
+    float dist_to_light = length(dir_to_light);
+    dir_to_light = normalize(dir_to_light);
+    float angle_to_light = dot(dir_to_light, -spot_direction);
+
+    // Illumination_parameters
+    float source_illumination = 1.0 / (dist_to_light * dist_to_light);
+    float angle = dot(n, dir_to_light);
+
+    // Spot light
+    if (angle_to_light < spot_angle_outside && angle_to_light >
+            spot_angle_inside) {
+        // Partially illuminated
+        float percentage = (angle_to_light - spot_angle_inside) /
+            (spot_angle_outside - spot_angle_inside);
+        vec3 color = spot_color.xyz * uni_color.xyz * angle * source_illumination;
+        diffuse += mix(vec3(0.0), color, percentage);
+    } else if (angle_to_light > spot_angle_inside) {
+        // Fully illuminated
+        diffuse += spot_color.xyz * uni_color.xyz * angle * source_illumination;
+    }
+
+    // Point lights
     for (int i = 0; i < uni_num_lights && i < MAX_LIGHTS; i++) {
         vec3 l = uni_light_positions[i] - pos;
         vec3 l_n = normalize(l);
