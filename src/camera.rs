@@ -109,6 +109,8 @@ impl Update for Camera {
         let new_matrix = rotation * self.transform.matrix();
         self.transform.set_matrix(new_matrix);
 
+        trace!("Cam position: {:?}", self.transform.position());
+
         self.view_matrix = Mat4::look_at_rh(
             self.transform.position(),
             self.transform.position() + self.transform.forward(),

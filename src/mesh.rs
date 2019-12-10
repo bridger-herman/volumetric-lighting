@@ -61,9 +61,12 @@ impl Mesh {
         // TODO assuming only one group per object, and only one object per file
         let mut uv = vec![];
         for tri in &obj_file.objects[0].groups[0].polys {
-            uv.push(obj_file.texture[tri[0].1.unwrap()]);
-            uv.push(obj_file.texture[tri[1].1.unwrap()]);
-            uv.push(obj_file.texture[tri[2].1.unwrap()]);
+            if let (Some(a), Some(b), Some(c)) = (tri[0].1, tri[1].1, tri[2].1)
+            {
+                uv.push(obj_file.texture[a]);
+                uv.push(obj_file.texture[b]);
+                uv.push(obj_file.texture[c]);
+            }
         }
         let uv_flat: Vec<_> = uv.iter().flatten().cloned().collect();
 
@@ -132,30 +135,34 @@ impl Mesh {
             0,
         );
 
-        let uv_vbo =
-            wre_gl!().create_buffer().expect("failed to create uv_vbo");
-        wre_gl!()
-            .bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&uv_vbo));
-
-        unsafe {
-            let uv_array = js_sys::Float32Array::view(&uv_flat);
-
-            wre_gl!().buffer_data_with_array_buffer_view(
+        if uv_flat.len() > 0 {
+            let uv_vbo =
+                wre_gl!().create_buffer().expect("failed to create uv_vbo");
+            wre_gl!().bind_buffer(
                 WebGl2RenderingContext::ARRAY_BUFFER,
-                &uv_array,
-                WebGl2RenderingContext::STATIC_DRAW,
+                Some(&uv_vbo),
+            );
+
+            unsafe {
+                let uv_array = js_sys::Float32Array::view(&uv_flat);
+
+                wre_gl!().buffer_data_with_array_buffer_view(
+                    WebGl2RenderingContext::ARRAY_BUFFER,
+                    &uv_array,
+                    WebGl2RenderingContext::STATIC_DRAW,
+                );
+            }
+
+            wre_gl!().enable_vertex_attrib_array(2);
+            wre_gl!().vertex_attrib_pointer_with_i32(
+                2,
+                2,
+                WebGl2RenderingContext::FLOAT,
+                false,
+                0,
+                0,
             );
         }
-
-        wre_gl!().enable_vertex_attrib_array(2);
-        wre_gl!().vertex_attrib_pointer_with_i32(
-            2,
-            2,
-            WebGl2RenderingContext::FLOAT,
-            false,
-            0,
-            0,
-        );
 
         let num_vertices = (pos_flat.len() / 3) as i32;
 

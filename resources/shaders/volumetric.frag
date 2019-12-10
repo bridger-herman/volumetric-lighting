@@ -4,7 +4,8 @@ precision mediump float;
 
 const int MAX_LIGHTS = 64;
 const float SPHERE_INTENSITY_THRESHOLD = 2.0;
-const float CYLINDER_INTENSITY_THRESHOLD = 0.5;
+const float CYLINDER_INTENSITY_THRESHOLD = 1.0;
+const float MIN_RADIUS = 0.1;
 
 in vec2 tex_coords;
 
@@ -37,11 +38,17 @@ vec3 eval_ray(vec3 ray_start, vec3 ray_dir, float t) {
     return ray_start + ray_dir * t;
 }
 
+float luminosity(vec3 color) {
+    return 0.3 * color.x + 0.6 * color.g + 0.1 * color.b;
+}
+
 vec3 sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
         sphere_center, vec3 halo_color) {
     // Calculate the effective radius of this sphere halo from its luminosity
-    float effective_radius = sqrt((0.3 * halo_color.x + 0.6 * halo_color.y +
-                0.1 * halo_color.z) / SPHERE_INTENSITY_THRESHOLD);
+    float effective_radius = sqrt(luminosity(halo_color) / SPHERE_INTENSITY_THRESHOLD);
+    if (effective_radius < MIN_RADIUS) {
+        return vec3(0.0);
+    }
 
     // Solve the quadratic to see if ray intersects sphere
     vec3 start_to_center = ray_start - sphere_center;
@@ -68,8 +75,11 @@ vec3 sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
 vec3 cylinder_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
         cb, vec3 ca, float radius, vec3 halo_color) {
     // Calculate the effective radius of this cylinder halo from its luminosity
-    float effective_radius = sqrt((0.3 * halo_color.x + 0.6 * halo_color.y +
-                0.1 * halo_color.z) / CYLINDER_INTENSITY_THRESHOLD);
+    float effective_radius = sqrt(luminosity(halo_color) / CYLINDER_INTENSITY_THRESHOLD);
+    if (effective_radius < MIN_RADIUS) {
+        return vec3(0.0);
+    }
+
     vec3 oc = ray_start - cb;
     float card = dot(ca, ray_dir);
     float caoc = dot(ca, oc);

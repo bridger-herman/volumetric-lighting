@@ -173,6 +173,7 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
                 scene
                     .meshes
                     .insert(mesh.clone(), Mesh::from_obj_str(&obj_text));
+                trace!("Loaded mesh {}", mesh);
 
                 // Find the texture(s) associated with this object's material
                 let mtl_name = mesh.replace("obj", "mtl");
@@ -201,9 +202,10 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
                         let mut bytes = vec![0u8; img_js.length() as usize];
                         img_js.copy_to(&mut bytes);
                         scene.textures.insert(
-                            path,
+                            path.clone(),
                             Texture::init_from_image(tex_id, &bytes),
                         );
+                        trace!("Loaded texture {}", path);
                         Some(tex_id)
                     }
                 } else {
@@ -213,7 +215,8 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
                 let mut material = Material::from_mtl_str(&mtl_text);
                 material.set_texture_id(tex_id);
                 material.shader_id = scene.shaders[&shader_name].id;
-                scene.materials.insert(mtl_name, material);
+                scene.materials.insert(mtl_name.clone(), material);
+                trace!("Loaded material {}", mtl_name);
             }
         }
     }
@@ -227,11 +230,12 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
         let transform = Transform::new(
             entity.position.unwrap_or_default(),
             Quat::from_rotation_ypr(rotation.y(), rotation.z(), rotation.x()),
-            entity.scale.unwrap_or_default(),
+            entity.scale.unwrap_or(Vec3::one()),
         );
 
         let eid = wre_entities!().create();
         wre_entities_mut!(eid).set_transform(&transform);
+        trace!("Initializing entity {}", eid);
 
         // Connect the mesh with this entity
         if let Some(mesh_path) = &scene.prefabs[&entity.prefab].mesh {

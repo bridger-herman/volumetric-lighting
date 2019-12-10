@@ -1,0 +1,51 @@
+{
+    "prefabs": {
+        "chamber": {
+            "mesh": "./resources/models/chamber.obj",
+            "scripts": []
+        },
+        "pedestal": {
+            "mesh": "./resources/models/pedestal.obj",
+            "scripts": []
+        },
+        "railing": {
+            "mesh": "./resources/models/railing.obj",
+            "scripts": []
+        },
+        "light_manager": {
+            "scripts": ["LightManager"]
+        }
+    },
+    "camera": {
+        "position": [0.0, 1.0, 0.0]
+    },
+    "point_lights": [
+        {
+            "color": [1.5, 1.5, 2.0],
+            "position": [0.0, 1.0, 0.0],
+            "halo_intensity": 0.0
+        }
+    ],
+    "spot_lights": [
+        {
+            "color": [0.8, 0.8, 1.1],
+            "position": [0, 1.5, 0],
+            "direction": [0, -1, 0],
+            "angle_inside": 45.0,
+            "angle_outside": 48.0,
+            "halo_intensity": 0.2
+        }
+    ],
+    "entities": [
+        {
+            "prefab": "chamber"
+        },
+        {
+            "prefab": "pedestal"
+        },
+        {
+            "prefab": "railing"
+        }
+    ]
+}
+

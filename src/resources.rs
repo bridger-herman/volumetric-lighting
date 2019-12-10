@@ -31,8 +31,9 @@ pub async fn load_text_resource(path: String) -> Result<JsValue, JsValue> {
     let resp_value =
         JsFuture::from(window.fetch_with_request(&request)).await?;
 
-    assert!(resp_value.is_instance_of::<Response>());
-    let resp: Response = resp_value.dyn_into().unwrap();
+    let resp: Response = resp_value.dyn_into().unwrap_or_else(|err| {
+        error_panic!("Response is not a Response: {:?}", err);
+    });
 
     // Convert this other `Promise` into a rust `Future`.
     let text = JsFuture::from(resp.text()?).await?;
