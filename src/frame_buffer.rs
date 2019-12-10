@@ -119,8 +119,7 @@ impl FrameBuffer {
         );
 
         // Send the camera right
-        let camera_right: Vec<f32> =
-            wre_camera!().transform().right().into();
+        let camera_right: Vec<f32> = wre_camera!().transform().right().into();
         let camera_right_location = wre_gl!()
             .get_uniform_location(screen_quad_shader, "uni_camera_right");
         wre_gl!().uniform3fv_with_f32_array(
@@ -129,14 +128,11 @@ impl FrameBuffer {
         );
 
         // Send the camera up
-        let camera_up: Vec<f32> =
-            wre_camera!().transform().up().into();
-        let camera_up_location = wre_gl!()
-            .get_uniform_location(screen_quad_shader, "uni_camera_up");
-        wre_gl!().uniform3fv_with_f32_array(
-            camera_up_location.as_ref(),
-            &camera_up,
-        );
+        let camera_up: Vec<f32> = wre_camera!().transform().up().into();
+        let camera_up_location =
+            wre_gl!().get_uniform_location(screen_quad_shader, "uni_camera_up");
+        wre_gl!()
+            .uniform3fv_with_f32_array(camera_up_location.as_ref(), &camera_up);
 
         wre_gl!().draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, 6);
 

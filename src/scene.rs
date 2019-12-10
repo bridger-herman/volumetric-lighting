@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use glam::{Quat, Vec3};
 use wasm_bindgen::prelude::*;
 
-use crate::light::PointLight;
+use crate::light::{PointLight, SpotLight};
 use crate::material::Material;
 use crate::mesh::Mesh;
 use crate::resources::{load_image_resource, load_text_resource};
@@ -62,7 +62,8 @@ pub struct JsonScene {
     prefabs: HashMap<String, JsonPrefab>,
 
     /// Lights in the scene
-    lights: Vec<PointLight>,
+    point_lights: Vec<PointLight>,
+    spot_lights: Vec<SpotLight>,
 
     /// Objects in the scene
     entities: Vec<JsonEntity>,
@@ -78,8 +79,9 @@ pub struct Scene {
     /// Prefabs that are available to entities in the scene
     prefabs: HashMap<String, JsonPrefab>,
 
-    /// All the lights in the scene
-    pub lights: Vec<PointLight>,
+    /// All the point lights in the scene
+    pub point_lights: Vec<PointLight>,
+    pub spot_lights: Vec<SpotLight>,
 
     /// The meshes in the scene (path, Mesh)
     pub meshes: HashMap<String, Mesh>,
@@ -133,7 +135,14 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
     let mut scene = Scene::default();
 
     // Move the lights over
-    scene.lights = json_scene.lights;
+    scene.point_lights = json_scene.point_lights;
+    scene.spot_lights = json_scene.spot_lights;
+
+    // Convert spot light radians
+    for s in scene.spot_lights.iter_mut() {
+        s.angle_inside = s.angle_inside.to_radians();
+        s.angle_outside = s.angle_outside.to_radians();
+    }
 
     // Load all the information about the prefabs (meshes, materials, shaders)
     for (_name, prefab) in json_scene.prefabs.iter() {

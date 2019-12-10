@@ -18,11 +18,6 @@ uniform vec4 uni_color;
 uniform vec4 uni_specular;
 uniform sampler2D uni_texture;
 
-// Lighting information
-uniform int uni_num_lights;
-uniform vec3 uni_light_positions[MAX_LIGHTS];
-uniform vec3 uni_light_colors[MAX_LIGHTS];
-
 // TEXTURE1 for frame buffer
 layout(location = 0) out vec4 color;
 // TEXTURE2 for frame buffer

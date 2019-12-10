@@ -42,7 +42,7 @@ use crate::script_manager::WreScript;
 
 pub use glam::{Mat4, Quat, Vec2, Vec3};
 
-const TARGET_FPS: i32 = 30;
+const TARGET_FPS: i32 = 60;
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
