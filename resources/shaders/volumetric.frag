@@ -3,6 +3,8 @@
 precision mediump float;
 
 const int MAX_LIGHTS = 64;
+const float SPHERE_INTENSITY_THRESHOLD = 2.0;
+const float CYLINDER_INTENSITY_THRESHOLD = 0.5;
 
 in vec2 tex_coords;
 
@@ -36,13 +38,17 @@ vec3 eval_ray(vec3 ray_start, vec3 ray_dir, float t) {
 }
 
 vec3 sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
-        sphere_center, float sphere_radius, vec3 halo_color) {
+        sphere_center, vec3 halo_color) {
+    // Calculate the effective radius of this sphere halo from its luminosity
+    float effective_radius = sqrt((0.3 * halo_color.x + 0.6 * halo_color.y +
+                0.1 * halo_color.z) / SPHERE_INTENSITY_THRESHOLD);
+
     // Solve the quadratic to see if ray intersects sphere
     vec3 start_to_center = ray_start - sphere_center;
     float a = dot(ray_dir, ray_dir);
     float b = 2.0 * dot(ray_dir, start_to_center);
-    float c = dot(start_to_center, start_to_center) - sphere_radius *
-        sphere_radius;
+    float c = dot(start_to_center, start_to_center) - effective_radius *
+        effective_radius;
 
     float discriminant = b * b - 4.0 * a * c;
     discriminant = max(discriminant, 0.0);
@@ -55,18 +61,21 @@ vec3 sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
     t2 = clamp(t2, 0.0, frag_depth);
 
     float l = abs(t1 - t2);
-    return halo_color * ((l * l) / (sphere_radius));
+    return halo_color * ((l * l) / (effective_radius));
 }
 
 // http://www.iquilezles.org/www/articles/intersectors/intersectors.htm
 vec3 cylinder_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
         cb, vec3 ca, float radius, vec3 halo_color) {
+    // Calculate the effective radius of this cylinder halo from its luminosity
+    float effective_radius = sqrt((0.3 * halo_color.x + 0.6 * halo_color.y +
+                0.1 * halo_color.z) / CYLINDER_INTENSITY_THRESHOLD);
     vec3 oc = ray_start - cb;
     float card = dot(ca, ray_dir);
     float caoc = dot(ca, oc);
     float a = 1.0 - card * card;
     float b = dot(oc, ray_dir) - caoc * card;
-    float c = dot(oc, oc) - caoc * caoc - radius * radius;
+    float c = dot(oc, oc) - caoc * caoc - effective_radius * effective_radius;
     float h = b * b - a * c;
     h = clamp(h, 0.0, frag_depth);
     float h2 = sqrt(h);
@@ -75,7 +84,7 @@ vec3 cylinder_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
     t1 = clamp(t1, 0.0, frag_depth);
     t2 = clamp(t2, 0.0, frag_depth);
     float l = abs(t2 - t1);
-    return halo_color * ((l * l) / radius);
+    return halo_color * ((l * l) / effective_radius);
 }
 
 void main() {
@@ -113,7 +122,6 @@ void main() {
             uni_camera_position,
             ray_dir,
             uni_point_light_positions[i],
-            0.3,
             uni_point_light_colors[i] * uni_point_light_halo_intensity[i]
         );
     }

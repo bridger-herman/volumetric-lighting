@@ -55,7 +55,7 @@
             "direction": [0, -1, 0],
             "angle_inside": 45.0,
             "angle_outside": 48.0,
-            "halo_intensity": 0.1
+            "halo_intensity": 0.3
         }
     ],
     "entities": [
