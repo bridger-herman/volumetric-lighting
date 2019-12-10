@@ -8,7 +8,10 @@
 
 use glam::Vec3;
 
-#[derive(Debug, Serialize, Deserialize)]
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub struct PointLight {
     /// The light's position
     pub position: Vec3,
@@ -19,7 +22,9 @@ pub struct PointLight {
     pub halo_intensity: f32,
 }
 
+#[wasm_bindgen]
 impl PointLight {
+    #[wasm_bindgen(constructor)]
     pub fn new(position: Vec3, color: Vec3, halo_intensity: f32) -> Self {
         Self {
             position,
@@ -29,7 +34,8 @@ impl PointLight {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[wasm_bindgen]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub struct SpotLight {
     pub position: Vec3,
     pub color: Vec3,
@@ -39,7 +45,9 @@ pub struct SpotLight {
     pub halo_intensity: f32,
 }
 
+#[wasm_bindgen]
 impl SpotLight {
+    #[wasm_bindgen(constructor)]
     pub fn new(
         position: Vec3,
         color: Vec3,

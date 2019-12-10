@@ -375,6 +375,14 @@ impl RenderSystem {
         }
     }
 
+    pub fn scene(&self) -> &Option<Scene> {
+        &self.scene
+    }
+
+    pub fn mut_scene(&mut self) -> &mut Option<Scene> {
+        &mut self.scene
+    }
+
     /// Add a scene to the rendering system, consuming scene
     pub fn add_scene(&mut self, scene: Scene) {
         self.scene = Some(scene);

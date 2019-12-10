@@ -11,19 +11,27 @@ use std::collections::HashMap;
 use glam::{Quat, Vec3};
 use wasm_bindgen::prelude::*;
 
+use crate::entity::EntityId;
 use crate::light::{PointLight, SpotLight};
 use crate::material::Material;
 use crate::mesh::Mesh;
 use crate::resources::{load_image_resource, load_text_resource};
+use crate::script_manager::WreScript;
 use crate::shader::{load_shader, Shader};
 use crate::texture::Texture;
 use crate::transform::Transform;
+
+#[wasm_bindgen(module = "/assets/loadWreScript.js")]
+extern "C" {
+    #[wasm_bindgen]
+    pub fn loadWreScript(name: &str, eid: EntityId) -> WreScript;
+}
 
 /// A prefab loaded from the scene file
 #[derive(Debug, Serialize, Deserialize)]
 struct JsonPrefab {
     /// Path to the mesh that should be drawn
-    mesh: String,
+    mesh: Option<String>,
 
     /// Names of the scripts that should be attached to this prefab
     scripts: Vec<String>,
@@ -154,56 +162,59 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
             scene.shaders.insert(shader_name.clone(), shader);
         }
 
-        // Don't load any mesh twice
-        if scene.meshes.get(&prefab.mesh).is_none() {
-            let obj_text_js = load_text_resource(prefab.mesh.clone()).await?;
-            let obj_text = obj_text_js.as_string().unwrap_or_else(|| {
-                error_panic!("Unable to convert obj to string");
-            });
+        if let Some(mesh) = &prefab.mesh {
+            // Don't load any mesh twice
+            if scene.meshes.get(mesh).is_none() {
+                let obj_text_js = load_text_resource(mesh.clone()).await?;
+                let obj_text = obj_text_js.as_string().unwrap_or_else(|| {
+                    error_panic!("Unable to convert obj to string");
+                });
 
-            scene
-                .meshes
-                .insert(prefab.mesh.clone(), Mesh::from_obj_str(&obj_text));
+                scene
+                    .meshes
+                    .insert(mesh.clone(), Mesh::from_obj_str(&obj_text));
 
-            // Find the texture(s) associated with this object's material
-            let mtl_name = prefab.mesh.replace("obj", "mtl");
-            let mtl_text_js = load_text_resource(mtl_name.clone()).await?;
-            let mtl_text = mtl_text_js.as_string().unwrap_or_else(|| {
-                error_panic!("Unable to convert mtl to string");
-            });
-            let texture_name = mtl_text
-                .lines()
-                .find(|line| line.to_lowercase().starts_with("map_kd"));
+                // Find the texture(s) associated with this object's material
+                let mtl_name = mesh.replace("obj", "mtl");
+                let mtl_text_js = load_text_resource(mtl_name.clone()).await?;
+                let mtl_text = mtl_text_js.as_string().unwrap_or_else(|| {
+                    error_panic!("Unable to convert mtl to string");
+                });
+                let texture_name = mtl_text
+                    .lines()
+                    .find(|line| line.to_lowercase().starts_with("map_kd"));
 
-            let tex_id = if let Some(name) = texture_name {
-                // Mutate the texture name so it can be found on the server
-                let path = format!(
-                    "./resources/textures/{}",
-                    name.split_whitespace().collect::<Vec<_>>()[1]
-                );
+                let tex_id = if let Some(name) = texture_name {
+                    // Mutate the texture name so it can be found on the server
+                    let path = format!(
+                        "./resources/textures/{}",
+                        name.split_whitespace().collect::<Vec<_>>()[1]
+                    );
 
-                // And only load the texture if it's not already there
-                if let Some(tex) = scene.textures.get(&path) {
-                    Some(tex.id)
+                    // And only load the texture if it's not already there
+                    if let Some(tex) = scene.textures.get(&path) {
+                        Some(tex.id)
+                    } else {
+                        let tex_id = scene.textures.len();
+                        let img_js = load_image_resource(path.clone()).await?;
+
+                        let mut bytes = vec![0u8; img_js.length() as usize];
+                        img_js.copy_to(&mut bytes);
+                        scene.textures.insert(
+                            path,
+                            Texture::init_from_image(tex_id, &bytes),
+                        );
+                        Some(tex_id)
+                    }
                 } else {
-                    let tex_id = scene.textures.len();
-                    let img_js = load_image_resource(path.clone()).await?;
+                    None
+                };
 
-                    let mut bytes = vec![0u8; img_js.length() as usize];
-                    img_js.copy_to(&mut bytes);
-                    scene
-                        .textures
-                        .insert(path, Texture::init_from_image(tex_id, &bytes));
-                    Some(tex_id)
-                }
-            } else {
-                None
-            };
-
-            let mut material = Material::from_mtl_str(&mtl_text);
-            material.set_texture_id(tex_id);
-            material.shader_id = scene.shaders[&shader_name].id;
-            scene.materials.insert(mtl_name, material);
+                let mut material = Material::from_mtl_str(&mtl_text);
+                material.set_texture_id(tex_id);
+                material.shader_id = scene.shaders[&shader_name].id;
+                scene.materials.insert(mtl_name, material);
+            }
         }
     }
 
@@ -223,17 +234,26 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
         wre_entities_mut!(eid).set_transform(&transform);
 
         // Connect the mesh with this entity
-        let mesh_path = &scene.prefabs[&entity.prefab].mesh;
-        let mesh = scene.meshes.get_mut(mesh_path).unwrap_or_else(|| {
-            error_panic!("Mesh {:?} not loaded from a prefab", mesh_path);
-        });
-        trace!("Attached mesh {:?} to entity {:?}", mesh_path, eid);
-        mesh.attached_to.push(eid);
+        if let Some(mesh_path) = &scene.prefabs[&entity.prefab].mesh {
+            let mesh = scene.meshes.get_mut(mesh_path).unwrap_or_else(|| {
+                error_panic!("Mesh {:?} not loaded from a prefab", mesh_path);
+            });
+            mesh.attached_to.push(eid);
+            trace!("Attached mesh {:?} to entity {:?}", mesh_path, eid);
 
-        // Add the material and connect it with the shader
-        let mtl_path = mesh_path.replace("obj", "mtl");
-        let material = scene.materials.get(&mtl_path).unwrap();
-        wre_entities_mut!(eid).set_material(material);
+            // Add the material and connect it with the shader
+            let mtl_path = mesh_path.replace("obj", "mtl");
+            let material = scene.materials.get(&mtl_path).unwrap();
+            wre_entities_mut!(eid).set_material(material);
+            trace!("Attached material {:?} to entity {:?}", mtl_path, eid);
+        }
+
+        // Attach the scripts to this entity
+        for script_name in &scene.prefabs[&entity.prefab].scripts {
+            let script = loadWreScript(script_name, eid);
+            wre_scripts!().add_script(eid, script);
+            trace!("Attached script {:?} to entity {}", script_name, eid);
+        }
     }
 
     // The post-processing shader must be loaded before the scene can be

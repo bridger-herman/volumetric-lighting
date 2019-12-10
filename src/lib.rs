@@ -38,6 +38,7 @@ pub mod window;
 use wasm_bindgen::prelude::*;
 
 use crate::entity::{Entity, EntityId};
+use crate::light::{PointLight, SpotLight};
 use crate::script_manager::WreScript;
 
 pub use glam::{Mat4, Quat, Vec2, Vec3};
@@ -109,4 +110,44 @@ pub fn set_entity(id: EntityId, entity: Entity) {
 #[wasm_bindgen]
 pub fn add_script(eid: EntityId, script: WreScript) {
     wre_scripts!().add_script(eid, script)
+}
+
+#[wasm_bindgen]
+pub fn get_point_light(index: usize) -> Option<PointLight> {
+    if let Some(scn) = wre_render_system!().scene() {
+        if let Some(light) = scn.point_lights.get(index) {
+            Some(*light)
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+#[wasm_bindgen]
+pub fn set_point_light(index: usize, p: PointLight) {
+    if let Some(scn) = wre_render_system!().mut_scene() {
+        scn.point_lights[index] = p;
+    }
+}
+
+#[wasm_bindgen]
+pub fn get_spot_light(index: usize) -> Option<SpotLight> {
+    if let Some(scn) = wre_render_system!().scene() {
+        if let Some(light) = scn.spot_lights.get(index) {
+            Some(*light)
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+#[wasm_bindgen]
+pub fn set_spot_light(index: usize, p: SpotLight) {
+    if let Some(scn) = wre_render_system!().mut_scene() {
+        scn.spot_lights[index] = p;
+    }
 }
