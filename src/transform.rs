@@ -129,12 +129,20 @@ impl Transform {
         self.matrix.set_y_axis(up.extend(0.0));
         self.matrix.set_z_axis(forward.extend(0.0));
 
+        self.update_pos_scale_rotation_from_matrix();
+    }
+
+    fn update_pos_scale_rotation_from_matrix(&mut self) {
+        // Extranct the position from the matrix
+        self.position = (self.matrix * Vec4::unit_w()).truncate();
+
         // Extract the scale and rotation from the matrix
         let scale = Vec3::new(
             self.matrix.x_axis().length(),
             self.matrix.y_axis().length(),
             self.matrix.z_axis().length(),
         );
+        self.scale = scale;
         let rotation_matrix = Mat4::new(
             Vec4::new(
                 self.matrix.x_axis().0 / scale.x(),

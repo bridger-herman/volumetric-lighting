@@ -8,7 +8,7 @@
 
 use std::collections::HashMap;
 
-use glam::{Quat, Vec3};
+use glam::{Quat, Vec2, Vec3};
 use wasm_bindgen::prelude::*;
 
 use crate::entity::EntityId;
@@ -61,6 +61,7 @@ struct JsonEntity {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JsonCamera {
     position: Vec3,
+    rotation: Vec2,
 }
 
 /// The scene file, loaded from JSON format
@@ -265,6 +266,9 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
     wre_render_system!().load_post_processing_shader().await?;
     wre_render_system!().add_scene(scene);
     info!("Loaded Scene: {:?}", scene_path);
+
+    wre_camera!().set_position(json_scene.camera.position);
+    wre_camera!().set_rotation(json_scene.camera.rotation);
 
     Ok(())
 }
