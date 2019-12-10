@@ -15,11 +15,17 @@ pub struct PointLight {
 
     /// The light's color
     pub color: Vec3,
+
+    pub halo_intensity: f32,
 }
 
 impl PointLight {
-    pub fn new(position: Vec3, color: Vec3) -> Self {
-        Self { position, color }
+    pub fn new(position: Vec3, color: Vec3, halo_intensity: f32) -> Self {
+        Self {
+            position,
+            color,
+            halo_intensity,
+        }
     }
 }
 
@@ -30,6 +36,7 @@ pub struct SpotLight {
     pub direction: Vec3,
     pub angle_inside: f32,
     pub angle_outside: f32,
+    pub halo_intensity: f32,
 }
 
 impl SpotLight {
@@ -39,6 +46,7 @@ impl SpotLight {
         direction: Vec3,
         angle_inside: f32,
         angle_outside: f32,
+        halo_intensity: f32,
     ) -> Self {
         Self {
             position,
@@ -46,6 +54,7 @@ impl SpotLight {
             direction,
             angle_inside,
             angle_outside,
+            halo_intensity,
         }
     }
 }

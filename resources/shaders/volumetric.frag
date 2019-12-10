@@ -2,21 +2,7 @@
 
 precision mediump float;
 
-const float INFINITY = 1e10;
-
-// Halo constants
-const int MAX_HALOS = 64;
-const float HALO_POWER = 0.01;
-
-// Halo definitions
-const int num_halos = 5;
-const vec3[] halo_positions = vec3[](
-    vec3(0.0, 1.0, 2.0),
-    vec3(0.0, 1.0, -2.0),
-    vec3(0.0, 1.0, 0.0),
-    vec3(2.0, 1.0, 0.0),
-    vec3(-2.0, 1.0, 0.0)
-);
+const int MAX_LIGHTS = 64;
 
 in vec2 tex_coords;
 
@@ -27,6 +13,21 @@ uniform vec3 uni_camera_right;
 uniform mat4 uni_camera_inv_proj;
 uniform sampler2D uni_color_texture;
 uniform sampler2D uni_position_texture;
+
+// Point light information
+uniform int uni_num_point_lights;
+uniform vec3 uni_point_light_positions[MAX_LIGHTS];
+uniform vec3 uni_point_light_colors[MAX_LIGHTS];
+uniform float uni_point_light_halo_intensity[MAX_LIGHTS];
+
+// Spot light information
+uniform int uni_num_spot_lights;
+uniform vec3 uni_spot_light_positions[MAX_LIGHTS];
+uniform vec3 uni_spot_light_directions[MAX_LIGHTS];
+uniform vec3 uni_spot_light_colors[MAX_LIGHTS];
+uniform float uni_spot_light_angle_inside[MAX_LIGHTS];
+uniform float uni_spot_light_angle_outside[MAX_LIGHTS];
+uniform float uni_spot_light_halo_intensity[MAX_LIGHTS];
 
 out vec4 final_color;
 
@@ -58,7 +59,7 @@ vec3 sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
 }
 
 // http://www.iquilezles.org/www/articles/intersectors/intersectors.htm
-vec3 cyl_integral(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
+vec3 cylinder_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
         cb, vec3 ca, float radius, vec3 halo_color) {
     vec3 oc = ray_start - cb;
     float card = dot(ca, ray_dir);
@@ -90,27 +91,32 @@ void main() {
             un_normalized_world.w);
     vec3 ray_dir = normalize(world_space_coords.xyz - uni_camera_position);
 
-    // Add the spot light halo
-    vec3 halo_value = cyl_integral(
-        position.w,
-        uni_camera_position,
-        ray_dir,
-        vec3(3, 1, 3),
-        vec3(0, -1, 0),
-        0.8,
-        vec3(0.2)
-    );
+    vec3 halo_value = vec3(0.0);
+
+    // Add the spot light halos
+    for (int i = 0; i < uni_num_spot_lights && i < MAX_LIGHTS; i++) {
+        halo_value += cylinder_halo(
+            position.w,
+            uni_camera_position,
+            ray_dir,
+            uni_spot_light_positions[i],
+            uni_spot_light_directions[i],
+            0.8,
+            uni_spot_light_colors[i] * uni_spot_light_halo_intensity[i]
+        );
+    }
 
     // Add the sphere halos
-    for (int i = 0; i < num_halos; i++) {
+    for (int i = 0; i < uni_num_point_lights && i < MAX_LIGHTS; i++) {
         halo_value += sphere_halo(
             position.w,
             uni_camera_position,
             ray_dir,
-            halo_positions[i],
+            uni_point_light_positions[i],
             0.3,
-            vec3(0.5, 0.0, 0.5)
+            uni_point_light_colors[i] * uni_point_light_halo_intensity[i]
         );
     }
+
     final_color = vec4(halo_value, 1.0) + texture(uni_color_texture, tex_coords);
 }

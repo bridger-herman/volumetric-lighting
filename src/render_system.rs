@@ -72,7 +72,7 @@ impl RenderSystem {
 
         // Splat that texture onto the viewport
         if let Some(shader) = &self.post_processing_shader {
-            self.frame_buffer.render(&shader.program);
+            self.frame_buffer.render(&shader.program, &self.scene);
         }
     }
 
@@ -183,6 +183,21 @@ impl RenderSystem {
                         &point_light_colors,
                     );
 
+                    let point_light_halo_intensity: Vec<f32> = scene
+                        .point_lights
+                        .iter()
+                        .map(|light| -> f32 { light.halo_intensity })
+                        .collect();
+                    let point_light_halo_intensity_location = wre_gl!()
+                        .get_uniform_location(
+                            &shader.program,
+                            "uni_point_light_halo_intensity",
+                        );
+                    wre_gl!().uniform1fv_with_f32_array(
+                        point_light_halo_intensity_location.as_ref(),
+                        &point_light_halo_intensity,
+                    );
+
                     // Send all the spot lights over to the shader
                     let num_spot_light_location = wre_gl!()
                         .get_uniform_location(
@@ -270,6 +285,21 @@ impl RenderSystem {
                     wre_gl!().uniform1fv_with_f32_array(
                         spot_light_angle_outside_location.as_ref(),
                         &spot_light_angle_outside,
+                    );
+
+                    let spot_light_halo_intensity: Vec<f32> = scene
+                        .spot_lights
+                        .iter()
+                        .map(|light| -> f32 { light.halo_intensity })
+                        .collect();
+                    let spot_light_halo_intensity_location = wre_gl!()
+                        .get_uniform_location(
+                            &shader.program,
+                            "uni_spot_light_halo_intensity",
+                        );
+                    wre_gl!().uniform1fv_with_f32_array(
+                        spot_light_halo_intensity_location.as_ref(),
+                        &spot_light_halo_intensity,
                     );
 
                     // Send the material's color to the GPU

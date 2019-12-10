@@ -11,6 +11,7 @@ use web_sys::{
 };
 
 use crate::mesh::Mesh;
+use crate::scene::Scene;
 use crate::window::DEFAULT_WINDOW_SIZE;
 
 const SCREEN_QUAD_OBJ: &str = "
@@ -48,7 +49,11 @@ impl FrameBuffer {
         // wre_gl!().disable(WebGl2RenderingContext::CULL_FACE);
     }
 
-    pub fn render(&self, screen_quad_shader: &WebGlProgram) {
+    pub fn render(
+        &self,
+        screen_quad_shader: &WebGlProgram,
+        scene: &Option<Scene>,
+    ) {
         wre_gl!().bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
 
         // Disable depth testing for screen-space quad drawing
@@ -133,6 +138,165 @@ impl FrameBuffer {
             wre_gl!().get_uniform_location(screen_quad_shader, "uni_camera_up");
         wre_gl!()
             .uniform3fv_with_f32_array(camera_up_location.as_ref(), &camera_up);
+
+        if let Some(scene) = scene {
+            // Send all the point lights over to the shader
+            let num_point_light_location = wre_gl!().get_uniform_location(
+                screen_quad_shader,
+                "uni_num_point_lights",
+            );
+            wre_gl!().uniform1i(
+                num_point_light_location.as_ref(),
+                scene.point_lights.len() as i32,
+            );
+
+            let point_light_positions: Vec<f32> = scene
+                .point_lights
+                .iter()
+                .map(|light| -> Vec<f32> { light.position.into() })
+                .flatten()
+                .collect();
+            let point_light_positions_location = wre_gl!()
+                .get_uniform_location(
+                    screen_quad_shader,
+                    "uni_point_light_positions",
+                );
+            wre_gl!().uniform3fv_with_f32_array(
+                point_light_positions_location.as_ref(),
+                &point_light_positions,
+            );
+
+            let point_light_colors: Vec<f32> = scene
+                .point_lights
+                .iter()
+                .map(|light| -> Vec<f32> { light.color.into() })
+                .flatten()
+                .collect();
+            let point_light_colors_location = wre_gl!().get_uniform_location(
+                screen_quad_shader,
+                "uni_point_light_colors",
+            );
+            wre_gl!().uniform3fv_with_f32_array(
+                point_light_colors_location.as_ref(),
+                &point_light_colors,
+            );
+
+            let point_light_halo_intensity: Vec<f32> = scene
+                .point_lights
+                .iter()
+                .map(|light| -> f32 { light.halo_intensity })
+                .collect();
+            let point_light_halo_intensity_location = wre_gl!()
+                .get_uniform_location(
+                    screen_quad_shader,
+                    "uni_point_light_halo_intensity",
+                );
+            wre_gl!().uniform1fv_with_f32_array(
+                point_light_halo_intensity_location.as_ref(),
+                &point_light_halo_intensity,
+            );
+
+            // Send all the spot lights over to the shader
+            let num_spot_light_location = wre_gl!().get_uniform_location(
+                screen_quad_shader,
+                "uni_num_spot_lights",
+            );
+            wre_gl!().uniform1i(
+                num_spot_light_location.as_ref(),
+                scene.spot_lights.len() as i32,
+            );
+
+            let spot_light_positions: Vec<f32> = scene
+                .spot_lights
+                .iter()
+                .map(|light| -> Vec<f32> { light.position.into() })
+                .flatten()
+                .collect();
+            let spot_light_positions_location = wre_gl!().get_uniform_location(
+                screen_quad_shader,
+                "uni_spot_light_positions",
+            );
+            wre_gl!().uniform3fv_with_f32_array(
+                spot_light_positions_location.as_ref(),
+                &spot_light_positions,
+            );
+
+            let spot_light_directions: Vec<f32> = scene
+                .spot_lights
+                .iter()
+                .map(|light| -> Vec<f32> { light.direction.into() })
+                .flatten()
+                .collect();
+            let spot_light_directions_location = wre_gl!()
+                .get_uniform_location(
+                    screen_quad_shader,
+                    "uni_spot_light_directions",
+                );
+            wre_gl!().uniform3fv_with_f32_array(
+                spot_light_directions_location.as_ref(),
+                &spot_light_directions,
+            );
+
+            let spot_light_colors: Vec<f32> = scene
+                .spot_lights
+                .iter()
+                .map(|light| -> Vec<f32> { light.color.into() })
+                .flatten()
+                .collect();
+            let spot_light_colors_location = wre_gl!().get_uniform_location(
+                screen_quad_shader,
+                "uni_spot_light_colors",
+            );
+            wre_gl!().uniform3fv_with_f32_array(
+                spot_light_colors_location.as_ref(),
+                &spot_light_colors,
+            );
+
+            let spot_light_angle_inside: Vec<f32> = scene
+                .spot_lights
+                .iter()
+                .map(|light| -> f32 { light.angle_inside })
+                .collect();
+            let spot_light_angle_inside_location = wre_gl!()
+                .get_uniform_location(
+                    screen_quad_shader,
+                    "uni_spot_light_angle_inside",
+                );
+            wre_gl!().uniform1fv_with_f32_array(
+                spot_light_angle_inside_location.as_ref(),
+                &spot_light_angle_inside,
+            );
+
+            let spot_light_angle_outside: Vec<f32> = scene
+                .spot_lights
+                .iter()
+                .map(|light| -> f32 { light.angle_outside })
+                .collect();
+            let spot_light_angle_outside_location = wre_gl!()
+                .get_uniform_location(
+                    screen_quad_shader,
+                    "uni_spot_light_angle_outside",
+                );
+            wre_gl!().uniform1fv_with_f32_array(
+                spot_light_angle_outside_location.as_ref(),
+                &spot_light_angle_outside,
+            );
+
+            let spot_light_halo_intensity: Vec<f32> = scene
+                .spot_lights
+                .iter()
+                .map(|light| -> f32 { light.halo_intensity })
+                .collect();
+            let spot_light_halo_intensity_location = wre_gl!()
+                .get_uniform_location(
+                    screen_quad_shader,
+                    "uni_spot_light_halo_intensity",
+                );
+            wre_gl!().uniform1fv_with_f32_array(
+                spot_light_halo_intensity_location.as_ref(),
+                &spot_light_halo_intensity,
+            );
+        }
 
         wre_gl!().draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, 6);
 
