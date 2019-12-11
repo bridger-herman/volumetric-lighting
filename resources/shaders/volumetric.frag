@@ -4,7 +4,7 @@ precision mediump float;
 
 const int MAX_LIGHTS = 64;
 const float SPHERE_INTENSITY_THRESHOLD = 2.0;
-const float CYLINDER_INTENSITY_THRESHOLD = 1.0;
+const float CYLINDER_INTENSITY_THRESHOLD = 0.2;
 const float MIN_RADIUS = 0.1;
 
 in vec2 tex_coords;

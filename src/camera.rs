@@ -13,7 +13,7 @@ use glam::{Mat4, Quat, Vec2, Vec3};
 use crate::traits::Update;
 use crate::transform::Transform;
 
-const ANGULAR_VELOCITY: f32 = 0.004;
+const ANGULAR_VELOCITY: f32 = 0.007;
 const LINEAR_VELOCITY: f32 = 0.002;
 
 #[derive(Debug)]
@@ -108,6 +108,9 @@ impl Update for Camera {
         let rotation = Mat4::from_quat(local_rotation);
         let new_matrix = rotation * self.transform.matrix();
         self.transform.set_matrix(new_matrix);
+
+        // trace!("Pos: {:?}", self.transform.position());
+        // trace!("Rot: {:?}", self.rotation);
 
         self.view_matrix = Mat4::look_at_rh(
             self.transform.position(),

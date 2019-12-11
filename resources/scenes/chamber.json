@@ -12,13 +12,21 @@
             "mesh": "./resources/models/railing.obj",
             "scripts": []
         },
+        "judge_box": {
+            "mesh": "./resources/models/judge_box.obj",
+            "scripts": []
+        },
+        "spikes": {
+            "mesh": "./resources/models/spikes.obj",
+            "scripts": []
+        },
         "light_manager": {
             "scripts": ["LightManager"]
         }
     },
     "camera": {
-        "position": [2.3641348, 3.9945908, -5.688708],
-        "rotation": [0.464, -0.55200005]
+        "position": [0.07689375, 2.5645797, 6.263313],
+        "rotation": [0.073999904, -3.1019998]
     },
     "point_lights": [
         {
@@ -29,7 +37,7 @@
     ],
     "spot_lights": [
         {
-            "color": [0.8, 0.8, 1.1],
+            "color": [0.5, 0.5, 1.1],
             "position": [0, 1.5, 0],
             "direction": [0, -1, 0],
             "angle_inside": 45.0,
@@ -40,6 +48,12 @@
     "entities": [
         {
             "prefab": "chamber"
+        },
+        {
+            "prefab": "judge_box"
+        },
+        {
+            "prefab": "spikes"
         },
         {
             "prefab": "pedestal"
