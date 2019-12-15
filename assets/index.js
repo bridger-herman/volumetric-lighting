@@ -13,9 +13,9 @@ import * as wre from '/assets/pkg/wre_wasm.js';
 
 
 function init() {
-    wre.load_scene_async('./resources/scenes/chamber.json').then(() => {
+    wre.load_scene_async('./resources/scenes/test-halos.json').then(() => {
         wre.init_window();
-        initWre();
+        // initWre();
     });
 }
 
