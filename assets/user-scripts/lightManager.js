@@ -56,7 +56,8 @@ export class LightManager extends WreScript {
         // Generate noise from -1.0 to 1.0
         let sinusoid = Math.sin(this._frequency * this._time);
 
-        for (let i = 1; i < 27; i++) {
+        // 18 lights in the scene
+        for (let i = 1; i < 18; i++) {
             let noise = Math.random() * 2.0 - 1.0;
             let yPerturb = (sinusoid + noise) * this._amplitude;
 

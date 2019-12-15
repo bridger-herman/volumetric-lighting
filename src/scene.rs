@@ -40,6 +40,13 @@ struct JsonPrefab {
     shader: Option<String>,
 }
 
+/// The fog in the scene
+#[derive(Default, Debug, Serialize, Deserialize)]
+pub struct JsonFog {
+    pub color: Vec3,
+    pub density: f32,
+}
+
 /// Each entity in the scene file. Optional fields are represented as `Option`
 /// type
 #[derive(Debug, Serialize, Deserialize)]
@@ -79,6 +86,9 @@ pub struct JsonScene {
 
     /// User camera information
     camera: JsonCamera,
+
+    /// Fog in the scene
+    fog: Option<JsonFog>,
 }
 
 /// The actual scene, containing all the de-duplicated resources loaded into WRE
@@ -103,6 +113,9 @@ pub struct Scene {
 
     /// The shaders that this scene's materials use (name, Shader)
     pub shaders: HashMap<String, Shader>,
+
+    /// Fog
+    pub fog: JsonFog,
 }
 
 impl Scene {
@@ -143,9 +156,10 @@ pub async fn load_scene_async(scene_path: String) -> Result<(), JsValue> {
     // Default scene (populated by contents of json scene)
     let mut scene = Scene::default();
 
-    // Move the lights over
+    // Move the lights and fog over
     scene.point_lights = json_scene.point_lights;
     scene.spot_lights = json_scene.spot_lights;
+    scene.fog = json_scene.fog.unwrap_or_default();
 
     // Convert spot light radians
     for s in scene.spot_lights.iter_mut() {

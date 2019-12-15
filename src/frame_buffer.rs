@@ -296,6 +296,24 @@ impl FrameBuffer {
                 spot_light_halo_intensity_location.as_ref(),
                 &spot_light_halo_intensity,
             );
+
+            // Send the fog info over
+            let fog_density_location = wre_gl!().get_uniform_location(
+                screen_quad_shader,
+                "uni_fog_density",
+            );
+            wre_gl!().uniform1f(
+                fog_density_location.as_ref(),
+                scene.fog.density,
+            );
+
+            let fog_color: Vec<f32> = scene.fog.color.into();
+            let fog_color_location = wre_gl!()
+                .get_uniform_location(screen_quad_shader, "uni_fog_color");
+            wre_gl!().uniform3fv_with_f32_array(
+                fog_color_location.as_ref(),
+                &fog_color,
+            );
         }
 
         wre_gl!().draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, 6);

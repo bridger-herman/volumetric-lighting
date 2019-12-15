@@ -14,7 +14,7 @@ use crate::traits::Update;
 use crate::transform::Transform;
 
 const ANGULAR_VELOCITY: f32 = 0.007;
-const LINEAR_VELOCITY: f32 = 0.005;
+const LINEAR_VELOCITY: f32 = 0.01;
 
 #[derive(Debug)]
 pub struct Camera {

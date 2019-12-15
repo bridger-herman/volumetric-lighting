@@ -17,6 +17,10 @@ uniform mat4 uni_camera_inv_proj;
 uniform sampler2D uni_color_texture;
 uniform sampler2D uni_position_texture;
 
+// Fog information
+uniform float uni_fog_density;
+uniform vec3 uni_fog_color;
+
 // Point light information
 uniform int uni_num_point_lights;
 uniform vec3 uni_point_light_positions[MAX_LIGHTS];
@@ -119,7 +123,7 @@ void main() {
             uni_camera_position,
             ray_dir,
             uni_spot_light_positions[i],
-            uni_spot_light_directions[i],
+            normalize(uni_spot_light_directions[i]),
             0.8,
             uni_spot_light_colors[i] * uni_spot_light_halo_intensity[i]
         );
@@ -137,4 +141,9 @@ void main() {
     }
 
     final_color = vec4(halo_value, 1.0) + texture(uni_color_texture, tex_coords);
+
+    // Add fog
+    vec3 eye_to_pos = position.xyz - uni_camera_position;
+    float fog_intensity = exp(-uni_fog_density * length(eye_to_pos));
+    final_color = vec4(mix(uni_fog_color, final_color.xyz, fog_intensity), 1.0);
 }
