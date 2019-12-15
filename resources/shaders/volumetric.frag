@@ -73,19 +73,19 @@ vec3 sphere_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
 
 // http://www.iquilezles.org/www/articles/intersectors/intersectors.htm
 vec3 cylinder_halo(float frag_depth, vec3 ray_start, vec3 ray_dir, vec3
-        cb, vec3 ca, float radius, vec3 halo_color) {
+        cyl_point, vec3 cyl_dir, float radius, vec3 halo_color) {
     // Calculate the effective radius of this cylinder halo from its luminosity
     float effective_radius = sqrt(luminosity(halo_color) / CYLINDER_INTENSITY_THRESHOLD);
     if (effective_radius < MIN_RADIUS) {
         return vec3(0.0);
     }
 
-    vec3 oc = ray_start - cb;
-    float card = dot(ca, ray_dir);
-    float caoc = dot(ca, oc);
-    float a = 1.0 - card * card;
-    float b = dot(oc, ray_dir) - caoc * card;
-    float c = dot(oc, oc) - caoc * caoc - effective_radius * effective_radius;
+    vec3 eye_to_cyl = ray_start - cyl_point;
+    float cyl_ray = dot(cyl_dir, ray_dir);
+    float cyl_eye = dot(cyl_dir, eye_to_cyl);
+    float a = 1.0 - cyl_ray * cyl_ray;
+    float b = dot(eye_to_cyl, ray_dir) - cyl_eye * cyl_ray;
+    float c = dot(eye_to_cyl, eye_to_cyl) - cyl_eye * cyl_eye - effective_radius * effective_radius;
     float h = b * b - a * c;
     h = clamp(h, 0.0, frag_depth);
     float h2 = sqrt(h);
