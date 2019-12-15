@@ -4,4 +4,4 @@
 Cargo.lock
 
 # WebAssembly targets
-/assets/pkg
+# /assets/pkg

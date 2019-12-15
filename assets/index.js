@@ -9,7 +9,7 @@
 
 import { importWasm } from './loadWasm.js';
 import { initWre } from './wre.js'
-import * as wre from '/assets/pkg/wre_wasm.js';
+import * as wre from './pkg/wre_wasm.js';
 
 
 function init() {

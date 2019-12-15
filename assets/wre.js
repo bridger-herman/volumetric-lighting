@@ -7,7 +7,7 @@
  * Assorted useful JavaScript interactions for WRE
  */
 
-import * as wre from '/assets/pkg/wre_wasm.js';
+import * as wre from './pkg/wre_wasm.js';
 
 function initCamera() {
     let oldMousePosition = wre.Vec2.zero();
